@@ -39,3 +39,7 @@ enableRobotsTXT = true
   name = "Panduan & Tips"
   url = "/panduan-tips/"
   weight = 4
+[[menu.main]]
+  name = "Tentang"
+  url = "/tentang/"
+  weight = 5
