@@ -7,6 +7,20 @@
     </div>
     {{ with .Params.images }}<img src="{{ index . 0 }}" alt="{{ $.Title }}">{{ end }}
     {{ .Content }}
+    {{ $rel := first 3 (where (where .Site.RegularPages "Section" .Section) "Permalink" "!=" .Permalink) }}
+    {{ with $rel }}
+    <section class="cc-related">
+      <h2>Artikel Terkait</h2>
+      <div class="cc-related__grid">
+        {{ range . }}
+        <a class="cc-related__item" href="{{ .RelPermalink }}">
+          <span class="cc-related__cat">{{ with .Params.categories }}{{ index . 0 }}{{ else }}{{ .Section | humanize }}{{ end }}</span>
+          <span class="cc-related__title">{{ .Title }}</span>
+        </a>
+        {{ end }}
+      </div>
+    </section>
+    {{ end }}
     <p style="margin-top:40px"><a href="/">← Kembali ke semua artikel</a></p>
   </article>
 {{ end }}

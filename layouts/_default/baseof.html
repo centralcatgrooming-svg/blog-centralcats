@@ -80,7 +80,6 @@
     article.post{max-width:760px;margin:0 auto}
     article.post img{max-width:100%;border-radius:14px}
     article.post .meta{color:var(--muted);font-size:.9rem;margin-bottom:24px}
-    footer.site{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:.9rem;text-align:center;margin-top:40px}
     @media (prefers-reduced-motion:reduce){.card{transition:none}}
 
     /* Hamburger + drawer mobile (mengikuti pola centralcats.id) — disembunyikan di desktop */
@@ -103,6 +102,24 @@
       body.menu-open{overflow:hidden}
       body{overflow-x:hidden}
     }
+
+    footer.site{border-top:1px solid var(--line);margin-top:48px;background:#fff;color:var(--muted);font-size:.9rem}
+    .footer-inner{max-width:1100px;margin:0 auto;padding:40px 20px 8px;display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:28px}
+    .footer-col h4{color:var(--brand-dark);font-size:.95rem;margin:0 0 12px}
+    .footer-col a{display:block;color:var(--muted);text-decoration:none;margin:6px 0}
+    .footer-col a:hover{color:var(--brand)}
+    .footer-col p{margin:10px 0;line-height:1.5}
+    .footer-brand img{display:block}
+    .footer-link{color:var(--brand);font-weight:600}
+    .footer-bottom{max-width:1100px;margin:0 auto;padding:18px 20px;border-top:1px solid var(--line);text-align:center}
+    .cc-related{margin-top:48px;border-top:1px solid var(--line);padding-top:28px}
+    .cc-related h2{font-size:1.2rem;color:var(--brand-dark);margin:0 0 16px}
+    .cc-related__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+    .cc-related__item{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;text-decoration:none;transition:border-color .15s}
+    .cc-related__item:hover{border-color:var(--brand)}
+    .cc-related__cat{font-size:.68rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.04em}
+    .cc-related__title{color:var(--brand-dark);font-weight:600;line-height:1.35}
+    @media(max-width:640px){.footer-inner{grid-template-columns:1fr;gap:20px}}
   </style>
 </head>
 <body>
@@ -124,9 +141,29 @@
     </div>
   </main>
   <footer class="site">
-    © <span id="cc-year">{{ now.Year }}</span> Central Cat's ·
-    <a href="{{ .Site.Params.mainSite }}">centralcats.id</a> ·
-    Grooming &amp; Petshop Kucing Tangerang
+    <div class="footer-inner">
+      <div class="footer-col">
+        <a class="footer-brand" href="/"><img src="/logo.png" alt="Central Cat's" style="height:34px;width:auto"></a>
+        <p>Grooming, treatment, cat hotel &amp; petshop kucing terpercaya di Tangerang sejak 2020.</p>
+        <a class="footer-link" href="https://www.centralcats.id">Kunjungi situs utama →</a>
+      </div>
+      <div class="footer-col">
+        <h4>Kategori</h4>
+        <a href="/berita-tren/">Berita &amp; Tren</a>
+        <a href="/kesehatan-hewan/">Kesehatan Hewan</a>
+        <a href="/bisnis-hewan/">Bisnis Hewan</a>
+        <a href="/panduan-tips/">Panduan &amp; Tips</a>
+      </div>
+      <div class="footer-col">
+        <h4>Ikuti Kami</h4>
+        <a href="https://www.instagram.com/centralcat_official" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://www.tiktok.com/@central_cats" target="_blank" rel="noopener">TikTok</a>
+        <a href="https://www.youtube.com/@central_cats" target="_blank" rel="noopener">YouTube</a>
+        <a href="https://www.facebook.com/Centralcatsofficial/" target="_blank" rel="noopener">Facebook</a>
+        <a href="https://wa.me/6282111827798" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© {{ now.Year }} Central Cat's · Grooming &amp; Petshop Kucing Tangerang</div>
   </footer>
   <script>
     (function(){ var y=document.getElementById("cc-year"); if(y) y.textContent=new Date().getFullYear(); })();
