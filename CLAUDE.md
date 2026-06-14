@@ -112,7 +112,9 @@ Target: skor Lighthouse Performance ≥ 90 di mobile.
 - [ ] Tulis untuk **manusia dulu**, mesin pencari kedua. Konten harus benar-benar bermanfaat.
 
 ### Tingkat situs (status terkini)
-- ✅ `enableRobotsTXT = true` aktif → `robots.txt` otomatis.
+- ✅ `enableRobotsTXT = false` → `robots.txt` & `llms.txt` kini disajikan dari **file statis**
+  (`static/robots.txt` + `static/llms.txt`, izinkan crawler mesin pencari & AI + Sitemap).
+  **Jangan aktifkan kembali** `enableRobotsTXT` tanpa paham dampaknya — Hugo akan menimpa file statis itu.
 - ✅ `baseURL` sudah benar (`https://blog.centralcats.id/`) → URL kanonik tepat.
 - ✅ **Google Search Console** sudah terverifikasi (file `static/google4120ad7b9c49fdb9.html`
   — **jangan dihapus**, Google mengecek ulang sewaktu-waktu).
@@ -162,8 +164,10 @@ Target: skor Lighthouse Performance ≥ 90 di mobile.
 
 ### Teknis (jangan dirusak)
 - ❌ **Jangan ubah/hapus tanpa paham dampaknya:**
-  - `layouts/index.json` & blok `[outputs] home = ["HTML", "RSS", "JSON"]` di `hugo.toml`
-    → ini sumber feed ke situs utama. Rusak = artikel hilang dari `centralcats.id`.
+  - `layouts/index.json` & blok `[outputs] home` di `hugo.toml`
+    (kini `["HTML", "RSS", "JSON", "SearchIndex"]`) → `JSON` = sumber feed ke situs utama
+    (jangan hapus/ubah, & tetap dibatasi 20 artikel); `SearchIndex` = indeks pencarian
+    (lihat Bagian 9). Rusak = artikel hilang dari `centralcats.id`.
   - `static/CNAME` → berisi `blog.centralcats.id`. Hapus = domain custom mati.
   - `static/google4120ad7b9c49fdb9.html` → file verifikasi Google Search Console. Hapus = verifikasi bisa lepas.
   - `.github/workflows/hugo.yml` → ini yang mem-build & deploy. Rusak = situs tidak ter-update.
@@ -184,3 +188,54 @@ Target: skor Lighthouse Performance ≥ 90 di mobile.
 5. Push ke `origin main`. Build otomatis akan jalan; ingatkan pengguna untuk cek tab Actions
    bila perubahan besar.
 6. Git identity: name `centralcatgrooming`, email `centralcatgrooming@gmail.com`.
+
+---
+
+## 8. Sistem Auto-Draft Artikel (AI) — v3
+
+Pipeline pembuat draf artikel otomatis. **Output selalu berupa Pull Request** untuk ditinjau
+manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit, Close = buang.
+
+- **Jadwal otomatis** (GitHub Actions, `.github/workflows/auto-draft.yml`):
+  cron `0 1 * * 1-6` = **Senin–Sabtu 08:00 WIB** (01:00 UTC). **Minggu libur.**
+  Bisa juga dijalankan manual dari tab Actions (input `jumlah` & `kategori`).
+- **Kategori mengikuti hari** (zona WIB), dipilih otomatis oleh `scripts/generate_drafts.py`
+  (env `SECTION="auto"`/kosong), atau dipaksa lewat input `kategori` saat run manual:
+  - Senin & Kamis → **Kesehatan Hewan**
+  - Selasa & Jumat → **Panduan & Tips**
+  - Rabu → **Bisnis Hewan**
+  - Sabtu → **Berita & Tren**
+- **Gambar:** kategori **Berita & Tren** = **foto asli (Pexels)**; kategori lain =
+  **ilustrasi/kartun (Pixabay)**, dengan fallback Pixabay→Pexels. Semua dikonversi
+  **WebP ≤1200px** (patuh Aturan Performa Bagian 4).
+- **Aturan HALAL** (khusus kategori Bisnis Hewan): boleh hewan peliharaan & ternak **halal**
+  (ayam, kambing, sapi, domba, kelinci, ikan, dll); **DILARANG** hewan haram (babi/celeng)
+  demi menghormati keyakinan muslim.
+- **FAQ & gaya:** tiap artikel memuat blok `[[faq]]` di front matter (3–5 tanya-jawab) dan
+  ditulis **answer-first** (paragraf pembuka langsung menjawab inti) — baik untuk SEO & asisten AI.
+- **Output:** Pull Request berlabel `ai-draft`, **branch unik per run** → tinjau → Merge = terbit.
+- **GitHub Secrets yang dipakai:** `GEMINI_API_KEY`, `PEXELS_API_KEY`, `PIXABAY_API_KEY`.
+- **Belum terpasang:** RSS berita real-time untuk **Berita & Tren** (Sabtu). Sementara artikel
+  Sabtu memakai pengetahuan Gemini + foto Pexels (bukan berita real-time). Akan disambungkan
+  saat URL portal RSS tersedia.
+
+---
+
+## 9. Pencarian Artikel
+
+- Halaman **`/cari/`** (`content/cari.md` + layout `layouts/_default/search.html`).
+  Pencarian **client-side** (filter judul/ringkasan/kategori di browser), **nol library**
+  (patuh Aturan Performa). Menu **"Cari"** ada di navigasi utama.
+- **Indeks:** `layouts/index.searchindex.json` menghasilkan **`/search-index.json`**
+  (berisi **SEMUA artikel**), lewat output format `[outputFormats.SearchIndex]` di `hugo.toml`.
+- ⚠️ **PENTING:** `index.json` (feed ke situs utama `centralcats.id`) **tetap dibatasi 20 artikel
+  — JANGAN diubah.** Pencarian memakai `search-index.json` yang **terpisah & lengkap**, bukan
+  `index.json`.
+
+---
+
+## 10. Tampilan & Komponen
+
+- **FAQ accordion** — gaya untuk class `cc-faq`, `cc-faq__item`, `cc-faq__q`, `cc-faq__a`
+  ada di blok `<style>` pada `layouts/_default/baseof.html`. Markup FAQ ada di
+  `layouts/_default/single.html` (render hanya bila artikel punya `[[faq]]`) + JSON-LD `FAQPage`.
