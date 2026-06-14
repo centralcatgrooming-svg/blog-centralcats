@@ -1,0 +1,88 @@
+{{ define "main" }}
+<style>
+.cc-search{max-width:760px;margin:0 auto;padding:1rem 0 2rem;}
+.cc-search__intro{color:#4b5563;margin:0 0 1.1rem;}
+.cc-search__input{width:100%;padding:.8rem 1rem;font-size:1.05rem;border:1px solid #cbd5e1;border-radius:10px;outline:none;box-sizing:border-box;}
+.cc-search__input:focus{border-color:#1e3a8a;box-shadow:0 0 0 3px rgba(30,58,138,.12);}
+.cc-search__status{color:#6b7280;font-size:.9rem;margin:.85rem 0 1rem;}
+.cc-search__results{display:flex;flex-direction:column;gap:.7rem;}
+.cc-search__card{display:block;padding:.9rem 1.1rem;border:1px solid #e5e7eb;border-radius:10px;text-decoration:none;background:#fff;transition:border-color .15s ease,box-shadow .15s ease;}
+.cc-search__card:hover{border-color:#1e3a8a;box-shadow:0 2px 10px rgba(30,58,138,.08);}
+.cc-search__cat{display:inline-block;font-size:.72rem;font-weight:600;color:#1e3a8a;background:#eef2ff;padding:.15rem .55rem;border-radius:999px;margin-bottom:.45rem;}
+.cc-search__title{display:block;font-weight:600;color:#162d6b;font-size:1.05rem;margin-bottom:.25rem;}
+.cc-search__sum{display:block;color:#4b5563;font-size:.9rem;line-height:1.55;}
+.cc-search__empty{color:#6b7280;}
+</style>
+
+<section class="cc-search">
+  <h1>{{ .Title }}</h1>
+  {{ with .Content }}<div class="cc-search__intro">{{ . }}</div>{{ end }}
+  <input type="search" id="cc-q" class="cc-search__input" placeholder="Ketik judul atau kata kunci&hellip;" aria-label="Cari artikel" autocomplete="off">
+  <p id="cc-search-status" class="cc-search__status">Memuat data pencarian&hellip;</p>
+  <div id="cc-search-results" class="cc-search__results"></div>
+</section>
+
+<script>
+(function(){
+  var q = document.getElementById('cc-q');
+  var res = document.getElementById('cc-search-results');
+  var st = document.getElementById('cc-search-status');
+  var data = [], loaded = false;
+
+  function esc(s){
+    return (s == null ? '' : String(s)).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+
+  function render(list){
+    if(!list.length){
+      res.innerHTML = '<p class="cc-search__empty">Tidak ada artikel yang cocok. Coba kata kunci lain.</p>';
+      return;
+    }
+    var html = '';
+    list.slice(0, 50).forEach(function(it){
+      html += '<a class="cc-search__card" href="' + esc(it.url) + '">'
+            +   '<span class="cc-search__cat">' + esc(it.category) + '</span>'
+            +   '<span class="cc-search__title">' + esc(it.title) + '</span>'
+            +   '<span class="cc-search__sum">' + esc(it.summary) + '</span>'
+            + '</a>';
+    });
+    res.innerHTML = html;
+  }
+
+  function doSearch(){
+    if(!loaded){ return; }
+    var term = (q.value || '').trim().toLowerCase();
+    if(!term){
+      res.innerHTML = '';
+      st.textContent = 'Ketik untuk mencari di ' + data.length + ' artikel.';
+      return;
+    }
+    var m = data.filter(function(it){
+      return (it.title || '').toLowerCase().indexOf(term) >= 0
+          || (it.summary || '').toLowerCase().indexOf(term) >= 0
+          || (it.category || '').toLowerCase().indexOf(term) >= 0;
+    });
+    st.textContent = m.length + ' hasil untuk "' + q.value.trim() + '"';
+    render(m);
+  }
+
+  fetch('/search-index.json')
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      data = Array.isArray(j) ? j : (j.items || []);
+      loaded = true;
+      var pre = new URLSearchParams(location.search).get('q');
+      if(pre){ q.value = pre; }
+      doSearch();
+      try { q.focus(); } catch(e){}
+    })
+    .catch(function(){
+      st.textContent = 'Gagal memuat data pencarian. Coba muat ulang halaman.';
+    });
+
+  q.addEventListener('input', doSearch);
+})();
+</script>
+{{ end }}

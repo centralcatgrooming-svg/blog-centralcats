@@ -15,9 +15,16 @@ enableRobotsTXT = false
   category = "categories"
   tag = "tags"
 
+# Format output kustom untuk indeks pencarian (menghasilkan search-index.json di root situs)
+[outputFormats.SearchIndex]
+  mediaType = "application/json"
+  baseName = "search-index"
+  isPlainText = true
+  notAlternative = true
+
 # Penting: home menghasilkan index.json (feed yang ditarik situs utama centralcats.id)
 [outputs]
-  home = ["HTML", "RSS", "JSON"]
+  home = ["HTML", "RSS", "JSON", "SearchIndex"]
 
 [markup.goldmark.renderer]
   unsafe = true
@@ -43,3 +50,7 @@ enableRobotsTXT = false
   name = "Tentang"
   url = "/tentang/"
   weight = 5
+[[menu.main]]
+  name = "Cari"
+  url = "/cari/"
+  weight = 6
