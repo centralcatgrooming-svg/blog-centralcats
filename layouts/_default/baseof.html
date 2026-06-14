@@ -12,17 +12,17 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <style>
-    :root{ --brand:{{ .Site.Params.brandColor }}; --brand-dark:#162d6b; --ink:#1f2937; --muted:#6b7280; --line:#eef0f4; --soft:#eef2ff; }
+    :root{ --brand:{{ .Site.Params.brandColor }}; --brand-dark:#162d6b; --accent:#d4af37; --ink:#1f2937; --muted:#6b7280; --line:#eef0f4; --soft:#eef2ff; }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#fff;line-height:1.6}
     a{color:var(--brand);text-decoration:none}
     a:hover{text-decoration:underline}
     .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
-    header.site{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:10}
+    header.site{border-bottom:3px solid var(--accent);background:var(--brand);position:sticky;top:0;z-index:10}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;max-width:1100px;margin:0 auto;flex-wrap:wrap}
     .brand{font-weight:800;font-size:1.25rem;color:var(--brand);display:flex;align-items:center;gap:8px}
-    nav.main a{color:var(--ink);font-weight:600;font-size:.95rem;margin-left:18px}
-    nav.main a:hover{color:var(--brand);text-decoration:none}
+    nav.main a{color:#fff;font-weight:600;font-size:.95rem;margin-left:18px}
+    nav.main a:hover{color:var(--accent);text-decoration:none}
     main{padding:40px 0;min-height:60vh}
     h1.page-title{font-size:clamp(1.7rem,3vw,2.4rem);color:var(--brand-dark);margin:0 0 6px}
     .lead{color:var(--muted);margin:0 0 28px}
@@ -58,9 +58,12 @@
     </div>
   </main>
   <footer class="site">
-    © {{ now.Year }} Central Cat's ·
+    © <span id="cc-year">{{ now.Year }}</span> Central Cat's ·
     <a href="{{ .Site.Params.mainSite }}">centralcats.id</a> ·
     Grooming &amp; Petshop Kucing Tangerang
   </footer>
+  <script>
+    (function(){ var y=document.getElementById("cc-year"); if(y) y.textContent=new Date().getFullYear(); })();
+  </script>
 </body>
 </html>
