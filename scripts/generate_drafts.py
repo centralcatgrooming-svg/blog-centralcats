@@ -2,17 +2,25 @@
 """
 Pembuat draf artikel blog Central Cat's.
 
-Alur:
-  1. Gemini (gratis) menulis artikel original sesuai aturan ketat (lihat SYSTEM).
-  2. Pexels (gratis) mengambil 1 foto relevan, di-resize + dikonversi ke WebP.
-  3. Artikel ditulis sebagai file Markdown Hugo ke content/<kategori>/.
-  4. File ini lalu dijadikan Pull Request oleh workflow -> Anda tinjau & Merge untuk tayang.
+Fitur:
+  - Jadwal per hari (otomatis pilih kategori sesuai hari, zona WIB):
+      Senin & Kamis  -> Kesehatan Hewan
+      Selasa & Jumat -> Panduan & Tips
+      Rabu           -> Bisnis Hewan (peliharaan + ternak HALAL)
+      Sabtu          -> Berita & Tren
+      Minggu         -> libur (tidak membuat artikel)
+  - Gambar: kategori "Berita & Tren" pakai FOTO asli (Pexels);
+            kategori lain pakai ILUSTRASI/kartun (Pixabay).
+  - Gemini menulis original, gaya answer-first, + FAQ (dipaksa via schema).
+  - Output: file Markdown Hugo (draft=false) -> dijadikan Pull Request utk review.
 
-Env yang dipakai:
-  GEMINI_API_KEY  (wajib)   - kunci Gemini dari GitHub Secrets
-  PEXELS_API_KEY  (opsional)- kunci Pexels; tanpa ini artikel dibuat tanpa gambar
-  NUM_ARTICLES    (opsional)- jumlah artikel, default 1
-  GEMINI_MODEL    (opsional)- default gemini-2.5-flash
+Env:
+  GEMINI_API_KEY  (wajib)
+  PEXELS_API_KEY  (opsional) - foto asli utk berita
+  PIXABAY_API_KEY (opsional) - ilustrasi/kartun utk non-berita
+  NUM_ARTICLES    (opsional) - default 1
+  SECTION         (opsional) - paksa kategori tertentu; "auto"/kosong = ikut hari
+  GEMINI_MODEL    (opsional) - default gemini-2.5-flash
 """
 
 import os
@@ -20,7 +28,6 @@ import re
 import io
 import sys
 import json
-import random
 import datetime
 import pathlib
 
@@ -37,8 +44,10 @@ except ImportError:
 
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 PEXELS_KEY = os.environ.get("PEXELS_API_KEY")
+PIXABAY_KEY = os.environ.get("PIXABAY_API_KEY")
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 NUM = int(os.environ.get("NUM_ARTICLES", "1") or "1")
+SECTION_OVERRIDE = (os.environ.get("SECTION", "") or "").strip()
 
 if not GEMINI_KEY:
     sys.exit("GEMINI_API_KEY belum diset (cek GitHub Secrets).")
@@ -61,10 +70,23 @@ SUBCATS = {
                         "Penyakit & Pencegahan", "Grooming & Perawatan"],
     "panduan-tips": ["Panduan Pemula", "Perawatan Harian"],
     "berita-tren": ["Tren & Lifestyle", "Event & Komunitas"],
-    "bisnis-hewan": ["Peluang Usaha & Waralaba", "Tips Petshop & Grooming", "Industri & Pasar"],
+    "bisnis-hewan": ["Peluang Usaha & Waralaba", "Tips Petshop & Grooming",
+                     "Ternak & Budidaya (Halal)", "Industri & Pasar"],
 }
 
-# ===================== ATURAN PEMBUATAN ARTIKEL =====================
+# Hari (Senin=0 ... Minggu=6, WIB) -> kategori.
+WEEKDAY_SECTION = {
+    0: "kesehatan-hewan",   # Senin
+    1: "panduan-tips",      # Selasa
+    2: "bisnis-hewan",      # Rabu
+    3: "kesehatan-hewan",   # Kamis
+    4: "panduan-tips",      # Jumat
+    5: "berita-tren",       # Sabtu
+    6: None,                # Minggu (libur)
+}
+
+WIB = datetime.timezone(datetime.timedelta(hours=7))
+
 SYSTEM = """Kamu penulis konten untuk blog Central Cat's — bisnis grooming, treatment kutu, cat hotel, dan petshop kucing di Tangerang (berdiri 2020). Pembaca adalah pemilik hewan peliharaan, terutama kucing (sering disebut "anabul").
 
 ATURAN WAJIB:
@@ -75,20 +97,19 @@ ATURAN WAJIB:
 5. JANGAN membuat klaim berlebihan atau menyesatkan tentang produk maupun hasil.
 6. SEO: judul jelas & menarik (idealnya <= 60 karakter), ringkasan memikat <= 150 karakter, gunakan subjudul (## dan ###) yang terstruktur, dan kata kunci yang muncul natural — TANPA keyword stuffing.
 7. Tubuh artikel dalam Markdown, sekitar 600-1000 kata: paragraf pembuka, beberapa subjudul, poin praktis, dan kesimpulan singkat. JANGAN menulis judul utama sebagai H1 (#) di dalam body — judul sudah dipakai terpisah.
-8. JAWAB LANGSUNG (penting untuk mesin pencari & asisten AI): paragraf PEMBUKA harus langsung menjawab inti pertanyaan/topik secara ringkas dan jelas (definisi atau jawaban inti dalam 2-3 kalimat pertama), baru kemudian diperdalam. Ini membantu artikel dikutip oleh AI seperti ChatGPT, Gemini, dan Google AI Overviews.
-9. Bila wajar, rumuskan judul dan beberapa subjudul sebagai PERTANYAAN yang benar-benar diketik orang (mis. "Berapa kali kucing harus dimandikan?", "Kenapa kucing muntah?"). Gunakan kalimat ringkas & mudah dipindai (paragraf pendek, daftar bila perlu).
+8. JAWAB LANGSUNG (penting untuk mesin pencari & asisten AI): paragraf PEMBUKA harus langsung menjawab inti pertanyaan/topik secara ringkas (definisi/jawaban inti dalam 2-3 kalimat pertama), baru diperdalam. Ini membantu artikel dikutip AI seperti ChatGPT, Gemini, dan Google AI Overviews.
+9. Bila wajar, rumuskan judul & beberapa subjudul sebagai PERTANYAAN yang benar-benar diketik orang. Gunakan kalimat ringkas & mudah dipindai.
+10. ATURAN HALAL (khusus kategori Bisnis Hewan): topik boleh mencakup hewan peliharaan dan ternak HALAL (mis. ayam, bebek, kambing, sapi, domba, kelinci, ikan, lebah madu). DILARANG KERAS mengangkat konten yang berpusat pada hewan haram dalam Islam (mis. babi/celeng) maupun budidaya/produk turunannya. Untuk kategori SELAIN Bisnis Hewan, tetap fokus pada kucing dan hewan peliharaan umum.
 
 Balas HANYA satu objek JSON valid dengan struktur:
 {"title": "...", "slug": "...", "subcategory": "...", "tags": ["...","..."], "summary": "...", "image_query": "...", "body": "...", "faq": [{"q": "...", "a": "..."}]}
 - "slug": huruf kecil, kata dipisah tanda hubung, tanpa spasi/tanda baca.
 - "subcategory": pilih SATU dari daftar yang diberikan.
 - "tags": 2-4 tag relevan (huruf kecil).
-- "image_query": 2-4 kata kunci dalam BAHASA INGGRIS untuk mencari foto pendukung di stok foto (mis. "persian cat grooming", "cat eating food", "kitten playing"). Pilih yang relevan dengan isi artikel.
-- "body": Markdown lengkap artikel (JANGAN masukkan bagian FAQ ke dalam body — FAQ ditaruh terpisah di field "faq").
-- "faq": 3-5 pasang tanya-jawab seputar topik artikel. Pertanyaan nyata yang sering ditanyakan pemilik kucing; jawaban ringkas 1-3 kalimat, akurat, satu baris (tanpa baris baru). Untuk topik kesehatan, sertakan anjuran konsultasi dokter hewan bila relevan. JANGAN mengarang angka/statistik di jawaban FAQ."""
+- "image_query": 2-4 kata kunci BAHASA INGGRIS untuk mencari gambar (mis. "persian cat grooming", "chicken farming"). Relevan dengan isi.
+- "body": Markdown lengkap artikel (JANGAN masukkan FAQ ke body).
+- "faq": 3-5 pasang tanya-jawab; jawaban ringkas 1-3 kalimat, akurat, satu baris. Topik kesehatan: sertakan anjuran dokter hewan bila relevan. JANGAN mengarang angka."""
 
-
-# Skema yang MEMAKSA Gemini selalu mengeluarkan semua field, termasuk faq.
 RESPONSE_SCHEMA = {
     "type": "OBJECT",
     "properties": {
@@ -103,16 +124,22 @@ RESPONSE_SCHEMA = {
             "type": "ARRAY",
             "items": {
                 "type": "OBJECT",
-                "properties": {
-                    "q": {"type": "STRING"},
-                    "a": {"type": "STRING"},
-                },
+                "properties": {"q": {"type": "STRING"}, "a": {"type": "STRING"}},
                 "required": ["q", "a"],
             },
         },
     },
     "required": ["title", "slug", "subcategory", "tags", "summary", "image_query", "body", "faq"],
 }
+
+
+def pick_section():
+    if SECTION_OVERRIDE and SECTION_OVERRIDE.lower() != "auto":
+        if SECTION_OVERRIDE in SECTIONS:
+            return SECTION_OVERRIDE
+        print(f"(SECTION '{SECTION_OVERRIDE}' tidak dikenal, pakai jadwal hari)", file=sys.stderr)
+    today = datetime.datetime.now(WIB).weekday()
+    return WEEKDAY_SECTION.get(today)
 
 
 def slugify(text):
@@ -140,10 +167,15 @@ def existing_titles():
 def gemini_article(section, avoid):
     subcats = SUBCATS[section]
     avoid_txt = "; ".join(avoid[-40:]) if avoid else "(belum ada)"
+    extra = ""
+    if section == "bisnis-hewan":
+        extra = ("Topik boleh bisnis hewan peliharaan ATAU ternak HALAL "
+                 "(ayam, kambing, sapi, domba, kelinci, ikan, dll). DILARANG babi/hewan haram.\n")
     user = (
         f"Tulis SATU artikel blog original untuk kategori utama \"{SECTIONS[section]}\".\n"
         f"Pilih SATU subkategori dari: {subcats}.\n"
-        f"Pilih sendiri topik yang bermanfaat, relevan untuk pemilik kucing, dan SEGAR.\n"
+        f"{extra}"
+        f"Pilih sendiri topik yang bermanfaat, relevan, dan SEGAR.\n"
         f"HINDARI topik yang mirip judul yang sudah ada: {avoid_txt}.\n"
         f"Patuhi semua ATURAN WAJIB. Balas HANYA JSON sesuai struktur."
     )
@@ -171,8 +203,22 @@ def gemini_article(section, avoid):
     return json.loads(text)
 
 
-def fetch_image(query, slug):
-    """Cari foto di Pexels, resize + konversi WebP. Return (web_path, credit) atau (None, None)."""
+def _save_webp(img_bytes, slug):
+    IMG_DIR.mkdir(parents=True, exist_ok=True)
+    if HAS_PIL:
+        out = IMG_DIR / f"{slug}.webp"
+        im = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+        if im.width > 1200:
+            ratio = 1200 / float(im.width)
+            im = im.resize((1200, int(im.height * ratio)), Image.LANCZOS)
+        im.save(out, "webp", quality=80, method=6)
+    else:
+        out = IMG_DIR / f"{slug}.jpg"
+        out.write_bytes(img_bytes)
+    return f"/images/{out.name}"
+
+
+def fetch_photo_pexels(query, slug):
     if not PEXELS_KEY or not query:
         return None, None
     try:
@@ -186,30 +232,45 @@ def fetch_image(query, slug):
         photos = r.json().get("photos", [])
         if not photos:
             return None, None
-        photo = photos[0]
-        src = photo["src"].get("large2x") or photo["src"].get("large") or photo["src"]["original"]
-        photographer = photo.get("photographer", "Pexels")
-
-        img_bytes = requests.get(src, timeout=60).content
-        IMG_DIR.mkdir(parents=True, exist_ok=True)
-        out = IMG_DIR / f"{slug}.webp"
-
-        if HAS_PIL:
-            im = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-            max_w = 1200
-            if im.width > max_w:
-                ratio = max_w / float(im.width)
-                im = im.resize((max_w, int(im.height * ratio)), Image.LANCZOS)
-            im.save(out, "webp", quality=80, method=6)
-        else:
-            # Tanpa Pillow: simpan apa adanya (fallback)
-            out = IMG_DIR / f"{slug}.jpg"
-            out.write_bytes(img_bytes)
-
-        return f"/images/{out.name}", photographer
+        p = photos[0]
+        src = p["src"].get("large2x") or p["src"].get("large") or p["src"]["original"]
+        img = requests.get(src, timeout=60).content
+        return _save_webp(img, slug), f"Foto: {p.get('photographer', 'Pexels')} / Pexels"
     except Exception as e:
-        print(f"  (gambar dilewati: {e})", file=sys.stderr)
+        print(f"  (foto Pexels dilewati: {e})", file=sys.stderr)
         return None, None
+
+
+def fetch_illustration_pixabay(query, slug):
+    if not PIXABAY_KEY or not query:
+        return None, None
+    try:
+        r = requests.get(
+            "https://pixabay.com/api/",
+            params={"key": PIXABAY_KEY, "q": query, "image_type": "illustration",
+                    "orientation": "horizontal", "safesearch": "true", "per_page": 3},
+            timeout=60,
+        )
+        r.raise_for_status()
+        hits = r.json().get("hits", [])
+        if not hits:
+            return None, None
+        h = hits[0]
+        src = h.get("largeImageURL") or h.get("webformatURL")
+        img = requests.get(src, timeout=60).content
+        return _save_webp(img, slug), f"Ilustrasi: {h.get('user', 'Pixabay')} / Pixabay"
+    except Exception as e:
+        print(f"  (ilustrasi Pixabay dilewati: {e})", file=sys.stderr)
+        return None, None
+
+
+def fetch_image(query, slug, want_photo):
+    if want_photo:
+        return fetch_photo_pexels(query, slug)
+    path, credit = fetch_illustration_pixabay(query, slug)
+    if not path:
+        path, credit = fetch_photo_pexels(query, slug)
+    return path, credit
 
 
 def write_article(section, data):
@@ -221,9 +282,10 @@ def write_article(section, data):
         slug = f"{slug}-{stamp}"
         path = CONTENT / section / f"{slug}.md"
 
-    img_path, credit = fetch_image(data.get("image_query", ""), slug)
+    want_photo = (section == "berita-tren")
+    img_path, credit = fetch_image(data.get("image_query", ""), slug, want_photo)
 
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(WIB)
     date_str = now.strftime("%Y-%m-%dT%H:%M:%S") + "+07:00"
     sub = (data.get("subcategory") or "").strip()
     tags = data.get("tags") or []
@@ -233,8 +295,6 @@ def write_article(section, data):
     body = (data.get("body") or "").strip()
     images_toml = f'"{img_path}"' if img_path else ""
 
-    # Siapkan blok FAQ (TOML array-of-tables). Harus diletakkan SETELAH semua
-    # key skalar di dalam front matter (aturan TOML).
     def _clean(s):
         return " ".join(str(s).split()).replace('"', "'").strip()
     faq_toml = ""
@@ -257,12 +317,9 @@ def write_article(section, data):
         "+++\n\n"
     )
 
-    # Catatan: gambar utama TIDAK disisipkan ke body karena template (single.html)
-    # sudah menampilkan front matter `images` sebagai gambar utama. Menyisipkan di
-    # body akan membuat foto tampil dobel. Hanya kredit foto yang ditambahkan.
     parts = [body]
     if img_path and credit:
-        parts.append(f"\n\n---\n\n*Foto: {credit} / Pexels*")
+        parts.append(f"\n\n---\n\n*{credit}*")
 
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(fm + "\n".join(parts) + "\n", encoding="utf-8")
@@ -270,16 +327,20 @@ def write_article(section, data):
 
 
 def main():
+    section = pick_section()
+    if not section:
+        print("Hari ini libur (Minggu, WIB) — tidak membuat artikel.")
+        return
+    print(f"Kategori hari ini: {SECTIONS[section]} ({section})")
+
     avoid = existing_titles()
-    sections = list(SECTIONS.keys())
     created = []
     for i in range(max(1, NUM)):
-        section = random.choice(sections)
         try:
             data = gemini_article(section, avoid)
             p, has_img = write_article(section, data)
             avoid.append(data.get("title", ""))
-            mark = "🖼️" if has_img else "📄"
+            mark = "[img]" if has_img else "[teks]"
             created.append(str(p.relative_to(ROOT)))
             print(f"[OK] {mark} {p.relative_to(ROOT)}")
         except Exception as e:

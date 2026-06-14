@@ -1,24 +1,28 @@
-name: Buat draf artikel (AI)
-
-# Cara pakai: tab Actions -> "Buat draf artikel (AI)" -> Run workflow -> isi jumlah.
-# Hasilnya berupa PULL REQUEST. Anda dapat notifikasi, tinjau artikelnya, lalu:
-#   - Setuju  : klik "Merge pull request"  -> artikel TAYANG
-#   - Tolak   : klik "Close pull request"  -> dibuang, tidak tayang
+name: Auto Draft Artikel (AI)
 
 on:
+  # Jadwal otomatis: Senin–Sabtu pukul 08:00 WIB (01:00 UTC).
+  # Script memilih kategori sesuai hari (Minggu libur -> tidak jalan).
+  schedule:
+    - cron: "0 1 * * 1-6"
+  # Bisa juga dijalankan manual dari tab Actions.
   workflow_dispatch:
     inputs:
       jumlah:
-        description: "Berapa artikel yang dibuat?"
-        required: true
+        description: "Jumlah artikel"
+        required: false
         default: "1"
-        type: string
-
-  # --- Jadwal otomatis (OPSIONAL) ---
-  # Hapus tanda '#' di 2 baris bawah untuk menyalakan jadwal.
-  # Contoh ini: tiap Senin 08.00 WIB (01:00 UTC), membuat 1 artikel.
-  # schedule:
-  #   - cron: "0 1 * * 1"
+      kategori:
+        description: "Kategori (auto = ikut jadwal hari)"
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - kesehatan-hewan
+          - panduan-tips
+          - bisnis-hewan
+          - berita-tren
 
 permissions:
   contents: write
@@ -28,7 +32,7 @@ jobs:
   draft:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -39,32 +43,30 @@ jobs:
       - name: Install dependencies
         run: pip install requests pillow
 
-      - name: Buat artikel (Gemini + Pexels)
+      - name: Generate draft(s)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           NUM_ARTICLES: ${{ github.event.inputs.jumlah || '1' }}
-          GEMINI_MODEL: gemini-2.5-flash
+          SECTION: ${{ github.event.inputs.kategori || 'auto' }}
         run: python scripts/generate_drafts.py
 
-      - name: Buka Pull Request untuk ditinjau
+      - name: Buka Pull Request untuk review
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Tambah artikel AI (menunggu review)"
-          branch: ai-drafts/run-${{ github.run_id }}
+          commit-message: "Draf artikel AI baru"
+          branch: auto-draft/run-${{ github.run_id }}
           delete-branch: true
-          title: "📝 Draf artikel AI siap ditinjau"
-          body: |
-            Artikel ini dibuat otomatis oleh AI (Gemini) dengan foto dari Pexels.
-
-            **Cara meninjau:**
-            - Buka tab **Files changed** untuk membaca artikel & melihat foto.
-            - **Setuju & terbitkan:** klik **Merge pull request** di bawah.
-            - **Tolak:** klik **Close pull request**.
-
-            Periksa terutama keakuratan (khusus topik kesehatan) sebelum Merge.
-
-            @centralcatgrooming-svg
           labels: ai-draft
+          title: "📝 Draf artikel AI baru — siap direview"
+          body: |
+            Draf artikel dibuat otomatis oleh AI (Gemini).
+
+            **Cara review:**
+            - Buka tab **Files changed** untuk membaca artikel.
+            - Cocok? Klik **Merge pull request** untuk menerbitkan.
+            - Tidak cocok? Klik **Close pull request** untuk menolak.
+
+            Gambar: ilustrasi (Pixabay) untuk non-berita, foto asli (Pexels) untuk Berita & Tren.
           assignees: centralcatgrooming-svg
