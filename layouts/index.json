@@ -1,7 +1,7 @@
 {{- $items := slice -}}
 {{- range first 20 (.Site.RegularPages.ByDate.Reverse) -}}
   {{- $img := "" -}}
-  {{- with .Params.images }}{{ $img = index . 0 }}{{ end -}}
+  {{- with .Params.images }}{{ $img = (index . 0) | absURL }}{{ end -}}
   {{- $cat := .Section | humanize -}}
   {{- with .Params.categories }}{{ $cat = index . 0 }}{{ end -}}
   {{- $items = $items | append (dict
