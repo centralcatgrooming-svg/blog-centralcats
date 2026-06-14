@@ -88,6 +88,33 @@ Balas HANYA satu objek JSON valid dengan struktur:
 - "faq": 3-5 pasang tanya-jawab seputar topik artikel. Pertanyaan nyata yang sering ditanyakan pemilik kucing; jawaban ringkas 1-3 kalimat, akurat, satu baris (tanpa baris baru). Untuk topik kesehatan, sertakan anjuran konsultasi dokter hewan bila relevan. JANGAN mengarang angka/statistik di jawaban FAQ."""
 
 
+# Skema yang MEMAKSA Gemini selalu mengeluarkan semua field, termasuk faq.
+RESPONSE_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "title": {"type": "STRING"},
+        "slug": {"type": "STRING"},
+        "subcategory": {"type": "STRING"},
+        "tags": {"type": "ARRAY", "items": {"type": "STRING"}},
+        "summary": {"type": "STRING"},
+        "image_query": {"type": "STRING"},
+        "body": {"type": "STRING"},
+        "faq": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "q": {"type": "STRING"},
+                    "a": {"type": "STRING"},
+                },
+                "required": ["q", "a"],
+            },
+        },
+    },
+    "required": ["title", "slug", "subcategory", "tags", "summary", "image_query", "body", "faq"],
+}
+
+
 def slugify(text):
     text = (text or "").lower()
     text = re.sub(r"[^a-z0-9\s-]", "", text)
@@ -125,8 +152,9 @@ def gemini_article(section, avoid):
         "contents": [{"role": "user", "parts": [{"text": user}]}],
         "generationConfig": {
             "temperature": 0.9,
-            "maxOutputTokens": 4096,
+            "maxOutputTokens": 8192,
             "responseMimeType": "application/json",
+            "responseSchema": RESPONSE_SCHEMA,
         },
     }
     r = requests.post(
