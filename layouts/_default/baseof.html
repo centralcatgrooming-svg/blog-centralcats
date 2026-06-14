@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}</title>
+  <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+  {{ hugo.Generator }}
+  <style>
+    :root{ --brand:{{ .Site.Params.brandColor }}; --brand-dark:#162d6b; --ink:#1f2937; --muted:#6b7280; --line:#eef0f4; --soft:#eef2ff; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#fff;line-height:1.6}
+    a{color:var(--brand);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+    header.site{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:10}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;max-width:1100px;margin:0 auto;flex-wrap:wrap}
+    .brand{font-weight:800;font-size:1.25rem;color:var(--brand);display:flex;align-items:center;gap:8px}
+    nav.main a{color:var(--ink);font-weight:600;font-size:.95rem;margin-left:18px}
+    nav.main a:hover{color:var(--brand);text-decoration:none}
+    main{padding:40px 0;min-height:60vh}
+    h1.page-title{font-size:clamp(1.7rem,3vw,2.4rem);color:var(--brand-dark);margin:0 0 6px}
+    .lead{color:var(--muted);margin:0 0 28px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
+    .card{border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s}
+    .card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(30,58,138,.12)}
+    .card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--soft)}
+    .card .body{padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
+    .badge{align-self:flex-start;font-size:.72rem;font-weight:700;color:var(--brand);background:var(--soft);padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+    .card h3{margin:0;font-size:1.08rem;line-height:1.35;color:var(--brand-dark)}
+    .card h3 a{color:inherit}
+    .card p{margin:0;color:var(--muted);font-size:.92rem;flex:1}
+    .card .date{color:#9aa1ad;font-size:.8rem}
+    article.post{max-width:760px;margin:0 auto}
+    article.post img{max-width:100%;border-radius:14px}
+    article.post .meta{color:var(--muted);font-size:.9rem;margin-bottom:24px}
+    footer.site{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:.9rem;text-align:center;margin-top:40px}
+    @media (prefers-reduced-motion:reduce){.card{transition:none}}
+  </style>
+</head>
+<body>
+  <header class="site">
+    <div class="topbar">
+      <a class="brand" href="/">🐱 Central Cat's Blog</a>
+      <nav class="main">
+        {{ range .Site.Menus.main }}<a href="{{ .URL }}">{{ .Name }}</a>{{ end }}
+      </nav>
+    </div>
+  </header>
+  <main>
+    <div class="wrap">
+      {{ block "main" . }}{{ end }}
+    </div>
+  </main>
+  <footer class="site">
+    © {{ now.Year }} Central Cat's ·
+    <a href="{{ .Site.Params.mainSite }}">centralcats.id</a> ·
+    Grooming &amp; Petshop Kucing Tangerang
+  </footer>
+</body>
+</html>

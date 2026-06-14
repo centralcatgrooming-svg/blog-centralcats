@@ -1,0 +1,16 @@
+{{- $items := slice -}}
+{{- range first 20 (.Site.RegularPages.ByDate.Reverse) -}}
+  {{- $img := "" -}}
+  {{- with .Params.images }}{{ $img = index . 0 }}{{ end -}}
+  {{- $cat := .Section | humanize -}}
+  {{- with .Params.categories }}{{ $cat = index . 0 }}{{ end -}}
+  {{- $items = $items | append (dict
+      "title" .Title
+      "url" .Permalink
+      "date" (.Date.Format "2006-01-02")
+      "dateText" (time.Format ":date_long" .Date)
+      "summary" (.Summary | plainify | truncate 160)
+      "category" $cat
+      "image" $img) -}}
+{{- end -}}
+{{- $items | jsonify (dict "indent" "  ") -}}

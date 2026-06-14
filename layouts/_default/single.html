@@ -1,0 +1,12 @@
+{{ define "main" }}
+  <article class="post">
+    <h1 class="page-title">{{ .Title }}</h1>
+    <div class="meta">
+      {{ time.Format ":date_long" .Date }}
+      {{ with .Params.categories }} · {{ delimit . ", " }}{{ end }}
+    </div>
+    {{ with .Params.images }}<img src="{{ index . 0 }}" alt="{{ $.Title }}">{{ end }}
+    {{ .Content }}
+    <p style="margin-top:40px"><a href="/">← Kembali ke semua artikel</a></p>
+  </article>
+{{ end }}

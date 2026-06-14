@@ -1,0 +1,10 @@
+<article class="card">
+  {{ with .Params.images }}<a href="{{ $.RelPermalink }}"><img src="{{ index . 0 }}" alt=""></a>
+  {{ else }}<a href="{{ .RelPermalink }}"><span style="display:block;aspect-ratio:16/9;background:var(--soft)"></span></a>{{ end }}
+  <div class="body">
+    <span class="badge">{{ with .Params.categories }}{{ index . 0 }}{{ else }}{{ .Section | humanize }}{{ end }}</span>
+    <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+    <p>{{ .Summary | plainify | truncate 120 }}</p>
+    <span class="date">{{ time.Format ":date_long" .Date }}</span>
+  </div>
+</article>

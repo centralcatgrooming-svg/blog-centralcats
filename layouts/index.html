@@ -1,0 +1,9 @@
+{{ define "main" }}
+  <h1 class="page-title">Artikel Terbaru</h1>
+  <p class="lead">{{ .Site.Params.description }}</p>
+  <div class="grid">
+    {{ range first 12 (.Site.RegularPages.ByDate.Reverse) }}
+      {{ partial "card.html" . }}
+    {{ end }}
+  </div>
+{{ end }}
