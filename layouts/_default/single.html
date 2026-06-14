@@ -7,6 +7,28 @@
     </div>
     {{ with .Params.images }}<img src="{{ index . 0 }}" alt="{{ $.Title }}">{{ end }}
     {{ .Content }}
+    {{ with .Params.faq }}
+    <section class="cc-faq">
+      <h2>Pertanyaan yang Sering Diajukan</h2>
+      {{ range . }}
+      <details class="cc-faq__item">
+        <summary class="cc-faq__q">{{ .q }}</summary>
+        <div class="cc-faq__a">{{ .a | markdownify }}</div>
+      </details>
+      {{ end }}
+    </section>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {{- range $i, $e := . }}{{ if $i }},{{ end }}
+        {"@type": "Question", "name": {{ $e.q | jsonify }}, "acceptedAnswer": {"@type": "Answer", "text": {{ $e.a | jsonify }}}}
+        {{- end }}
+      ]
+    }
+    </script>
+    {{ end }}
     {{ $rel := first 3 (where (where .Site.RegularPages "Section" .Section) "Permalink" "!=" .Permalink) }}
     {{ with $rel }}
     <section class="cc-related">

@@ -75,14 +75,17 @@ ATURAN WAJIB:
 5. JANGAN membuat klaim berlebihan atau menyesatkan tentang produk maupun hasil.
 6. SEO: judul jelas & menarik (idealnya <= 60 karakter), ringkasan memikat <= 150 karakter, gunakan subjudul (## dan ###) yang terstruktur, dan kata kunci yang muncul natural — TANPA keyword stuffing.
 7. Tubuh artikel dalam Markdown, sekitar 600-1000 kata: paragraf pembuka, beberapa subjudul, poin praktis, dan kesimpulan singkat. JANGAN menulis judul utama sebagai H1 (#) di dalam body — judul sudah dipakai terpisah.
+8. JAWAB LANGSUNG (penting untuk mesin pencari & asisten AI): paragraf PEMBUKA harus langsung menjawab inti pertanyaan/topik secara ringkas dan jelas (definisi atau jawaban inti dalam 2-3 kalimat pertama), baru kemudian diperdalam. Ini membantu artikel dikutip oleh AI seperti ChatGPT, Gemini, dan Google AI Overviews.
+9. Bila wajar, rumuskan judul dan beberapa subjudul sebagai PERTANYAAN yang benar-benar diketik orang (mis. "Berapa kali kucing harus dimandikan?", "Kenapa kucing muntah?"). Gunakan kalimat ringkas & mudah dipindai (paragraf pendek, daftar bila perlu).
 
 Balas HANYA satu objek JSON valid dengan struktur:
-{"title": "...", "slug": "...", "subcategory": "...", "tags": ["...","..."], "summary": "...", "image_query": "...", "body": "..."}
+{"title": "...", "slug": "...", "subcategory": "...", "tags": ["...","..."], "summary": "...", "image_query": "...", "body": "...", "faq": [{"q": "...", "a": "..."}]}
 - "slug": huruf kecil, kata dipisah tanda hubung, tanpa spasi/tanda baca.
 - "subcategory": pilih SATU dari daftar yang diberikan.
 - "tags": 2-4 tag relevan (huruf kecil).
 - "image_query": 2-4 kata kunci dalam BAHASA INGGRIS untuk mencari foto pendukung di stok foto (mis. "persian cat grooming", "cat eating food", "kitten playing"). Pilih yang relevan dengan isi artikel.
-- "body": Markdown lengkap artikel."""
+- "body": Markdown lengkap artikel (JANGAN masukkan bagian FAQ ke dalam body — FAQ ditaruh terpisah di field "faq").
+- "faq": 3-5 pasang tanya-jawab seputar topik artikel. Pertanyaan nyata yang sering ditanyakan pemilik kucing; jawaban ringkas 1-3 kalimat, akurat, satu baris (tanpa baris baru). Untuk topik kesehatan, sertakan anjuran konsultasi dokter hewan bila relevan. JANGAN mengarang angka/statistik di jawaban FAQ."""
 
 
 def slugify(text):
@@ -202,6 +205,17 @@ def write_article(section, data):
     body = (data.get("body") or "").strip()
     images_toml = f'"{img_path}"' if img_path else ""
 
+    # Siapkan blok FAQ (TOML array-of-tables). Harus diletakkan SETELAH semua
+    # key skalar di dalam front matter (aturan TOML).
+    def _clean(s):
+        return " ".join(str(s).split()).replace('"', "'").strip()
+    faq_toml = ""
+    for item in (data.get("faq") or []):
+        q = _clean(item.get("q", "")) if isinstance(item, dict) else ""
+        a = _clean(item.get("a", "")) if isinstance(item, dict) else ""
+        if q and a:
+            faq_toml += f'\n[[faq]]\nq = "{q}"\na = "{a}"\n'
+
     fm = (
         "+++\n"
         f'title = "{title_esc}"\n'
@@ -211,6 +225,7 @@ def write_article(section, data):
         f"tags = [{tags_toml}]\n"
         f'summary = "{summary}"\n'
         f"images = [{images_toml}]\n"
+        f"{faq_toml}"
         "+++\n\n"
     )
 
