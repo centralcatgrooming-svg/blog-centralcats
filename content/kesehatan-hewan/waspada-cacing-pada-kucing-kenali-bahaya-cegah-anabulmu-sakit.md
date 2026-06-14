@@ -8,8 +8,6 @@ summary = "Cacingan adalah masalah kesehatan umum pada kucing yang bisa berbahay
 images = ["/images/waspada-cacing-pada-kucing-kenali-bahaya-cegah-anabulmu-sakit.webp"]
 +++
 
-![Waspada Cacing pada Kucing: Kenali Bahaya & Cegah Anabulmu Sakit!](/images/waspada-cacing-pada-kucing-kenali-bahaya-cegah-anabulmu-sakit.webp)
-
 Sebagai pemilik anabul, kita tentu ingin si kucing selalu sehat dan ceria, bukan? Namun, ada satu masalah kesehatan yang seringkali luput dari perhatian, padahal dampaknya bisa sangat serius bagi anabul kesayangan kita: cacingan.
 
 Cacingan pada kucing bukan hanya sekadar masalah 'biasa', lho. Jika tidak ditangani dengan benar, infeksi cacing bisa menyebabkan berbagai masalah kesehatan serius, mulai dari gangguan pencernaan ringan hingga kondisi yang mengancam jiwa, terutama pada anak kucing. Yuk, kita kenali lebih dalam tentang cacingan pada kucing, mulai dari jenis, gejala, bahaya, hingga cara pencegahannya agar anabul tetap sehat dan lincah!

@@ -214,10 +214,10 @@ def write_article(section, data):
         "+++\n\n"
     )
 
-    parts = []
-    if img_path:
-        parts.append(f"![{title_esc}]({img_path})\n")
-    parts.append(body)
+    # Catatan: gambar utama TIDAK disisipkan ke body karena template (single.html)
+    # sudah menampilkan front matter `images` sebagai gambar utama. Menyisipkan di
+    # body akan membuat foto tampil dobel. Hanya kredit foto yang ditambahkan.
+    parts = [body]
     if img_path and credit:
         parts.append(f"\n\n---\n\n*Foto: {credit} / Pexels*")
 
