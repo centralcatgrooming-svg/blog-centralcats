@@ -20,7 +20,7 @@
     .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
     header.site{border-bottom:3px solid var(--accent);background:var(--brand);position:sticky;top:0;z-index:10}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;max-width:1100px;margin:0 auto;flex-wrap:wrap}
-    .brand{font-weight:800;font-size:1.25rem;color:var(--brand);display:flex;align-items:center;gap:8px}
+    .brand{display:inline-flex;align-items:center;background:#fff;padding:8px 16px;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.15)}
     nav.main a{color:#fff;font-weight:600;font-size:.95rem;margin-left:18px}
     nav.main a:hover{color:var(--accent);text-decoration:none}
     main{padding:40px 0;min-height:60vh}
@@ -46,7 +46,7 @@
 <body>
   <header class="site">
     <div class="topbar">
-      <a class="brand" href="/"><img src="/logo.png" alt="Central Cat's Blog" style="height:46px;width:auto;display:block"></a>
+      <a class="brand" href="/"><img src="/logo.png" alt="Central Cat's Blog" style="height:58px;width:auto;display:block"></a>
       <nav class="main">
         {{ range .Site.Menus.main }}<a href="{{ .URL }}">{{ .Name }}</a>{{ end }}
       </nav>
