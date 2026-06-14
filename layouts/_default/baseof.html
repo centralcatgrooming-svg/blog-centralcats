@@ -11,6 +11,47 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
+
+  {{/* SEO: judul, deskripsi, gambar — dipakai bersama oleh Open Graph, Twitter Card, & JSON-LD */}}
+  {{- $title := cond .IsHome .Site.Title (printf "%s — %s" .Title .Site.Title) -}}
+  {{- $desc := "" -}}
+  {{- with .Description }}{{ $desc = . }}{{ else }}{{ with .Summary }}{{ $desc = . | plainify }}{{ else }}{{ $desc = .Site.Params.description }}{{ end }}{{ end -}}
+  {{- $img := "" -}}
+  {{- with .Params.images }}{{ $img = index . 0 | absURL }}{{ else }}{{ $img = "/logo.png" | absURL }}{{ end -}}
+
+  <link rel="canonical" href="{{ .Permalink }}">
+  <meta property="og:site_name" content="{{ .Site.Title }}">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
+  <meta property="og:title" content="{{ $title }}">
+  <meta property="og:description" content="{{ $desc }}">
+  <meta property="og:url" content="{{ .Permalink }}">
+  <meta property="og:image" content="{{ $img }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ $title }}">
+  <meta name="twitter:description" content="{{ $desc }}">
+  <meta name="twitter:image" content="{{ $img }}">
+
+  {{- if .IsPage }}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": {{ .Title | jsonify }},
+    "description": {{ $desc | jsonify }},
+    "image": {{ $img | jsonify }},
+    "datePublished": {{ .Date.Format "2006-01-02T15:04:05Z07:00" | jsonify }},
+    "dateModified": {{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" | jsonify }},
+    "author": { "@type": "Organization", "name": "Central Cat's" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Central Cat's",
+      "logo": { "@type": "ImageObject", "url": {{ "/logo.png" | absURL | jsonify }} }
+    },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": {{ .Permalink | jsonify }} }
+  }
+  </script>
+  {{- end }}
   <style>
     :root{ --brand:{{ .Site.Params.brandColor }}; --brand-dark:#162d6b; --accent:#d4af37; --ink:#1f2937; --muted:#6b7280; --line:#eef0f4; --soft:#eef2ff; }
     *{box-sizing:border-box}
