@@ -111,14 +111,18 @@ Target: skor Lighthouse Performance ≥ 90 di mobile.
 - [ ] Panjang artikel cukup untuk membahas topik tuntas (umumnya 600–1500+ kata untuk topik kompetitif).
 - [ ] Tulis untuk **manusia dulu**, mesin pencari kedua. Konten harus benar-benar bermanfaat.
 
-### Tingkat situs (sudah/perlu diatur)
-- `enableRobotsTXT = true` sudah aktif → `robots.txt` otomatis.
-- Hugo otomatis membuat `sitemap.xml`. **Daftarkan ke Google Search Console** dan submit sitemap.
-- Pastikan `baseURL` benar (`https://blog.centralcats.id/`) agar URL kanonik tepat.
-- **Disarankan ditambahkan ke template** (`baseof.html`) — minta bantuan untuk implementasi:
-  - Tag Open Graph & Twitter Card (judul, deskripsi, gambar) untuk tampilan saat dibagikan.
-  - Structured data **JSON-LD `Article`** (judul, penulis, tanggal, gambar) untuk rich result.
+### Tingkat situs (status terkini)
+- ✅ `enableRobotsTXT = true` aktif → `robots.txt` otomatis.
+- ✅ `baseURL` sudah benar (`https://blog.centralcats.id/`) → URL kanonik tepat.
+- ✅ **Google Search Console** sudah terverifikasi (file `static/google4120ad7b9c49fdb9.html`
+  — **jangan dihapus**, Google mengecek ulang sewaktu-waktu).
+- ✅ `sitemap.xml` (otomatis dari Hugo) sudah **disubmit** ke Search Console.
+- ✅ **Sudah terpasang di template** (`baseof.html`, di dalam `<head>`):
+  - Tag **Open Graph & Twitter Card** (judul, deskripsi, gambar) untuk tampilan saat dibagikan.
+  - Structured data **JSON-LD `Article`** (judul, tanggal, gambar, publisher) — hanya di halaman artikel.
   - Tag `<link rel="canonical">`.
+  - Variabel bersama `$title`/`$desc`/`$img`: `$desc` ambil dari `description` → `summary` → deskripsi situs;
+    `$img` ambil `images[0]` (di-`absURL`), fallback `/logo.png`. **Jangan ubah tanpa paham dampaknya.**
 - Konsistensi publikasi (mis. 1–3 artikel berkualitas per minggu) lebih penting daripada volume sekali banyak.
 
 ### E-E-A-T (penting untuk konten kesehatan)
@@ -161,8 +165,10 @@ Target: skor Lighthouse Performance ≥ 90 di mobile.
   - `layouts/index.json` & blok `[outputs] home = ["HTML", "RSS", "JSON"]` di `hugo.toml`
     → ini sumber feed ke situs utama. Rusak = artikel hilang dari `centralcats.id`.
   - `static/CNAME` → berisi `blog.centralcats.id`. Hapus = domain custom mati.
+  - `static/google4120ad7b9c49fdb9.html` → file verifikasi Google Search Console. Hapus = verifikasi bisa lepas.
   - `.github/workflows/hugo.yml` → ini yang mem-build & deploy. Rusak = situs tidak ter-update.
   - `baseURL` di `hugo.toml`.
+  - Blok SEO di `<head>` `baseof.html` (Open Graph, Twitter Card, canonical, JSON-LD Article).
 - ❌ Jangan menambah dependensi/library berat yang melanggar Aturan Performa (Bagian 4).
 - ✅ Saat menyentuh file teknis inti, tampilkan dulu perubahannya (diff) untuk ditinjau
   sebelum commit & push.
