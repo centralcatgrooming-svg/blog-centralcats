@@ -82,16 +82,41 @@
     article.post .meta{color:var(--muted);font-size:.9rem;margin-bottom:24px}
     footer.site{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:.9rem;text-align:center;margin-top:40px}
     @media (prefers-reduced-motion:reduce){.card{transition:none}}
+
+    /* Hamburger + drawer mobile (mengikuti pola centralcats.id) — disembunyikan di desktop */
+    .hamburger{display:none}
+    .menu-overlay{display:none}
+    @media (max-width:768px){
+      .topbar{flex-wrap:nowrap;justify-content:space-between}
+      .hamburger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:30px;height:30px;padding:0;background:none;border:0;cursor:pointer;z-index:40}
+      .hamburger span{display:block;width:26px;height:2px;background:#fff;border-radius:2px;transition:transform .3s ease,opacity .3s ease}
+      .hamburger.active span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+      .hamburger.active span:nth-child(2){opacity:0}
+      .hamburger.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+      nav.main{position:fixed;top:60px;right:0;width:50%;height:calc(100vh - 60px);background:var(--brand);
+        display:flex;flex-direction:column;align-items:stretch;padding:22px 22px;gap:2px;
+        transform:translateX(100%);transition:transform .3s ease;box-shadow:-10px 0 30px rgba(0,0,0,.25);z-index:30}
+      nav.main.open{transform:translateX(0)}
+      nav.main a{margin:0;width:100%;padding:13px 0;font-size:1rem;border-bottom:1px solid rgba(255,255,255,.12)}
+      .menu-overlay{display:block;position:fixed;inset:60px 0 0 0;background:rgba(0,0,0,.35);opacity:0;visibility:hidden;transition:opacity .3s ease;z-index:20}
+      .menu-overlay.show{opacity:1;visibility:visible}
+      body.menu-open{overflow:hidden}
+      body{overflow-x:hidden}
+    }
   </style>
 </head>
 <body>
   <header class="site">
     <div class="topbar">
       <a class="brand" href="/"><img src="/logo.png" alt="Central Cat's Blog" style="height:44px;width:auto;display:block"></a>
-      <nav class="main">
+      <button class="hamburger" id="nav-toggle" aria-label="Buka menu" aria-controls="nav-main" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="main" id="nav-main">
         {{ range .Site.Menus.main }}<a href="{{ .URL }}">{{ .Name }}</a>{{ end }}
       </nav>
     </div>
+    <div class="menu-overlay" id="nav-overlay"></div>
   </header>
   <main>
     <div class="wrap">
@@ -105,6 +130,15 @@
   </footer>
   <script>
     (function(){ var y=document.getElementById("cc-year"); if(y) y.textContent=new Date().getFullYear(); })();
+    (function(){
+      var t=document.getElementById("nav-toggle"),n=document.getElementById("nav-main"),o=document.getElementById("nav-overlay");
+      if(!t||!n) return;
+      function close(){t.classList.remove("active");n.classList.remove("open");if(o)o.classList.remove("show");document.body.classList.remove("menu-open");t.setAttribute("aria-expanded","false");}
+      function toggle(){var open=n.classList.toggle("open");t.classList.toggle("active",open);if(o)o.classList.toggle("show",open);document.body.classList.toggle("menu-open",open);t.setAttribute("aria-expanded",open?"true":"false");}
+      t.addEventListener("click",toggle);
+      if(o)o.addEventListener("click",close);
+      n.querySelectorAll("a").forEach(function(a){a.addEventListener("click",close);});
+    })();
   </script>
 </body>
 </html>
