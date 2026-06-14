@@ -3,7 +3,7 @@ languageCode = "id-id"
 defaultContentLanguage = "id"
 title = "Central Cat's Blog"
 timeZone = "Asia/Jakarta"
-enableRobotsTXT = true
+enableRobotsTXT = false
 
 [params]
   description = "Berita, tips kesehatan, dan panduan merawat hewan peliharaan dari Central Cat's."
