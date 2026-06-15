@@ -66,6 +66,7 @@ dan ahli di bidangnya.
    tags = ["kucing", "kesehatan", "bulu"]
    summary = "Ringkasan 1–2 kalimat. Ini juga dipakai sebagai meta description SEO (maks ~155 karakter)."
    images = ["/images/nama-gambar.webp"]   # gambar unggulan, opsional tapi sangat disarankan
+   author = "Team Central Cat's"           # opsional; default "Team Central Cat's" bila dikosongkan
    +++
    ```
 4. **Kategori utama** = folder. **Subkategori** = field `categories`.
@@ -121,7 +122,8 @@ Target: skor Lighthouse Performance ≥ 90 di mobile.
 - ✅ `sitemap.xml` (otomatis dari Hugo) sudah **disubmit** ke Search Console.
 - ✅ **Sudah terpasang di template** (`baseof.html`, di dalam `<head>`):
   - Tag **Open Graph & Twitter Card** (judul, deskripsi, gambar) untuk tampilan saat dibagikan.
-  - Structured data **JSON-LD `Article`** (judul, tanggal, gambar, publisher) — hanya di halaman artikel.
+  - Structured data **JSON-LD `Article`** (judul, tanggal, gambar, **penulis**, publisher) — hanya di
+    halaman artikel. Field `author` diambil dari `.Params.author`, default **"Team Central Cat's"**.
   - Tag `<link rel="canonical">`.
   - Variabel bersama `$title`/`$desc`/`$img`: `$desc` ambil dari `description` → `summary` → deskripsi situs;
     `$img` ambil `images[0]` (di-`absURL`), fallback `/logo.png`. **Jangan ubah tanpa paham dampaknya.**
@@ -222,6 +224,8 @@ manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit,
   demi menghormati keyakinan muslim.
 - **FAQ & gaya:** tiap artikel memuat blok `[[faq]]` di front matter (3–5 tanya-jawab) dan
   ditulis **answer-first** (paragraf pembuka langsung menjawab inti) — baik untuk SEO & asisten AI.
+- **Penulis (byline):** tiap draf otomatis menambahkan `author = "Team Central Cat's"` di front matter
+  (lihat Bagian 10). Bila perlu, ganti manual ke nama penulis spesifik sebelum merge.
 - **Output:** Pull Request berlabel `ai-draft`, **branch unik per run** → tinjau → Merge = terbit.
 - **GitHub Secrets yang dipakai:** `GEMINI_API_KEY`, `PEXELS_API_KEY`, `PIXABAY_API_KEY`.
 - **Belum terpasang:** RSS berita real-time untuk **Berita & Tren** (Sabtu). Sementara artikel
@@ -248,3 +252,6 @@ manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit,
 - **FAQ accordion** — gaya untuk class `cc-faq`, `cc-faq__item`, `cc-faq__q`, `cc-faq__a`
   ada di blok `<style>` pada `layouts/_default/baseof.html`. Markup FAQ ada di
   `layouts/_default/single.html` (render hanya bila artikel punya `[[faq]]`) + JSON-LD `FAQPage`.
+- **Byline penulis** — di `layouts/_default/single.html`, dekat tanggal artikel ditampilkan
+  `Ditulis oleh {{ .Params.author | default "Team Central Cat's" }}`. Default ini juga dipakai
+  di JSON-LD `Article` (`baseof.html`) — jadi artikel tanpa field `author` tetap punya penulis.
