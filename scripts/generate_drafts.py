@@ -28,6 +28,7 @@ import re
 import io
 import sys
 import json
+import random
 import datetime
 import pathlib
 
@@ -99,14 +100,15 @@ ATURAN WAJIB:
 7. Tubuh artikel dalam Markdown, sekitar 600-1000 kata: paragraf pembuka, beberapa subjudul, poin praktis, dan kesimpulan singkat. JANGAN menulis judul utama sebagai H1 (#) di dalam body — judul sudah dipakai terpisah.
 8. JAWAB LANGSUNG (penting untuk mesin pencari & asisten AI): paragraf PEMBUKA harus langsung menjawab inti pertanyaan/topik secara ringkas (definisi/jawaban inti dalam 2-3 kalimat pertama), baru diperdalam. Ini membantu artikel dikutip AI seperti ChatGPT, Gemini, dan Google AI Overviews.
 9. Bila wajar, rumuskan judul & beberapa subjudul sebagai PERTANYAAN yang benar-benar diketik orang. Gunakan kalimat ringkas & mudah dipindai.
-10. ATURAN HALAL (khusus kategori Bisnis Hewan): topik boleh mencakup hewan peliharaan dan ternak HALAL (mis. ayam, bebek, kambing, sapi, domba, kelinci, ikan, lebah madu). DILARANG KERAS mengangkat konten yang berpusat pada hewan haram dalam Islam (mis. babi/celeng) maupun budidaya/produk turunannya. Untuk kategori SELAIN Bisnis Hewan, tetap fokus pada kucing dan hewan peliharaan umum.
+10. ATURAN HALAL (khusus kategori Bisnis Hewan): topik boleh mencakup hewan peliharaan dan ternak HALAL (mis. ayam, bebek, kambing, sapi, domba, kelinci, ikan, lebah madu). DILARANG KERAS mengangkat konten yang berpusat pada hewan haram dalam Islam (mis. babi/celeng) maupun budidaya/produk turunannya.
+11. CAKUPAN HEWAN: kucing adalah TEMA UTAMA blog (mayoritas artikel), tetapi artikel BOLEH membahas hewan peliharaan lain (anjing, kelinci, hamster, burung, ikan, dll) bila relevan & bermanfaat — tidak harus selalu kucing. Sesuaikan isi dengan hewan yang dibahas.
 
 Balas HANYA satu objek JSON valid dengan struktur:
 {"title": "...", "slug": "...", "subcategory": "...", "tags": ["...","..."], "summary": "...", "image_query": "...", "body": "...", "faq": [{"q": "...", "a": "..."}]}
 - "slug": huruf kecil, kata dipisah tanda hubung, tanpa spasi/tanda baca.
 - "subcategory": pilih SATU dari daftar yang diberikan.
 - "tags": 2-4 tag relevan (huruf kecil).
-- "image_query": 2-4 kata kunci BAHASA INGGRIS untuk mencari gambar (mis. "persian cat grooming", "chicken farming"). Relevan dengan isi.
+- "image_query": 2-4 kata BAHASA INGGRIS berupa OBJEK/ADEGAN KONKRET yang mudah ditemukan di situs foto/ilustrasi (mis. "cat drinking water", "fluffy cat grooming", "dog playing park", "rabbit eating", "chicken farm"). HINDARI istilah abstrak/medis yang tidak punya gambar (JANGAN mis. "urinary tract infection", "nutrition deficiency"). Query HARUS menampilkan HEWAN/SUBJEK UTAMA artikel ini secara konkret (kalau artikelnya tentang kucing pakai kucing, kalau tentang anjing pakai anjing, dst).
 - "body": Markdown lengkap artikel (JANGAN masukkan FAQ ke body).
 - "faq": 3-5 pasang tanya-jawab; jawaban ringkas 1-3 kalimat, akurat, satu baris. Topik kesehatan: sertakan anjuran dokter hewan bila relevan. JANGAN mengarang angka."""
 
@@ -265,11 +267,22 @@ def fetch_illustration_pixabay(query, slug):
 
 
 def fetch_image(query, slug, want_photo):
+    """Berita & Tren -> foto asli (Pexels). Non-berita -> KONDISIONAL:
+    coba ilustrasi (Pixabay) & foto (Pexels) bergantian acak, dengan saling fallback,
+    supaya gambar bervariasi (kadang kartun, kadang foto) tapi tetap relevan."""
     if want_photo:
-        return fetch_photo_pexels(query, slug)
-    path, credit = fetch_illustration_pixabay(query, slug)
-    if not path:
         path, credit = fetch_photo_pexels(query, slug)
+        if not path:
+            path, credit = fetch_illustration_pixabay(query, slug)
+        return path, credit
+    if random.choice([True, False]):
+        path, credit = fetch_illustration_pixabay(query, slug)
+        if not path:
+            path, credit = fetch_photo_pexels(query, slug)
+    else:
+        path, credit = fetch_photo_pexels(query, slug)
+        if not path:
+            path, credit = fetch_illustration_pixabay(query, slug)
     return path, credit
 
 
