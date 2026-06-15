@@ -3,6 +3,7 @@ title = "Memulai Usaha Petshop: 4 Hal yang Perlu Disiapkan"
 date = 2026-06-08T09:00:00+07:00
 categories = ["Peluang Usaha & Waralaba"]
 tags = ["bisnis", "petshop"]
+hewan = ["kucing"]
 summary = "Tertarik membuka petshop? Empat fondasi ini menentukan apakah usaha Anda bertahan di tahun pertama."
 +++
 

@@ -3,6 +3,7 @@ title = "Tren Cat Hotel: Kenapa Makin Diminati"
 date = 2026-06-10T09:00:00+07:00
 categories = ["Tren & Lifestyle"]
 tags = ["cat hotel", "tren"]
+hewan = ["kucing"]
 summary = "Layanan penitipan kucing tumbuh pesat seiring gaya hidup pemilik anabul. Apa yang sebenarnya dicari pelanggan?"
 +++
 

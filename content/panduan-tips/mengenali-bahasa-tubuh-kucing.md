@@ -4,6 +4,7 @@ date = 2026-06-14T18:20:50+07:00
 draft = false
 categories = ["Perawatan Harian"]
 tags = ["bahasa tubuh kucing", "perilaku kucing", "komunikasi kucing", "ikatan kucing"]
+hewan = ["kucing"]
 summary = "Kucing sering disebut misterius, tapi sebenarnya mereka berkomunikasi lho! Pelajari cara membaca bahasa tubuh anabulmu, mulai dari ekor, telinga, mata, hingga suaranya, agar ikatanmu makin erat."
 images = ["/images/mengenali-bahasa-tubuh-kucing.webp"]
 +++

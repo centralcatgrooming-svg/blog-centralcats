@@ -4,6 +4,7 @@ date = 2026-06-15T08:44:48+07:00
 draft = false
 categories = ["Penyakit & Pencegahan"]
 tags = ["kesehatan kucing", "isk kucing", "pencegahan penyakit", "kucing sakit"]
+hewan = ["kucing"]
 summary = "Infeksi Saluran Kemih (ISK) adalah masalah umum pada kucing yang bisa sangat menyakitkan. Kenali gejala ISK pada anabul Anda, faktor risikonya, serta langkah-langkah pencegahan yang bisa dilakukan."
 images = ["/images/waspada-isk-kucing-kenali-gejala-dan-pencegahannya.webp"]
 

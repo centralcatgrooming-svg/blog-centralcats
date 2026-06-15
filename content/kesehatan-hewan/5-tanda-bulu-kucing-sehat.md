@@ -3,6 +3,7 @@ title = "5 Tanda Bulu Kucing yang Sehat"
 date = 2026-06-12T09:00:00+07:00
 categories = ["Kesehatan Kucing"]
 tags = ["kucing", "kesehatan", "grooming"]
+hewan = ["kucing"]
 summary = "Bulu yang berkilau bukan sekadar penampilan—ini cermin kesehatan kulit dan nutrisi anabul. Kenali lima tandanya."
 +++
 

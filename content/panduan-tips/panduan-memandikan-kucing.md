@@ -3,6 +3,7 @@ title = "Panduan Aman Memandikan Kucing di Rumah"
 date = 2026-06-06T09:00:00+07:00
 categories = ["Perawatan Harian"]
 tags = ["kucing", "grooming", "panduan"]
+hewan = ["kucing"]
 summary = "Tidak semua kucing perlu sering dimandikan. Saat memang perlu, ikuti langkah aman ini agar anabul tetap tenang."
 +++
 
