@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>(function(){try{var t=localStorage.getItem('theme')||((window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-P6KB8Y28NX"></script>
   <script>
@@ -61,16 +62,29 @@
   </script>
   {{- end }}
   <style>
-    :root{ --brand:{{ .Site.Params.brandColor }}; --brand-dark:#162d6b; --accent:#d4af37; --ink:#1f2937; --muted:#6b7280; --line:#eef0f4; --soft:#eef2ff; }
+    :root{
+      --bg:#fbfaf8; --surface:#ffffff; --surface-2:#f4f2ee;
+      --text:#16213e; --text-muted:#5d6b82; --border:#eceae5;
+      --brand:{{ .Site.Params.brandColor }}; --brand-strong:#162d6b; --brand-soft:#eef2ff;
+      --header-bg:#1e3a8a; --footer-bg:#162d6b; --on-brand:#ffffff;
+      /* alias token lama -> token baru (kompatibilitas; ikut berubah saat dark mode) */
+      --brand-dark:var(--brand-strong); --accent:#d4af37; --ink:var(--text); --muted:var(--text-muted); --line:var(--border); --soft:var(--brand-soft);
+    }
+    [data-theme="dark"]{
+      --bg:#0e1320; --surface:#151b2b; --surface-2:#1b2333;
+      --text:#e9ecf4; --text-muted:#9aa6bd; --border:#27314a;
+      --brand:#8ba3ff; --brand-strong:#aebdff; --brand-soft:#1b2540;
+      --header-bg:#162d6b; --footer-bg:#0a0f1a; --on-brand:#ffffff;
+    }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#fff;line-height:1.6}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:var(--bg);line-height:1.6;transition:background .3s ease,color .3s ease}
     a{color:var(--brand);text-decoration:none}
     a:hover{text-decoration:underline}
     .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
-    header.site{background:var(--brand);position:sticky;top:0;z-index:10}
+    header.site{background:var(--header-bg);position:sticky;top:0;z-index:10}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:8px 20px;max-width:1100px;margin:0 auto;flex-wrap:wrap}
     .brand{display:inline-flex;align-items:center;background:#fff;padding:0 4px;border-radius:6px;box-shadow:0 3px 8px rgba(0,0,0,.10)}
-    nav.main a{color:#fff;font-weight:600;font-size:.95rem;margin-left:18px}
+    nav.main a{color:var(--on-brand);font-weight:600;font-size:.95rem;margin-left:18px}
     nav.main a:hover{color:var(--accent);text-decoration:none}
     main{padding:40px 0;min-height:60vh}
     h1.page-title{font-size:clamp(1.7rem,3vw,2.4rem);color:var(--brand-dark);margin:0 0 6px}
@@ -84,7 +98,7 @@
     .card h3{margin:0;font-size:1.08rem;line-height:1.35;color:var(--brand-dark)}
     .card h3 a{color:inherit}
     .card p{margin:0;color:var(--muted);font-size:.92rem;flex:1}
-    .card .date{color:#9aa1ad;font-size:.8rem}
+    .card .date{color:var(--text-muted);font-size:.8rem}
     article.post{max-width:760px;margin:0 auto}
     article.post img{max-width:100%;border-radius:14px}
     article.post .meta{color:var(--muted);font-size:.9rem;margin-bottom:24px}
@@ -96,11 +110,11 @@
     @media (max-width:768px){
       .topbar{flex-wrap:nowrap;justify-content:space-between}
       .hamburger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:30px;height:30px;padding:0;background:none;border:0;cursor:pointer;z-index:40}
-      .hamburger span{display:block;width:26px;height:2px;background:#fff;border-radius:2px;transition:transform .3s ease,opacity .3s ease}
+      .hamburger span{display:block;width:26px;height:2px;background:var(--on-brand);border-radius:2px;transition:transform .3s ease,opacity .3s ease}
       .hamburger.active span:nth-child(1){transform:translateY(7px) rotate(45deg)}
       .hamburger.active span:nth-child(2){opacity:0}
       .hamburger.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
-      nav.main{position:fixed;top:60px;right:0;width:50%;height:calc(100vh - 60px);background:var(--brand);
+      nav.main{position:fixed;top:60px;right:0;width:50%;height:calc(100vh - 60px);background:var(--header-bg);
         display:flex;flex-direction:column;align-items:stretch;padding:22px 22px;gap:2px;
         transform:translateX(100%);transition:transform .3s ease;box-shadow:-10px 0 30px rgba(0,0,0,.25);z-index:30}
       nav.main.open{transform:translateX(0)}
@@ -111,7 +125,7 @@
       body{overflow-x:hidden}
     }
 
-    footer.site{margin-top:48px;background:var(--brand-dark);color:#cdd6f0;font-size:.9rem}
+    footer.site{margin-top:48px;background:var(--footer-bg);color:#cdd6f0;font-size:.9rem}
     .footer-inner{max-width:1100px;margin:0 auto;padding:48px 20px 16px;display:grid;grid-template-columns:1.6fr 1fr 1.2fr;gap:32px}
     .footer-col h4{color:#fff;font-size:.95rem;margin:0 0 14px}
     .footer-col a{display:block;color:#cdd6f0;text-decoration:none;margin:7px 0}
@@ -133,17 +147,17 @@
     @media(max-width:640px){.footer-inner{grid-template-columns:1fr;gap:24px}}
 /* ===== FAQ accordion (cc-faq) ===== */
 .cc-faq{margin:2.75rem 0 1rem;}
-.cc-faq h2{font-size:1.5rem;color:#1e3a8a;margin:0 0 1.1rem;}
+.cc-faq h2{font-size:1.5rem;color:var(--brand);margin:0 0 1.1rem;}
 .cc-faq__item{
-  border:1px solid #e5e7eb;
+  border:1px solid var(--border);
   border-radius:10px;
   margin-bottom:.7rem;
-  background:#fff;
+  background:var(--surface);
   overflow:hidden;
   transition:border-color .2s ease, box-shadow .2s ease;
 }
 .cc-faq__item[open]{
-  border-color:#1e3a8a;
+  border-color:var(--brand);
   box-shadow:0 2px 12px rgba(30,58,138,.08);
 }
 .cc-faq__q{
@@ -155,18 +169,18 @@
   gap:1rem;
   padding:1rem 1.2rem;
   font-weight:600;
-  color:#162d6b;
+  color:var(--brand-strong);
   transition:color .15s ease;
 }
 .cc-faq__q::-webkit-details-marker{display:none;}
-.cc-faq__q:hover{color:#1e3a8a;}
+.cc-faq__q:hover{color:var(--brand);}
 .cc-faq__q::after{
   content:"+";
   flex-shrink:0;
   font-size:1.4rem;
   font-weight:400;
   line-height:1;
-  color:#1e3a8a;
+  color:var(--brand);
   transition:transform .2s ease;
 }
 .cc-faq__item[open] .cc-faq__q::after{
@@ -175,18 +189,27 @@
 }
 .cc-faq__a{
   padding:0 1.2rem 1.1rem;
-  color:#374151;
+  color:var(--text);
   line-height:1.7;
 }
 .cc-faq__a p{margin:0 0 .6rem;}
 .cc-faq__a p:last-child{margin-bottom:0;}
-.cc-faq__a a{color:#1e3a8a;text-decoration:underline;}
+.cc-faq__a a{color:var(--brand);text-decoration:underline;}
+/* ===== Tombol dark mode toggle ===== */
+.cc-theme-toggle{width:38px;height:38px;border-radius:9px;border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--on-brand);cursor:pointer;display:inline-grid;place-items:center;padding:0;flex-shrink:0}
+.cc-theme-toggle:hover{background:rgba(255,255,255,.14)}
+.cc-theme-toggle svg{width:19px;height:19px}
+.cc-moon{display:none}[data-theme="dark"] .cc-moon{display:block}[data-theme="dark"] .cc-sun{display:none}
   </style>
 </head>
 <body>
   <header class="site">
     <div class="topbar">
       <a class="brand" href="/"><img src="/logo.png" alt="Central Cat's Blog" style="height:44px;width:auto;display:block"></a>
+      <button class="cc-theme-toggle" id="cc-theme-toggle" type="button" aria-label="Ganti mode gelap/terang">
+        <svg class="cc-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
+        <svg class="cc-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      </button>
       <button class="hamburger" id="nav-toggle" aria-label="Buka menu" aria-controls="nav-main" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -243,5 +266,6 @@
       n.querySelectorAll("a").forEach(function(a){a.addEventListener("click",close);});
     })();
   </script>
+  <script>(function(){var b=document.getElementById('cc-theme-toggle');if(!b)return;b.addEventListener('click',function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}});})();</script>
 </body>
 </html>
