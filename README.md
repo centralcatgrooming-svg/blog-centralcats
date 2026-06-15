@@ -1,4 +1,4 @@
-# Central Cat's Blog (Hugo + GitHub Pages)
+# Central Cat's News (Hugo + GitHub Pages)
 
 Blog statis untuk `blog.centralcats.id`. Gratis, cepat, aman. Tulis artikel dalam
 Markdown → commit ke GitHub → otomatis tayang. Situs utama `centralcats.id` menarik

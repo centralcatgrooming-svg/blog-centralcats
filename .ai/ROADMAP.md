@@ -1,4 +1,4 @@
-# ROADMAP — Central Cat's Blog (Premium Knowledge Platform)
+# ROADMAP — Central Cat's News (Premium Knowledge Platform)
 
 Dokumen ini = cetak biru & patokan. Dibaca dulu sebelum mengerjakan tugas UI/fitur apa pun.
 Prinsip: **tetap Hugo statis + GitHub Pages, ringan, JS minimal.** Jangan ganti framework. Jangan rusak yang sudah jalan.

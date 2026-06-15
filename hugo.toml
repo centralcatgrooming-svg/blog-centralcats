@@ -1,7 +1,7 @@
 baseURL = "https://blog.centralcats.id/"
 languageCode = "id-id"
 defaultContentLanguage = "id"
-title = "Central Cat's Blog"
+title = "Central Cat's News"
 timeZone = "Asia/Jakarta"
 enableRobotsTXT = false
 

@@ -1,4 +1,4 @@
-# robots.txt — Central Cat's Blog
+# robots.txt — Central Cat's News
 # Menyambut mesin pencari & asisten AI untuk membaca dan mengutip konten kami.
 
 User-agent: *
