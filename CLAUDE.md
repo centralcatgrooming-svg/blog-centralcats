@@ -1,5 +1,7 @@
 # CLAUDE.md — Panduan Blog Central Cat's
 
+> Cetak biru desain & roadmap: baca `.ai/ROADMAP.md` sebelum mengerjakan tugas UI/fitur.
+
 > File ini adalah instruksi tetap untuk Claude Code (dan kontributor) saat bekerja di
 > repo `blog-centralcats`. Letakkan di **root repo**. File ini TIDAK dipublikasikan
 > oleh Hugo (Hugo hanya memproses folder `content/`), jadi tidak memengaruhi kecepatan situs.
