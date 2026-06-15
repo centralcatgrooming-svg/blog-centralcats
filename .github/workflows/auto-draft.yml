@@ -1,10 +1,11 @@
 name: Auto Draft Artikel (AI)
 
 on:
-  # Jadwal otomatis: Senin–Sabtu pukul 08:00 WIB (01:00 UTC).
+  # Jadwal otomatis: Senin–Sabtu pukul 08:17 WIB (01:17 UTC).
+  # Menit ganjil (:17) agar tak bentrok beban puncak GitHub di menit :00.
   # Script memilih kategori sesuai hari (Minggu libur -> tidak jalan).
   schedule:
-    - cron: "0 1 * * 1-6"
+    - cron: "17 1 * * 1-6"
   # Bisa juga dijalankan manual dari tab Actions.
   workflow_dispatch:
     inputs:

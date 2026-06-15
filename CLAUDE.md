@@ -197,7 +197,8 @@ Pipeline pembuat draf artikel otomatis. **Output selalu berupa Pull Request** un
 manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit, Close = buang.
 
 - **Jadwal otomatis** (GitHub Actions, `.github/workflows/auto-draft.yml`):
-  cron `0 1 * * 1-6` = **Senin–Sabtu 08:00 WIB** (01:00 UTC). **Minggu libur.**
+  cron `17 1 * * 1-6` = **Senin–Sabtu 08:17 WIB** (01:17 UTC). **Minggu libur.**
+  (Menit ganjil `:17` dipilih agar tak bentrok beban puncak GitHub di menit `:00`.)
   Bisa juga dijalankan manual dari tab Actions (input `jumlah` & `kategori`).
 - **Kategori mengikuti hari** (zona WIB), dipilih otomatis oleh `scripts/generate_drafts.py`
   (env `SECTION="auto"`/kosong), atau dipaksa lewat input `kategori` saat run manual:
@@ -205,11 +206,19 @@ manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit,
   - Selasa & Jumat → **Panduan & Tips**
   - Rabu → **Bisnis Hewan**
   - Sabtu → **Berita & Tren**
-- **Gambar:** kategori **Berita & Tren** = **foto asli (Pexels)**; kategori lain =
-  **ilustrasi/kartun (Pixabay)**, dengan fallback Pixabay→Pexels. Semua dikonversi
-  **WebP ≤1200px** (patuh Aturan Performa Bagian 4).
+- **Gambar (kondisional):** kategori **Berita & Tren** = **foto asli (Pexels)** (fallback ke
+  ilustrasi Pixabay bila kosong). Kategori **non-berita** = **dicampur acak** antara
+  **foto (Pexels)** & **ilustrasi/kartun (Pixabay)** dengan **saling fallback**, supaya gambar
+  bervariasi (kadang foto, kadang kartun) tapi tetap relevan. Kata kunci gambar dibuat
+  **konkret/visual** dan **mengikuti HEWAN/SUBJEK artikel** (mis. kucing, anjing, kelinci,
+  ayam) — **tidak dipaksa selalu kucing**. Semua dikonversi **WebP ≤1200px**
+  (patuh Aturan Performa Bagian 4).
+- **Cakupan hewan:** **kucing adalah TEMA UTAMA** blog (mayoritas artikel), tetapi artikel
+  **boleh** membahas **hewan peliharaan lain** (anjing, kelinci, hamster, burung, ikan, dll)
+  bila relevan & bermanfaat — **tidak harus selalu kucing**. Untuk **Bisnis Hewan**, cakupan
+  meluas ke **ternak halal** (lihat aturan HALAL). Isi & gambar menyesuaikan hewan yang dibahas.
 - **Aturan HALAL** (khusus kategori Bisnis Hewan): boleh hewan peliharaan & ternak **halal**
-  (ayam, kambing, sapi, domba, kelinci, ikan, dll); **DILARANG** hewan haram (babi/celeng)
+  (ayam, bebek, kambing, sapi, domba, kelinci, ikan, dll); **DILARANG** hewan haram (babi/celeng)
   demi menghormati keyakinan muslim.
 - **FAQ & gaya:** tiap artikel memuat blok `[[faq]]` di front matter (3–5 tanya-jawab) dan
   ditulis **answer-first** (paragraf pembuka langsung menjawab inti) — baik untuk SEO & asisten AI.
