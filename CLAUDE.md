@@ -22,6 +22,11 @@ Tangerang (Pasar Kemis & Rajeg). Blog ini adalah bagian dari ekosistem:
 **Stack:** Hugo (static site generator) → GitHub Pages → custom domain `blog.centralcats.id`.
 Build otomatis lewat GitHub Actions (`.github/workflows/hugo.yml`) setiap `push` ke `main`.
 
+**Judul situs publik:** **"Central Cat's News"** (di `hugo.toml` `title` & `content/_index.md`).
+Nama brand di footer & narasumber tetap **"Central Cat's"** (tanpa "News"). Desain bertahap
+mengikuti `.ai/ROADMAP.md` (Tahap 0–7 sudah selesai: token+dark mode, tipografi, homepage portal,
+halaman artikel, header+pencarian, Indeks Hewan A‑Z, Kisah Sukses, poles aksesibilitas/performa).
+
 **Integrasi penting:** Hugo menghasilkan `index.json` di root situs
 (`https://blog.centralcats.id/index.json`). Situs utama `centralcats.id` menarik file ini
 untuk menampilkan section "Artikel Terbaru" secara otomatis. **Jangan rusak feed ini.**
@@ -66,12 +71,14 @@ dan ahli di bidangnya.
    date = 2026-06-14T09:00:00+07:00
    categories = ["Kesehatan Kucing"]   # = SUBKATEGORI
    tags = ["kucing", "kesehatan", "bulu"]
+   hewan = ["kucing"]                       # taxonomy Indeks Hewan A-Z (huruf kecil; default ["kucing"])
    summary = "Ringkasan 1–2 kalimat. Ini juga dipakai sebagai meta description SEO (maks ~155 karakter)."
    images = ["/images/nama-gambar.webp"]   # gambar unggulan, opsional tapi sangat disarankan
    author = "Team Central Cat's"           # opsional; default "Team Central Cat's" bila dikosongkan
    +++
    ```
-4. **Kategori utama** = folder. **Subkategori** = field `categories`.
+4. **Kategori utama** = folder. **Subkategori** = field `categories`. **`hewan`** = taxonomy untuk
+   halaman **Indeks Hewan A-Z** (`/hewan/`); isi huruf kecil (mis. `["kucing"]`, `["anjing"]`).
 5. Commit & push → tayang otomatis di blog dan di `centralcats.id`.
 
 ---
@@ -118,7 +125,15 @@ Target: skor Lighthouse Performance ≥ 90 di mobile.
 - ✅ `enableRobotsTXT = false` → `robots.txt` & `llms.txt` kini disajikan dari **file statis**
   (`static/robots.txt` + `static/llms.txt`, izinkan crawler mesin pencari & AI + Sitemap).
   **Jangan aktifkan kembali** `enableRobotsTXT` tanpa paham dampaknya — Hugo akan menimpa file statis itu.
-- ✅ `baseURL` sudah benar (`https://blog.centralcats.id/`) → URL kanonik tepat.
+- ✅ `baseURL` = `https://blog.centralcats.id/` (https) → URL kanonik tepat. Workflow `hugo.yml`
+  mem-build dengan `--baseURL "https://blog.centralcats.id/"` (**hardcoded https**); JANGAN kembalikan
+  ke `${{ steps.pages.outputs.base_url }}` karena bisa menghasilkan `http://` → canonical salah di GSC.
+- ✅ **Judul SEO homepage terpisah dari teks tampilan:** `content/_index.md` punya `seo_title`
+  (dipakai `<title>` + OG/Twitter title saat `.IsHome`) & `description` (meta/OG/Twitter desc home).
+  Teks di bawah "Artikel Terbaru" tetap dari `.Site.Params.description` (`hugo.toml [params]`).
+- ✅ **Aksesibilitas & performa (Tahap 7):** semua `<img>` punya `alt` = judul artikel; SVG dekoratif
+  `aria-hidden`; font Google dimuat non-blocking (`rel=preload`→`stylesheet` + `<noscript>`); indikator
+  fokus keyboard `:focus-visible` (putih di header, brand di body).
 - ✅ **Google Search Console** sudah terverifikasi (file `static/google4120ad7b9c49fdb9.html`
   — **jangan dihapus**, Google mengecek ulang sewaktu-waktu).
 - ✅ `sitemap.xml` (otomatis dari Hugo) sudah **disubmit** ke Search Console.
@@ -175,7 +190,11 @@ Target: skor Lighthouse Performance ≥ 90 di mobile.
   - `static/CNAME` → berisi `blog.centralcats.id`. Hapus = domain custom mati.
   - `static/google4120ad7b9c49fdb9.html` → file verifikasi Google Search Console. Hapus = verifikasi bisa lepas.
   - `.github/workflows/hugo.yml` → ini yang mem-build & deploy. Rusak = situs tidak ter-update.
-  - `baseURL` di `hugo.toml`.
+    Argumen `--baseURL "https://blog.centralcats.id/"` harus tetap **https** (lihat Bagian 5).
+  - `baseURL` di `hugo.toml` (https).
+  - `[taxonomies]` di `hugo.toml` (`category`, `tag`, `hewan`) + template `layouts/hewan/list.html`
+    (indeks A-Z) & `layouts/hewan/term.html` (per-hewan). Menghapus salah satu taxonomy bawaan
+    (`category`/`tag`) saat menambah kustom = pill/kartu kategori rusak.
   - Blok SEO di `<head>` `baseof.html` (Open Graph, Twitter Card, canonical, JSON-LD Article).
 - ❌ Jangan menambah dependensi/library berat yang melanggar Aturan Performa (Bagian 4).
 - ✅ Saat menyentuh file teknis inti, tampilkan dulu perubahannya (diff) untuk ditinjau
@@ -228,6 +247,8 @@ manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit,
   ditulis **answer-first** (paragraf pembuka langsung menjawab inti) — baik untuk SEO & asisten AI.
 - **Penulis (byline):** tiap draf otomatis menambahkan `author = "Team Central Cat's"` di front matter
   (lihat Bagian 10). Bila perlu, ganti manual ke nama penulis spesifik sebelum merge.
+- **Taxonomy `hewan`:** Gemini menentukan hewan utama artikel; ditulis `hewan = [...]` (huruf kecil,
+  default `["kucing"]`, hewan haram babi/celeng difilter) → mengisi Indeks Hewan A-Z otomatis.
 - **Output:** Pull Request berlabel `ai-draft`, **branch unik per run** → tinjau → Merge = terbit.
 - **GitHub Secrets yang dipakai:** `GEMINI_API_KEY`, `PEXELS_API_KEY`, `PIXABAY_API_KEY`.
 - **Belum terpasang:** RSS berita real-time untuk **Berita & Tren** (Sabtu). Sementara artikel
@@ -240,7 +261,11 @@ manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit,
 
 - Halaman **`/cari/`** (`content/cari.md` + layout `layouts/_default/search.html`).
   Pencarian **client-side** (filter judul/ringkasan/kategori di browser), **nol library**
-  (patuh Aturan Performa). Menu **"Cari"** ada di navigasi utama.
+  (patuh Aturan Performa). Tetap ada sebagai halaman hasil lengkap/cadangan.
+- **Kotak cari di header** (`baseof.html`) dengan **dropdown hasil live** dari `/search-index.json`
+  (maks 6, Enter → `/cari/?q=`): desktop = `#cc-hsearch` di topbar; mobile = ikon kaca `#cc-msearch-btn`
+  membuka baris cari `#cc-msearch`. Index di-`fetch` **sekali** & dibagi kedua kotak (JS `init(...)`
+  bersama). Link menu "Cari" disembunyikan (digantikan kotak/ikon ini).
 - **Indeks:** `layouts/index.searchindex.json` menghasilkan **`/search-index.json`**
   (berisi **SEMUA artikel**), lewat output format `[outputFormats.SearchIndex]` di `hugo.toml`.
 - ⚠️ **PENTING:** `index.json` (feed ke situs utama `centralcats.id`) **tetap dibatasi 20 artikel
@@ -257,3 +282,26 @@ manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit,
 - **Byline penulis** — di `layouts/_default/single.html`, dekat tanggal artikel ditampilkan
   `Ditulis oleh {{ .Params.author | default "Team Central Cat's" }}`. Default ini juga dipakai
   di JSON-LD `Article` (`baseof.html`) — jadi artikel tanpa field `author` tetap punya penulis.
+
+> Semua CSS komponen ada di blok `<style>` `baseof.html` dan **memakai token warna** (`var(--…)`)
+> agar otomatis ikut **dark mode** (`data-theme`, toggle `#cc-theme-toggle` desktop + `#cc-theme-toggle-m`
+> di drawer mobile, simpan ke `localStorage`). Jangan hardcode warna; pakai token. Font: heading
+> **Fraunces** (serif), body **Inter** (sans).
+
+- **Homepage portal** (`layouts/index.html`): hanya artikel ber-`Section` (terbaru dulu). **Featured grid**
+  (`.feat-grid`: 1 kartu besar + 2 kecil), **strip "Terkini"** (running text/ticker `.ticker`),
+  **seksi per kategori** (`.cat-sec`, 3 artikel + "Lihat semua"). Kartu sisa pakai `partial card.html`.
+- **Tag warna per kategori** (berdasar `.Section`): `.badge--<section>` (kartu) & `.pill-light--<section>`
+  (featured) — token `--cat-health/guide/biz/news-*`. Slug: `kesehatan-hewan`, `panduan-tips`,
+  `bisnis-hewan`, `berita-tren`.
+- **Placeholder kartu tanpa gambar** — `.cc-noimg` + ikon kucing SVG (kartu grid latar `--brand-soft`;
+  featured latar gelap `#1a2744`). Dipakai di `card.html` & featured `index.html`.
+- **Halaman artikel** (`single.html`): header `.post-head` (pill kategori → H1 serif → `.post-meta`
+  penulis · tanggal · `{{ .ReadingTime }} menit baca`), **hero** `.post-hero` (16/8, hanya bila ada
+  `images`), blockquote bergaya.
+- **Indeks Hewan A-Z** — `layouts/hewan/list.html` (`/hewan/`, chip `.hewan-chip` dikelompok A-Z, ada
+  fallback "Indeks sedang dilengkapi" bila kosong) & `layouts/hewan/term.html` (`/hewan/<nama>/`). Link
+  di nav header & footer.
+- **Kisah Sukses** — artikel `tipe = "kisah-sukses"` menampilkan **kartu narasumber** `.cc-narsum`
+  (nama + tombol LINK ke `instagram`/`youtube`/`tiktok`/`situs`, **bukan embed**) di atas konten.
+  Front matter: `tipe`, `narasumber`, dan URL sosial/situs opsional. Artikel biasa tidak terpengaruh.
