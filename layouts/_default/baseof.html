@@ -84,6 +84,7 @@
     header.site{background:var(--header-bg);position:sticky;top:0;z-index:10}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:8px 20px;max-width:1100px;margin:0 auto;flex-wrap:wrap}
     .brand{display:inline-flex;align-items:center;background:#fff;padding:0 4px;border-radius:6px;box-shadow:0 3px 8px rgba(0,0,0,.10)}
+    nav.main{margin-left:auto}
     nav.main a{color:var(--on-brand);font-weight:600;font-size:.95rem;margin-left:18px}
     nav.main a:hover{color:var(--accent);text-decoration:none}
     main{padding:40px 0;min-height:60vh}
@@ -196,7 +197,7 @@
 .cc-faq__a p:last-child{margin-bottom:0;}
 .cc-faq__a a{color:var(--brand);text-decoration:underline;}
 /* ===== Tombol dark mode toggle ===== */
-.cc-theme-toggle{width:38px;height:38px;border-radius:9px;border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--on-brand);cursor:pointer;display:inline-grid;place-items:center;padding:0;flex-shrink:0;margin-left:auto}
+.cc-theme-toggle{width:38px;height:38px;border-radius:9px;border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--on-brand);cursor:pointer;display:inline-grid;place-items:center;padding:0;flex-shrink:0;margin-left:14px}
 .cc-theme-toggle:hover{background:rgba(255,255,255,.14)}
 .cc-theme-toggle svg{width:19px;height:19px}
 .cc-moon{display:none}[data-theme="dark"] .cc-moon{display:block}[data-theme="dark"] .cc-sun{display:none}
@@ -206,16 +207,16 @@
   <header class="site">
     <div class="topbar">
       <a class="brand" href="/"><img src="/logo.png" alt="Central Cat's Blog" style="height:44px;width:auto;display:block"></a>
-      <button class="cc-theme-toggle" id="cc-theme-toggle" type="button" aria-label="Ganti mode gelap/terang">
-        <svg class="cc-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
-        <svg class="cc-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
-      </button>
       <button class="hamburger" id="nav-toggle" aria-label="Buka menu" aria-controls="nav-main" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
       <nav class="main" id="nav-main">
         {{ range .Site.Menus.main }}<a href="{{ .URL }}">{{ .Name }}</a>{{ end }}
       </nav>
+      <button class="cc-theme-toggle" id="cc-theme-toggle" type="button" aria-label="Ganti mode gelap/terang">
+        <svg class="cc-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
+        <svg class="cc-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      </button>
     </div>
     <div class="menu-overlay" id="nav-overlay"></div>
   </header>
