@@ -12,6 +12,20 @@
       </div>
     </header>
     {{ with .Params.images }}<img class="post-hero" src="{{ index . 0 }}" alt="{{ $.Title }}">{{ end }}
+    {{ if eq .Params.tipe "kisah-sukses" }}
+    <aside class="cc-narsum">
+      <div class="cc-narsum__info">
+        <span class="cc-narsum__label">Narasumber</span>
+        <span class="cc-narsum__nama">{{ .Params.narasumber }}</span>
+      </div>
+      <div class="cc-narsum__links">
+        {{ with .Params.instagram }}<a href="{{ . }}" target="_blank" rel="noopener" class="cc-narsum__btn">Instagram</a>{{ end }}
+        {{ with .Params.youtube }}<a href="{{ . }}" target="_blank" rel="noopener" class="cc-narsum__btn">YouTube</a>{{ end }}
+        {{ with .Params.tiktok }}<a href="{{ . }}" target="_blank" rel="noopener" class="cc-narsum__btn">TikTok</a>{{ end }}
+        {{ with .Params.situs }}<a href="{{ . }}" target="_blank" rel="noopener" class="cc-narsum__btn">Situs Web</a>{{ end }}
+      </div>
+    </aside>
+    {{ end }}
     {{ .Content }}
     {{ with .Params.faq }}
     <section class="cc-faq">
