@@ -170,12 +170,14 @@
     .terkini{display:flex;align-items:center;gap:16px;margin:0 0 22px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
     .terkini .lbl{flex-shrink:0;display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#e23b3b}
     .terkini .pulse{width:8px;height:8px;border-radius:50%;background:#e23b3b;animation:ccpulse 2s infinite}
-    .terkini .links{display:flex;gap:22px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
-    .terkini .links::-webkit-scrollbar{display:none}
-    .terkini .links a{font-size:.9rem;font-weight:500;color:var(--text-muted)}
-    .terkini .links a:hover{color:var(--brand)}
+    .ticker{flex:1;overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent,#000 24px,#000 calc(100% - 24px),transparent);mask-image:linear-gradient(to right,transparent,#000 24px,#000 calc(100% - 24px),transparent)}
+    .ticker__track{display:inline-flex;align-items:center;white-space:nowrap;width:max-content;animation:ccticker 40s linear infinite}
+    .ticker__track a{font-size:.9rem;font-weight:500;color:var(--text-muted);text-decoration:none;margin-right:34px}
+    .ticker__track a:hover{color:var(--brand)}
+    .ticker:hover .ticker__track{animation-play-state:paused}
     @keyframes ccpulse{0%{box-shadow:0 0 0 0 rgba(226,59,59,.5)}70%{box-shadow:0 0 0 8px rgba(226,59,59,0)}100%{box-shadow:0 0 0 0 rgba(226,59,59,0)}}
-    @media (prefers-reduced-motion:reduce){.terkini .pulse{animation:none}}
+    @keyframes ccticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    @media (prefers-reduced-motion:reduce){.terkini .pulse{animation:none}.ticker__track{animation:none}}
     /* seksi per kategori */
     .cat-sec{margin:48px 0 0}
     .cat-sec .sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--border)}

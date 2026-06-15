@@ -5,10 +5,17 @@
   {{/* SARING: hanya artikel ber-section (kategori), terbaru dulu — samakan prinsip dgn index.json */}}
   {{ $articles := (where .Site.RegularPages "Section" "!=" "").ByDate.Reverse }}
 
-  {{/* STRIP TERKINI: 5 artikel terbaru */}}
+  {{/* STRIP TERKINI: 8 artikel terbaru, running text (digandakan utk loop mulus) */}}
   {{ with $articles }}
-    <div class="terkini"><span class="lbl"><span class="pulse"></span> Terkini</span>
-      <div class="links">{{ range first 5 . }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}</div>
+    <div class="terkini">
+      <span class="lbl"><span class="pulse"></span> Terkini</span>
+      <div class="ticker">
+        <div class="ticker__track">
+          {{ range first 8 . }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}
+          {{/* gandakan untuk loop mulus */}}
+          {{ range first 8 . }}<a href="{{ .RelPermalink }}" aria-hidden="true" tabindex="-1">{{ .Title }}</a>{{ end }}
+        </div>
+      </div>
     </div>
   {{ end }}
 
