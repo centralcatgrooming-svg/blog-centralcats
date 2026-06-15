@@ -101,7 +101,7 @@
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:8px 20px;max-width:1100px;margin:0 auto;flex-wrap:wrap}
     .brand{display:inline-flex;align-items:center;background:#fff;padding:0 4px;border-radius:6px;box-shadow:0 3px 8px rgba(0,0,0,.10)}
     nav.main{margin-left:auto}
-    nav.main a{color:var(--on-brand);font-weight:600;font-size:.95rem;margin-left:18px}
+    nav.main a{color:var(--on-brand);font-weight:600;font-size:.88rem;margin-left:14px}
     nav.main a:hover{color:var(--accent);text-decoration:none}
     main{padding:40px 0;min-height:60vh}
     h1.page-title{font-size:clamp(1.7rem,3vw,2.4rem);color:var(--brand-dark);margin:0 0 6px;line-height:1.15;letter-spacing:-.02em}
@@ -294,10 +294,13 @@
 nav.main a[href="/cari/"]{display:none}
 .cc-hsearch .ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--on-brand);opacity:.8;pointer-events:none}
 .cc-hsearch:focus-within .ic{color:var(--text-muted);opacity:.9}
-.cc-hsearch input{width:200px;height:38px;padding:0 12px 0 34px;border:1px solid rgba(255,255,255,.35);border-radius:9px;background:rgba(255,255,255,.12);color:var(--on-brand);font-family:var(--sans);font-size:.9rem;outline:none;transition:width .25s,background .2s,border-color .2s}
+.cc-hsearch input{width:170px;height:38px;padding:0 12px 0 34px;border:1px solid rgba(255,255,255,.35);border-radius:9px;background:rgba(255,255,255,.12);color:var(--on-brand);font-family:var(--sans);font-size:.9rem;outline:none;transition:width .25s,background .2s,border-color .2s}
 .cc-hsearch input::placeholder{color:rgba(255,255,255,.7)}
-.cc-hsearch input:focus{width:240px;background:#fff;color:#16213e;border-color:#fff}
+.cc-hsearch input:focus{width:210px;background:#fff;color:#16213e;border-color:#fff}
 .cc-hsearch input:focus::placeholder{color:var(--text-muted)}
+/* Header desktop: paksa 1 baris (jangan wrap) + rapatkan; breakpoint laptop sempit */
+@media(min-width:769px){.topbar{flex-wrap:nowrap;gap:12px}}
+@media(min-width:769px) and (max-width:1080px){nav.main a{margin-left:10px;font-size:.84rem}.cc-hsearch input{width:150px}}
 .cc-hresults{position:absolute;top:46px;right:0;width:360px;max-width:80vw;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);overflow:hidden;display:none;z-index:60}
 .cc-hresults.open{display:block}
 .cc-hresults a{display:block;padding:11px 15px;border-bottom:1px solid var(--border);text-decoration:none}
