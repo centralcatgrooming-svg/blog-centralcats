@@ -48,10 +48,14 @@ enableRobotsTXT = false
   url = "/panduan-tips/"
   weight = 4
 [[menu.main]]
+  name = "Indeks Hewan"
+  url = "/hewan/"
+  weight = 5
+[[menu.main]]
   name = "Tentang"
   url = "/tentang/"
-  weight = 5
+  weight = 6
 [[menu.main]]
   name = "Cari"
   url = "/cari/"
-  weight = 6
+  weight = 7
