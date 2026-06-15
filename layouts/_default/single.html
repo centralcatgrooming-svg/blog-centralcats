@@ -3,6 +3,7 @@
     <h1 class="page-title">{{ .Title }}</h1>
     <div class="meta">
       {{ time.Format ":date_long" .Date }}
+      · Ditulis oleh {{ .Params.author | default "Team Central Cat's" }}
       {{ with .Params.categories }} · {{ delimit . ", " }}{{ end }}
     </div>
     {{ with .Params.images }}<img src="{{ index . 0 }}" alt="{{ $.Title }}">{{ end }}

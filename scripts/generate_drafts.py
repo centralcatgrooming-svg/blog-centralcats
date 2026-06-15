@@ -322,6 +322,7 @@ def write_article(section, data):
         f'title = "{title_esc}"\n'
         f"date = {date_str}\n"
         "draft = false\n"
+        "author = \"Team Central Cat's\"\n"
         f'categories = ["{sub}"]\n'
         f"tags = [{tags_toml}]\n"
         f'summary = "{summary}"\n'
