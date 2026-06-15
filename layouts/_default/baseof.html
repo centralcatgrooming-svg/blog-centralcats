@@ -15,7 +15,7 @@
     gtag('js', new Date());
     gtag('config', 'G-P6KB8Y28NX');
   </script>
-  <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}</title>
+  <title>{{ if .IsHome }}{{ .Params.seo_title | default .Site.Title }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}</title>
   <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
   {{ hugo.Generator }}
   <link rel="icon" href="/favicon.ico" sizes="any">
@@ -25,7 +25,7 @@
   <link rel="manifest" href="/site.webmanifest">
 
   {{/* SEO: judul, deskripsi, gambar — dipakai bersama oleh Open Graph, Twitter Card, & JSON-LD */}}
-  {{- $title := cond .IsHome .Site.Title (printf "%s — %s" .Title .Site.Title) -}}
+  {{- $title := cond .IsHome (.Params.seo_title | default .Site.Title) (printf "%s — %s" .Title .Site.Title) -}}
   {{- $desc := "" -}}
   {{- with .Description }}{{ $desc = . }}{{ else }}{{ with .Summary }}{{ $desc = . | plainify }}{{ else }}{{ $desc = .Site.Params.description }}{{ end }}{{ end -}}
   {{- $img := "" -}}
