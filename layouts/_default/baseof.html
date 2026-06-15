@@ -116,7 +116,9 @@
     .menu-overlay{display:none}
     @media (max-width:768px){
       .topbar{flex-wrap:nowrap;justify-content:space-between}
-      .hamburger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:30px;height:30px;padding:0;background:none;border:0;cursor:pointer;z-index:40}
+      .cc-theme-toggle{display:none}
+      .cc-theme-toggle--drawer{display:inline-grid;margin:0 0 14px 0;border-color:rgba(255,255,255,.4)}
+      .hamburger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:30px;height:30px;padding:0;background:none;border:0;cursor:pointer;z-index:40;margin-left:auto}
       .hamburger span{display:block;width:26px;height:2px;background:var(--on-brand);border-radius:2px;transition:transform .3s ease,opacity .3s ease}
       .hamburger.active span:nth-child(1){transform:translateY(7px) rotate(45deg)}
       .hamburger.active span:nth-child(2){opacity:0}
@@ -206,6 +208,7 @@
 .cc-theme-toggle{width:38px;height:38px;border-radius:9px;border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--on-brand);cursor:pointer;display:inline-grid;place-items:center;padding:0;flex-shrink:0;margin-left:14px}
 .cc-theme-toggle:hover{background:rgba(255,255,255,.14)}
 .cc-theme-toggle svg{width:19px;height:19px}
+.cc-theme-toggle--drawer{display:none}
 .cc-moon{display:none}[data-theme="dark"] .cc-moon{display:block}[data-theme="dark"] .cc-sun{display:none}
   </style>
 </head>
@@ -217,6 +220,10 @@
         <span></span><span></span><span></span>
       </button>
       <nav class="main" id="nav-main">
+        <button class="cc-theme-toggle cc-theme-toggle--drawer" id="cc-theme-toggle-m" type="button" aria-label="Ganti mode gelap/terang">
+          <svg class="cc-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
+          <svg class="cc-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+        </button>
         {{ range .Site.Menus.main }}<a href="{{ .URL }}">{{ .Name }}</a>{{ end }}
       </nav>
       <button class="cc-theme-toggle" id="cc-theme-toggle" type="button" aria-label="Ganti mode gelap/terang">
@@ -273,6 +280,6 @@
       n.querySelectorAll("a").forEach(function(a){a.addEventListener("click",close);});
     })();
   </script>
-  <script>(function(){var b=document.getElementById('cc-theme-toggle');if(!b)return;b.addEventListener('click',function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}});})();</script>
+  <script>(function(){var btns=[document.getElementById('cc-theme-toggle'),document.getElementById('cc-theme-toggle-m')].filter(Boolean);if(!btns.length)return;function flip(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}}btns.forEach(function(b){b.addEventListener('click',flip);});})();</script>
 </body>
 </html>
