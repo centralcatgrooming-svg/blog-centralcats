@@ -1,12 +1,17 @@
 {{ define "main" }}
   <article class="post">
-    <h1 class="page-title">{{ .Title }}</h1>
-    <div class="meta">
-      {{ time.Format ":date_long" .Date }}
-      · Ditulis oleh {{ .Params.author | default "Team Central Cat's" }}
-      {{ with .Params.categories }} · {{ delimit . ", " }}{{ end }}
-    </div>
-    {{ with .Params.images }}<img src="{{ index . 0 }}" alt="{{ $.Title }}">{{ end }}
+    <header class="post-head">
+      {{ if .Section }}<span class="badge badge--{{ .Section }}">{{ with .Params.categories }}{{ index . 0 }}{{ else }}{{ .Section | humanize }}{{ end }}</span>{{ end }}
+      <h1>{{ .Title }}</h1>
+      <div class="post-meta">
+        <span>Ditulis oleh {{ .Params.author | default "Team Central Cat's" }}</span>
+        <span class="dot"></span>
+        <span>{{ time.Format ":date_long" .Date }}</span>
+        <span class="dot"></span>
+        <span>{{ .ReadingTime }} menit baca</span>
+      </div>
+    </header>
+    {{ with .Params.images }}<img class="post-hero" src="{{ index . 0 }}" alt="{{ $.Title }}">{{ end }}
     {{ .Content }}
     {{ with .Params.faq }}
     <section class="cc-faq">
