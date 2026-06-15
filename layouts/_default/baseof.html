@@ -288,6 +288,23 @@
 .cc-theme-toggle svg{width:19px;height:19px}
 .cc-theme-toggle--drawer{display:none}
 .cc-moon{display:none}[data-theme="dark"] .cc-moon{display:block}[data-theme="dark"] .cc-sun{display:none}
+/* ===== Tahap 4a: kotak pencarian header + dropdown live (desktop) ===== */
+.cc-hsearch{position:relative;display:none}
+@media(min-width:769px){.cc-hsearch{display:block}nav.main a[href="/cari/"]{display:none}}
+.cc-hsearch .ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--on-brand);opacity:.8;pointer-events:none}
+.cc-hsearch:focus-within .ic{color:var(--text-muted);opacity:.9}
+.cc-hsearch input{width:200px;height:38px;padding:0 12px 0 34px;border:1px solid rgba(255,255,255,.35);border-radius:9px;background:rgba(255,255,255,.12);color:var(--on-brand);font-family:var(--sans);font-size:.9rem;outline:none;transition:width .25s,background .2s,border-color .2s}
+.cc-hsearch input::placeholder{color:rgba(255,255,255,.7)}
+.cc-hsearch input:focus{width:240px;background:#fff;color:var(--text);border-color:#fff}
+.cc-hsearch input:focus::placeholder{color:var(--text-muted)}
+.cc-hresults{position:absolute;top:46px;right:0;width:360px;max-width:80vw;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);overflow:hidden;display:none;z-index:60}
+.cc-hresults.open{display:block}
+.cc-hresults a{display:block;padding:11px 15px;border-bottom:1px solid var(--border);text-decoration:none}
+.cc-hresults a:last-child{border-bottom:none}
+.cc-hresults a:hover{background:var(--surface-2)}
+.cc-hresults .rcat{display:block;font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);margin-bottom:2px}
+.cc-hresults .rtitle{display:block;font-size:.92rem;font-weight:500;color:var(--text);line-height:1.35}
+.cc-hresults .empty{padding:13px 15px;color:var(--text-muted);font-size:.9rem}
   </style>
 </head>
 <body>
@@ -304,6 +321,11 @@
         </button>
         {{ range .Site.Menus.main }}<a href="{{ .URL }}">{{ .Name }}</a>{{ end }}
       </nav>
+      <div class="cc-hsearch">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="cc-hsearch-input" type="search" placeholder="Cari artikel…" autocomplete="off" aria-label="Cari artikel">
+        <div class="cc-hresults" id="cc-hsearch-results"></div>
+      </div>
       <button class="cc-theme-toggle" id="cc-theme-toggle" type="button" aria-label="Ganti mode gelap/terang">
         <svg class="cc-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
         <svg class="cc-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
@@ -359,5 +381,43 @@
     })();
   </script>
   <script>(function(){var btns=[document.getElementById('cc-theme-toggle'),document.getElementById('cc-theme-toggle-m')].filter(Boolean);if(!btns.length)return;function flip(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}}btns.forEach(function(b){b.addEventListener('click',flip);});})();</script>
+  <script>(function(){
+    var input=document.getElementById('cc-hsearch-input'),box=document.getElementById('cc-hsearch-results');
+    if(!input||!box)return;
+    var data=[],loaded=false,loading=false;
+    function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+    function load(){
+      if(loaded||loading)return;loading=true;
+      fetch('/search-index.json').then(function(r){return r.json();}).then(function(j){
+        data=Array.isArray(j)?j:(j.items||[]);loaded=true;loading=false;
+        if((input.value||'').trim())run();
+      }).catch(function(){loading=false;});
+    }
+    function run(){
+      var term=(input.value||'').trim().toLowerCase();
+      if(!term){box.classList.remove('open');box.innerHTML='';return;}
+      if(!loaded){return;}
+      var m=data.filter(function(it){
+        return (it.title||'').toLowerCase().indexOf(term)>=0
+            || (it.summary||'').toLowerCase().indexOf(term)>=0
+            || (it.category||'').toLowerCase().indexOf(term)>=0;
+      }).slice(0,6);
+      if(!m.length){
+        box.innerHTML='<div class="empty">Tidak ada hasil untuk "'+esc(input.value.trim())+'"</div>';
+      }else{
+        box.innerHTML=m.map(function(it){
+          return '<a href="'+esc(it.url)+'"><span class="rcat">'+esc(it.category)+'</span><span class="rtitle">'+esc(it.title)+'</span></a>';
+        }).join('');
+      }
+      box.classList.add('open');
+    }
+    input.addEventListener('focus',load);
+    input.addEventListener('input',function(){if(!loaded)load();run();});
+    input.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){var v=(input.value||'').trim();window.location=v?('/cari/?q='+encodeURIComponent(v)):'/cari/';}
+    });
+    document.addEventListener('click',function(e){if(!e.target.closest('.cc-hsearch'))box.classList.remove('open');});
+    if('requestIdleCallback' in window){requestIdleCallback(load);}
+  })();</script>
 </body>
 </html>
