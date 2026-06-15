@@ -1,9 +1,48 @@
 {{ define "main" }}
   <h1 class="page-title">Artikel Terbaru</h1>
   <p class="lead">{{ .Site.Params.description }}</p>
-  <div class="grid">
-    {{ range first 12 (.Site.RegularPages.ByDate.Reverse) }}
-      {{ partial "card.html" . }}
-    {{ end }}
-  </div>
+
+  {{/* SARING: hanya artikel ber-section (kategori), terbaru dulu — samakan prinsip dgn index.json */}}
+  {{ $articles := (where .Site.RegularPages "Section" "!=" "").ByDate.Reverse }}
+
+  {{/* FEATURED GRID: 1 kartu besar + 2 kartu kecil */}}
+  {{ with $articles }}
+    {{ $top := first 3 . }}
+    <div class="feat-grid">
+      {{ $f := index $top 0 }}
+      <a class="feat" href="{{ $f.RelPermalink }}">
+        {{ with $f.Params.images }}<img src="{{ index . 0 }}" alt="">{{ end }}
+        <div class="scrim"></div>
+        <div class="ft">
+          <span class="pill-light">{{ with $f.Params.categories }}{{ index . 0 }}{{ else }}{{ $f.Section | humanize }}{{ end }}</span>
+          <h2>{{ $f.Title }}</h2>
+          <div class="meta">{{ time.Format ":date_long" $f.Date }}</div>
+        </div>
+      </a>
+      {{ if gt (len $top) 1 }}
+      <div class="subgrid">
+        {{ range after 1 $top }}
+        <a class="scard" href="{{ .RelPermalink }}">
+          {{ with .Params.images }}<img src="{{ index . 0 }}" alt="">{{ end }}
+          <div class="scrim"></div>
+          <div class="ft">
+            <span class="pill-light">{{ with .Params.categories }}{{ index . 0 }}{{ else }}{{ .Section | humanize }}{{ end }}</span>
+            <h3>{{ .Title }}</h3>
+          </div>
+        </a>
+        {{ end }}
+      </div>
+      {{ end }}
+    </div>
+  {{ end }}
+
+  {{/* ARTIKEL LAINNYA: ke-4 dst di grid kartu yang sudah ada (tetap dibatasi 12 total spt sebelumnya) */}}
+  {{ if gt (len $articles) 3 }}
+    <h2 class="more-head">Artikel Lainnya</h2>
+    <div class="grid">
+      {{ range after 3 (first 12 $articles) }}
+        {{ partial "card.html" . }}
+      {{ end }}
+    </div>
+  {{ end }}
 {{ end }}
