@@ -1,0 +1,34 @@
+{{ define "main" }}
+  <h1 class="page-title">Indeks Hewan A-Z</h1>
+  <p class="lead">Jelajahi artikel berdasarkan jenis hewan peliharaan &amp; ternak.</p>
+
+  {{ $tax := .Site.Taxonomies.hewan }}
+  {{ if gt (len $tax) 0 }}
+    {{ $letters := slice }}
+    {{ range $name, $wp := $tax }}{{ $letters = $letters | append (upper (substr $name 0 1)) }}{{ end }}
+    {{ $letters = $letters | uniq | sort }}
+
+    <div class="hewan-azbar">
+      {{ range $letter := $letters }}<a href="#huruf-{{ $letter }}">{{ $letter }}</a>{{ end }}
+    </div>
+
+    {{ range $letter := $letters }}
+    <section class="hewan-group" id="huruf-{{ $letter }}">
+      <h2 class="hewan-letter">{{ $letter }}</h2>
+      <div class="hewan-chips">
+        {{ range $name, $wp := $tax }}
+          {{ if eq (upper (substr $name 0 1)) $letter }}
+          {{ $tp := $.Site.GetPage (printf "/hewan/%s" $name) }}
+          <a class="hewan-chip" href="{{ with $tp }}{{ .RelPermalink }}{{ else }}{{ printf "/hewan/%s/" ($name | urlize) | relURL }}{{ end }}">
+            <span class="hewan-chip__nm">{{ $name | humanize }}</span>
+            <span class="hewan-chip__ct">{{ len $wp }} artikel</span>
+          </a>
+          {{ end }}
+        {{ end }}
+      </div>
+    </section>
+    {{ end }}
+  {{ else }}
+    <p class="lead">Indeks sedang dilengkapi — segera hadir pengelompokan artikel per jenis hewan. 🐾</p>
+  {{ end }}
+{{ end }}

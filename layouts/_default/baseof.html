@@ -321,6 +321,17 @@ nav.main a[href="/cari/"]{display:none}
   .cc-msearch .cc-hresults{position:static;width:100%;max-width:none;margin-top:8px;box-shadow:none}
 }
 @media(min-width:769px){.cc-msearch,.cc-msearch-btn{display:none !important}}
+/* ===== Tahap 5a: Indeks Hewan A-Z ===== */
+.hewan-azbar{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 8px}
+.hewan-azbar a{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;font-weight:600;font-size:.85rem;color:var(--brand);background:var(--brand-soft);text-decoration:none}
+.hewan-azbar a:hover{background:var(--brand);color:#fff}
+.hewan-group{margin:36px 0 0}
+.hewan-letter{font-family:var(--serif);font-size:1.7rem;font-weight:600;color:var(--brand-dark);border-bottom:2px solid var(--border);padding-bottom:8px;margin:0 0 16px}
+.hewan-chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.hewan-chip{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-decoration:none;transition:transform .18s,border-color .18s}
+.hewan-chip:hover{transform:translateY(-3px);border-color:var(--brand)}
+.hewan-chip__nm{font-weight:600;color:var(--text)}
+.hewan-chip__ct{font-size:.78rem;font-weight:700;color:var(--brand);background:var(--brand-soft);padding:3px 10px;border-radius:999px;white-space:nowrap}
   </style>
 </head>
 <body>

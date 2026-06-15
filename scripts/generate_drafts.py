@@ -104,11 +104,12 @@ ATURAN WAJIB:
 11. CAKUPAN HEWAN: kucing adalah TEMA UTAMA blog (mayoritas artikel), tetapi artikel BOLEH membahas hewan peliharaan lain (anjing, kelinci, hamster, burung, ikan, dll) bila relevan & bermanfaat — tidak harus selalu kucing. Sesuaikan isi dengan hewan yang dibahas.
 
 Balas HANYA satu objek JSON valid dengan struktur:
-{"title": "...", "slug": "...", "subcategory": "...", "tags": ["...","..."], "summary": "...", "image_query": "...", "body": "...", "faq": [{"q": "...", "a": "..."}]}
+{"title": "...", "slug": "...", "subcategory": "...", "tags": ["...","..."], "summary": "...", "image_query": "...", "hewan": ["..."], "body": "...", "faq": [{"q": "...", "a": "..."}]}
 - "slug": huruf kecil, kata dipisah tanda hubung, tanpa spasi/tanda baca.
 - "subcategory": pilih SATU dari daftar yang diberikan.
 - "tags": 2-4 tag relevan (huruf kecil).
 - "image_query": 2-4 kata BAHASA INGGRIS berupa OBJEK/ADEGAN KONKRET yang mudah ditemukan di situs foto/ilustrasi (mis. "cat drinking water", "fluffy cat grooming", "dog playing park", "rabbit eating", "chicken farm"). HINDARI istilah abstrak/medis yang tidak punya gambar (JANGAN mis. "urinary tract infection", "nutrition deficiency"). Query HARUS menampilkan HEWAN/SUBJEK UTAMA artikel ini secara konkret (kalau artikelnya tentang kucing pakai kucing, kalau tentang anjing pakai anjing, dst).
+- "hewan": 1-2 nama HEWAN UTAMA yang dibahas artikel, huruf kecil & tunggal (mis. ["kucing"], ["anjing"], ["kelinci"], ["ayam"]). Bila artikel umum/tidak spesifik ke satu hewan, pakai ["kucing"] (tema utama blog). JANGAN memasukkan hewan haram (mis. babi/celeng).
 - "body": Markdown lengkap artikel (JANGAN masukkan FAQ ke body).
 - "faq": 3-5 pasang tanya-jawab; jawaban ringkas 1-3 kalimat, akurat, satu baris. Topik kesehatan: sertakan anjuran dokter hewan bila relevan. JANGAN mengarang angka."""
 
@@ -121,6 +122,7 @@ RESPONSE_SCHEMA = {
         "tags": {"type": "ARRAY", "items": {"type": "STRING"}},
         "summary": {"type": "STRING"},
         "image_query": {"type": "STRING"},
+        "hewan": {"type": "ARRAY", "items": {"type": "STRING"}},
         "body": {"type": "STRING"},
         "faq": {
             "type": "ARRAY",
@@ -303,6 +305,23 @@ def write_article(section, data):
     sub = (data.get("subcategory") or "").strip()
     tags = data.get("tags") or []
     tags_toml = ", ".join('"{}"'.format(str(t).replace('"', "")) for t in tags)
+
+    # taxonomy "hewan": normalisasi ke slug huruf kecil, default ["kucing"], jaga aturan halal
+    def _hslug(s):
+        s = re.sub(r"[^a-z0-9\s-]", "", (str(s) or "").lower())
+        return re.sub(r"\s+", "-", s).strip("-")
+    hewan_raw = data.get("hewan") or []
+    if isinstance(hewan_raw, str):
+        hewan_raw = [hewan_raw]
+    hewan_list = []
+    for h in hewan_raw:
+        hs = _hslug(h)
+        if hs and hs not in ("babi", "celeng") and hs not in hewan_list:
+            hewan_list.append(hs)
+    if not hewan_list:
+        hewan_list = ["kucing"]
+    hewan_toml = ", ".join('"{}"'.format(h) for h in hewan_list)
+
     summary = (data.get("summary") or "").replace('"', "'").strip()
     title_esc = title.replace('"', "'")
     body = (data.get("body") or "").strip()
@@ -325,6 +344,7 @@ def write_article(section, data):
         "author = \"Team Central Cat's\"\n"
         f'categories = ["{sub}"]\n'
         f"tags = [{tags_toml}]\n"
+        f"hewan = [{hewan_toml}]\n"
         f'summary = "{summary}"\n'
         f"images = [{images_toml}]\n"
         f"{faq_toml}"
