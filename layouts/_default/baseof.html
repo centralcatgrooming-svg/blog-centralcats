@@ -196,7 +196,7 @@
       .topbar{flex-wrap:nowrap;justify-content:space-between}
       #cc-theme-toggle{display:none !important}
       #cc-theme-toggle-m{display:inline-grid;margin:0 0 14px 0;border-color:rgba(255,255,255,.4)}
-      .hamburger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:30px;height:30px;padding:0;background:none;border:0;cursor:pointer;z-index:40;margin-left:auto}
+      .hamburger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:30px;height:30px;padding:0;background:none;border:0;cursor:pointer;z-index:40}
       .hamburger span{display:block;width:26px;height:2px;background:var(--on-brand);border-radius:2px;transition:transform .3s ease,opacity .3s ease}
       .hamburger.active span:nth-child(1){transform:translateY(7px) rotate(45deg)}
       .hamburger.active span:nth-child(2){opacity:0}
@@ -290,7 +290,8 @@
 .cc-moon{display:none}[data-theme="dark"] .cc-moon{display:block}[data-theme="dark"] .cc-sun{display:none}
 /* ===== Tahap 4a: kotak pencarian header + dropdown live (desktop) ===== */
 .cc-hsearch{position:relative;display:none}
-@media(min-width:769px){.cc-hsearch{display:block}nav.main a[href="/cari/"]{display:none}}
+@media(min-width:769px){.cc-hsearch{display:block}}
+nav.main a[href="/cari/"]{display:none}
 .cc-hsearch .ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--on-brand);opacity:.8;pointer-events:none}
 .cc-hsearch:focus-within .ic{color:var(--text-muted);opacity:.9}
 .cc-hsearch input{width:200px;height:38px;padding:0 12px 0 34px;border:1px solid rgba(255,255,255,.35);border-radius:9px;background:rgba(255,255,255,.12);color:var(--on-brand);font-family:var(--sans);font-size:.9rem;outline:none;transition:width .25s,background .2s,border-color .2s}
@@ -305,12 +306,30 @@
 .cc-hresults .rcat{display:block;font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);margin-bottom:2px}
 .cc-hresults .rtitle{display:block;font-size:.92rem;font-weight:500;color:var(--text);line-height:1.35}
 .cc-hresults .empty{padding:13px 15px;color:var(--text-muted);font-size:.9rem}
+/* ===== Tahap 4b: pencarian mobile (ikon kaca + baris cari) ===== */
+.cc-msearch-btn{display:none}
+.cc-msearch{display:none}
+@media(max-width:768px){
+  .cc-msearch-btn{display:inline-grid;place-items:center;width:38px;height:38px;border:0;background:transparent;color:var(--on-brand);cursor:pointer;padding:0;margin-left:auto}
+  .cc-msearch-btn svg{width:21px;height:21px}
+  .cc-msearch{display:none;padding:0 20px 12px}
+  .cc-msearch.open{display:block}
+  .cc-msearch__inner{position:relative;display:flex;align-items:center}
+  .cc-msearch__inner svg{position:absolute;left:12px;width:17px;height:17px;color:var(--text-muted);pointer-events:none}
+  .cc-msearch input{width:100%;height:42px;padding:0 14px 0 38px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-family:var(--sans);font-size:1rem;outline:none}
+  .cc-msearch input:focus{border-color:var(--brand)}
+  .cc-msearch .cc-hresults{position:static;width:100%;max-width:none;margin-top:8px;box-shadow:none}
+}
+@media(min-width:769px){.cc-msearch,.cc-msearch-btn{display:none !important}}
   </style>
 </head>
 <body>
   <header class="site">
     <div class="topbar">
       <a class="brand" href="/"><img src="/logo.png" alt="Central Cat's Blog" style="height:44px;width:auto;display:block"></a>
+      <button class="cc-msearch-btn" id="cc-msearch-btn" type="button" aria-label="Cari" aria-controls="cc-msearch" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </button>
       <button class="hamburger" id="nav-toggle" aria-label="Buka menu" aria-controls="nav-main" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -330,6 +349,13 @@
         <svg class="cc-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
         <svg class="cc-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
       </button>
+    </div>
+    <div class="cc-msearch" id="cc-msearch">
+      <div class="cc-msearch__inner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="cc-msearch-input" type="search" placeholder="Cari artikel…" autocomplete="off" aria-label="Cari artikel">
+      </div>
+      <div class="cc-hresults" id="cc-msearch-results"></div>
     </div>
     <div class="menu-overlay" id="nav-overlay"></div>
   </header>
@@ -382,42 +408,58 @@
   </script>
   <script>(function(){var btns=[document.getElementById('cc-theme-toggle'),document.getElementById('cc-theme-toggle-m')].filter(Boolean);if(!btns.length)return;function flip(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}}btns.forEach(function(b){b.addEventListener('click',flip);});})();</script>
   <script>(function(){
-    var input=document.getElementById('cc-hsearch-input'),box=document.getElementById('cc-hsearch-results');
-    if(!input||!box)return;
-    var data=[],loaded=false,loading=false;
+    var data=[],loaded=false,loading=false,waiters=[];
     function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-    function load(){
-      if(loaded||loading)return;loading=true;
+    function load(cb){
+      if(loaded){if(cb)cb();return;}
+      if(cb)waiters.push(cb);
+      if(loading)return;
+      loading=true;
       fetch('/search-index.json').then(function(r){return r.json();}).then(function(j){
         data=Array.isArray(j)?j:(j.items||[]);loaded=true;loading=false;
-        if((input.value||'').trim())run();
+        waiters.forEach(function(f){f();});waiters=[];
       }).catch(function(){loading=false;});
     }
-    function run(){
-      var term=(input.value||'').trim().toLowerCase();
-      if(!term){box.classList.remove('open');box.innerHTML='';return;}
-      if(!loaded){return;}
-      var m=data.filter(function(it){
-        return (it.title||'').toLowerCase().indexOf(term)>=0
-            || (it.summary||'').toLowerCase().indexOf(term)>=0
-            || (it.category||'').toLowerCase().indexOf(term)>=0;
-      }).slice(0,6);
-      if(!m.length){
-        box.innerHTML='<div class="empty">Tidak ada hasil untuk "'+esc(input.value.trim())+'"</div>';
-      }else{
-        box.innerHTML=m.map(function(it){
-          return '<a href="'+esc(it.url)+'"><span class="rcat">'+esc(it.category)+'</span><span class="rtitle">'+esc(it.title)+'</span></a>';
-        }).join('');
+    function init(input,box,closeSel){
+      if(!input||!box)return;
+      function run(){
+        var term=(input.value||'').trim().toLowerCase();
+        if(!term){box.classList.remove('open');box.innerHTML='';return;}
+        if(!loaded)return;
+        var m=data.filter(function(it){
+          return (it.title||'').toLowerCase().indexOf(term)>=0
+              || (it.summary||'').toLowerCase().indexOf(term)>=0
+              || (it.category||'').toLowerCase().indexOf(term)>=0;
+        }).slice(0,6);
+        if(!m.length){
+          box.innerHTML='<div class="empty">Tidak ada hasil untuk "'+esc(input.value.trim())+'"</div>';
+        }else{
+          box.innerHTML=m.map(function(it){
+            return '<a href="'+esc(it.url)+'"><span class="rcat">'+esc(it.category)+'</span><span class="rtitle">'+esc(it.title)+'</span></a>';
+          }).join('');
+        }
+        box.classList.add('open');
       }
-      box.classList.add('open');
+      input.addEventListener('focus',function(){load(run);});
+      input.addEventListener('input',function(){run();if(!loaded)load(run);});
+      input.addEventListener('keydown',function(e){
+        if(e.key==='Enter'){var v=(input.value||'').trim();window.location=v?('/cari/?q='+encodeURIComponent(v)):'/cari/';}
+      });
+      document.addEventListener('click',function(e){if(!e.target.closest(closeSel))box.classList.remove('open');});
     }
-    input.addEventListener('focus',load);
-    input.addEventListener('input',function(){if(!loaded)load();run();});
-    input.addEventListener('keydown',function(e){
-      if(e.key==='Enter'){var v=(input.value||'').trim();window.location=v?('/cari/?q='+encodeURIComponent(v)):'/cari/';}
-    });
-    document.addEventListener('click',function(e){if(!e.target.closest('.cc-hsearch'))box.classList.remove('open');});
-    if('requestIdleCallback' in window){requestIdleCallback(load);}
+    init(document.getElementById('cc-hsearch-input'),document.getElementById('cc-hsearch-results'),'.cc-hsearch');
+    init(document.getElementById('cc-msearch-input'),document.getElementById('cc-msearch-results'),'.cc-msearch');
+    if('requestIdleCallback' in window){requestIdleCallback(function(){load();});}
+    // toggle baris cari mobile
+    (function(){
+      var btn=document.getElementById('cc-msearch-btn'),row=document.getElementById('cc-msearch'),inp=document.getElementById('cc-msearch-input');
+      if(!btn||!row)return;
+      btn.addEventListener('click',function(){
+        var open=row.classList.toggle('open');
+        btn.setAttribute('aria-expanded',open?'true':'false');
+        if(open&&inp){try{inp.focus();}catch(e){}}
+      });
+    })();
   })();</script>
 </body>
 </html>
