@@ -1,0 +1,58 @@
+name: Notifikasi Push Artikel Baru (OneSignal)
+
+# Saat ada artikel BARU ditambahkan ke main (mis. PR auto-draft di-merge),
+# kirim 1 push web ke pelanggan OneSignal. Hanya untuk file yang DITAMBAHKAN
+# (status A), bukan yang diedit -> tidak spam saat artikel lama disunting.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/**"
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # perlu histori untuk diff before..after
+
+      - name: Deteksi artikel baru (file ditambahkan)
+        id: detect
+        run: |
+          BEFORE='${{ github.event.before }}'
+          AFTER='${{ github.event.after }}'
+          # Bila BEFORE tidak valid (mis. 000... pada push pertama), pakai parent AFTER.
+          if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            BEFORE="$(git rev-parse "${AFTER}^" 2>/dev/null || true)"
+          fi
+          if [ -z "$BEFORE" ]; then
+            FILES="$(git show --name-only --diff-filter=A --format= "$AFTER" -- content || true)"
+          else
+            FILES="$(git diff --name-only --diff-filter=A "$BEFORE" "$AFTER" -- content || true)"
+          fi
+          echo "File baru di content/:"
+          echo "$FILES"
+          if [ -n "$(printf '%s' "$FILES" | tr -d '[:space:]')" ]; then
+            echo "has=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has=false" >> "$GITHUB_OUTPUT"
+          fi
+          {
+            echo 'files<<__EOF__'
+            echo "$FILES"
+            echo '__EOF__'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Kirim push OneSignal
+        if: steps.detect.outputs.has == 'true'
+        env:
+          ONESIGNAL_APP_ID: "844d69d1-7c8c-4fca-a45d-9f6cccd1a6b6"
+          ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+          BASE_URL: "https://blog.centralcats.id/"
+          NEW_FILES: ${{ steps.detect.outputs.files }}
+        run: python3 scripts/notify_new_post.py
