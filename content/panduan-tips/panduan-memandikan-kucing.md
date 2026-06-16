@@ -5,6 +5,7 @@ categories = ["Perawatan Harian"]
 tags = ["kucing", "grooming", "panduan"]
 hewan = ["kucing"]
 summary = "Tidak semua kucing perlu sering dimandikan. Saat memang perlu, ikuti langkah aman ini agar anabul tetap tenang."
+images = ["/images/panduan-memandikan-kucing.webp"]
 +++
 
 Kucing umumnya pandai membersihkan diri, jadi memandikan tidak perlu terlalu sering. Saat memang diperlukan, lakukan dengan tenang.
