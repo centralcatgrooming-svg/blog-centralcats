@@ -220,13 +220,9 @@ Pipeline pembuat draf artikel otomatis. **Output selalu berupa Pull Request** un
 manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit, Close = buang.
 
 - **Jadwal otomatis** (GitHub Actions, `.github/workflows/auto-draft.yml`):
-  dipicu **scheduler eksternal presisi** (cron-job.org) yang memanggil GitHub API
-  **`repository_dispatch`** (event_type `auto-draft`) **Senin–Sabtu 08:17 WIB**.
-  Cron bawaan GitHub (`schedule`) **sudah dihapus** karena best-effort (sering telat/di-skip).
-  **Minggu tetap libur** otomatis karena `scripts/generate_drafts.py` berhenti di hari Minggu (WIB),
-  jadi aman walau scheduler keliru menembak hari Minggu.
-  Bisa juga dijalankan manual dari tab Actions (input `jumlah` & `kategori`), atau lewat
-  `repository_dispatch` dengan payload `{ "jumlah": "1", "kategori": "auto" }`.
+  cron `17 1 * * 1-6` = **Senin–Sabtu 08:17 WIB** (01:17 UTC). **Minggu libur.**
+  (Menit ganjil `:17` dipilih agar tak bentrok beban puncak GitHub di menit `:00`.)
+  Bisa juga dijalankan manual dari tab Actions (input `jumlah` & `kategori`).
 - **Kategori mengikuti hari** (zona WIB), dipilih otomatis oleh `scripts/generate_drafts.py`
   (env `SECTION="auto"`/kosong), atau dipaksa lewat input `kategori` saat run manual:
   - Senin & Kamis → **Kesehatan Hewan**

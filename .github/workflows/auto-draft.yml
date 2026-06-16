@@ -1,14 +1,11 @@
 name: Auto Draft Artikel (AI)
 
 on:
-  # Pemicu jadwal PRESISI lewat scheduler eksternal (mis. cron-job.org) yang
-  # memanggil GitHub API repository_dispatch dengan event_type "auto-draft".
-  # Dipakai karena cron bawaan GitHub sering telat/di-skip (best-effort).
-  # Atur scheduler eksternal: Senin–Sabtu 08:17 WIB. Minggu tetap aman karena
-  # script (generate_drafts.py) otomatis libur di hari Minggu (WIB).
-  # Payload opsional: { "jumlah": "1", "kategori": "auto" }.
-  repository_dispatch:
-    types: [auto-draft]
+  # Jadwal otomatis: Senin–Sabtu pukul 08:17 WIB (01:17 UTC).
+  # Menit ganjil (:17) agar tak bentrok beban puncak GitHub di menit :00.
+  # Script memilih kategori sesuai hari (Minggu libur -> tidak jalan).
+  schedule:
+    - cron: "17 1 * * 1-6"
   # Bisa juga dijalankan manual dari tab Actions.
   workflow_dispatch:
     inputs:
@@ -52,8 +49,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
-          NUM_ARTICLES: ${{ github.event.inputs.jumlah || github.event.client_payload.jumlah || '1' }}
-          SECTION: ${{ github.event.inputs.kategori || github.event.client_payload.kategori || 'auto' }}
+          NUM_ARTICLES: ${{ github.event.inputs.jumlah || '1' }}
+          SECTION: ${{ github.event.inputs.kategori || 'auto' }}
         run: python scripts/generate_drafts.py
 
       - name: Buka Pull Request untuk review
