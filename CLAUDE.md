@@ -304,3 +304,35 @@ manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit,
 - **Kisah Sukses** — artikel `tipe = "kisah-sukses"` menampilkan **kartu narasumber** `.cc-narsum`
   (nama + tombol LINK ke `instagram`/`youtube`/`tiktok`/`situs`, **bukan embed**) di atas konten.
   Front matter: `tipe`, `narasumber`, dan URL sosial/situs opsional. Artikel biasa tidak terpengaruh.
+
+---
+
+## 11. Notifikasi Push "Berita Terbaru" (OneSignal Web Push)
+
+Pengunjung bisa berlangganan **notifikasi push browser** dan otomatis dapat pemberitahuan
+tiap artikel baru terbit. Situs statis (tanpa backend), jadi pakai **OneSignal** (gratis) +
+**GitHub Actions** untuk pengiriman.
+
+- **App ID (publik):** `844d69d1-7c8c-4fca-a45d-9f6cccd1a6b6` (boleh ada di kode klien).
+- **Opt-in / SDK (Phase 1):** init SDK OneSignal **v16** di `<head>` `baseof.html`
+  (`OneSignalSDK.page.js`, di-`defer` agar tak ganggu performa) + **service worker**
+  `static/OneSignalSDKWorker.js` (tersaji di `/OneSignalSDKWorker.js`, content-type
+  `application/javascript`). Prompt langganan ("Slide Prompt") diatur di **dashboard OneSignal**,
+  bukan di kode.
+- **Auto-send (Phase 2):** workflow `.github/workflows/notify-new-post.yml` ter-trigger saat
+  **push ke `main`** menyentuh `content/**`. Ia mendeteksi file artikel **BARU** (git diff
+  `--diff-filter=A`, hanya yang DITAMBAHKAN — bukan editan) lalu menjalankan
+  `scripts/notify_new_post.py` yang memanggil **OneSignal REST API**
+  (`POST https://api.onesignal.com/notifications`, header `Authorization: Key …`,
+  segment `"Subscribed Users"`, field `headings`/`contents`/`url`/`chrome_web_image`).
+  Skrip pakai **pustaka standar** (tanpa pip install) & aman bila belum ada subscriber.
+- **Secret:** `ONESIGNAL_REST_API_KEY` (GitHub Secret, dari OneSignal "API/REST key" —
+  istilah baru "API Authentication Key"). **JANGAN** taruh di kode/commit.
+- **Catatan iOS:** push web hanya jalan bila situs di-"Add to Home Screen" (PWA) — batasan Apple.
+  Android Chrome & desktop mulus.
+- ❌ **Jangan hapus/ubah tanpa paham:** `static/OneSignalSDKWorker.js`, blok init OneSignal di
+  `baseof.html`, `scripts/notify_new_post.py`, `.github/workflows/notify-new-post.yml`.
+- **Status:** pipeline auto-send terbukti jalan (deteksi artikel baru → REST API balas `200`).
+  **Belum** dikonfirmasi terkirim ke device karena uji pertama 0 subscriber (kebetulan
+  subscribe via incognito — tidak persisten). Uji ulang: subscribe di **jendela normal**,
+  verifikasi 1 "Subscribed" di dashboard, lalu terbitkan/kirim ulang.
