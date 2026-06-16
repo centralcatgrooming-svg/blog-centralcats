@@ -8,6 +8,14 @@ on:
     branches: [main]
     paths:
       - "content/**"
+  # Kirim ulang MANUAL (uji): kosongkan `path` -> kirim untuk artikel terbaru,
+  # atau isi path artikel tertentu (mis. content/panduan-tips/xxx.md).
+  workflow_dispatch:
+    inputs:
+      path:
+        description: "Path artikel utk kirim ulang (kosong = artikel terbaru)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -24,16 +32,27 @@ jobs:
       - name: Deteksi artikel baru (file ditambahkan)
         id: detect
         run: |
-          BEFORE='${{ github.event.before }}'
-          AFTER='${{ github.event.after }}'
-          # Bila BEFORE tidak valid (mis. 000... pada push pertama), pakai parent AFTER.
-          if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
-            BEFORE="$(git rev-parse "${AFTER}^" 2>/dev/null || true)"
-          fi
-          if [ -z "$BEFORE" ]; then
-            FILES="$(git show --name-only --diff-filter=A --format= "$AFTER" -- content || true)"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Mode manual: pakai path input, atau artikel .md yang PALING BARU ditambahkan.
+            IN='${{ github.event.inputs.path }}'
+            if [ -n "$IN" ]; then
+              FILES="$IN"
+            else
+              FILES="$(git log --diff-filter=A --name-only --pretty=format: -- content \
+                       | grep -E '\.md$' | grep -v '_index.md' | head -1)"
+            fi
           else
-            FILES="$(git diff --name-only --diff-filter=A "$BEFORE" "$AFTER" -- content || true)"
+            BEFORE='${{ github.event.before }}'
+            AFTER='${{ github.event.after }}'
+            # Bila BEFORE tidak valid (mis. 000... pada push pertama), pakai parent AFTER.
+            if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+              BEFORE="$(git rev-parse "${AFTER}^" 2>/dev/null || true)"
+            fi
+            if [ -z "$BEFORE" ]; then
+              FILES="$(git show --name-only --diff-filter=A --format= "$AFTER" -- content || true)"
+            else
+              FILES="$(git diff --name-only --diff-filter=A "$BEFORE" "$AFTER" -- content || true)"
+            fi
           fi
           echo "File baru di content/:"
           echo "$FILES"
