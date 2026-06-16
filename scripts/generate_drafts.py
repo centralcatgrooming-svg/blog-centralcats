@@ -85,6 +85,16 @@ WEEKDAY_SECTION = {
     6: None,                # Minggu (libur)
 }
 
+# Nama hewan (slug Indonesia) -> kata kunci Inggris untuk pencarian foto Pexels.
+# Dipakai untuk MEWAJIBKAN hewan jadi jangkar query gambar (hindari nyamber foto manusia).
+ANIMAL_EN = {
+    "kucing": "cat", "anjing": "dog", "kelinci": "rabbit", "hamster": "hamster",
+    "burung": "bird", "ikan": "fish", "ayam": "chicken", "bebek": "duck",
+    "kambing": "goat", "sapi": "cattle", "domba": "sheep", "kuda": "horse",
+    "kura-kura": "turtle", "marmut": "guinea pig", "ular": "snake", "lebah": "bee",
+    "landak": "hedgehog", "sugar-glider": "sugar glider", "iguana": "iguana",
+}
+
 WIB = datetime.timezone(datetime.timedelta(hours=7))
 
 SYSTEM = """Kamu penulis konten untuk blog Central Cat's — bisnis grooming, treatment kutu, cat hotel, dan petshop kucing di Tangerang (berdiri 2020). Pembaca adalah pemilik hewan peliharaan, terutama kucing (sering disebut "anabul").
@@ -286,8 +296,6 @@ def write_article(section, data):
         slug = f"{slug}-{stamp}"
         path = CONTENT / section / f"{slug}.md"
 
-    img_path, credit = fetch_image(data.get("image_query", ""), slug)
-
     now = datetime.datetime.now(WIB)
     date_str = now.strftime("%Y-%m-%dT%H:%M:%S") + "+07:00"
     sub = (data.get("subcategory") or "").strip()
@@ -309,6 +317,19 @@ def write_article(section, data):
     if not hewan_list:
         hewan_list = ["kucing"]
     hewan_toml = ", ".join('"{}"'.format(h) for h in hewan_list)
+
+    # Gambar: WAJIB jangkar HEWAN utama (Inggris) di query agar foto Pexels relevan
+    # & tidak nyamber subjek manusia. Bila Gemini sudah menyebut hewannya, query dipakai apa adanya.
+    raw_query = (data.get("image_query") or "").strip()
+    animal_en = ANIMAL_EN.get(hewan_list[0], hewan_list[0])
+    if raw_query and re.search(r"\b" + re.escape(animal_en) + r"\b", raw_query.lower()):
+        query = raw_query
+    else:
+        query = (animal_en + " " + raw_query).strip()
+    print(f"  Query gambar: \"{query}\" (hewan: {hewan_list[0]})", file=sys.stderr)
+    img_path, credit = fetch_image(query, slug)
+    if credit:
+        print(f"  {credit}", file=sys.stderr)
 
     summary = (data.get("summary") or "").replace('"', "'").strip()
     title_esc = title.replace('"', "'")
