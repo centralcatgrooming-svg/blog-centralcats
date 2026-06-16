@@ -5,6 +5,7 @@ categories = ["Peluang Usaha & Waralaba"]
 tags = ["bisnis", "petshop"]
 hewan = ["kucing"]
 summary = "Tertarik membuka petshop? Empat fondasi ini menentukan apakah usaha Anda bertahan di tahun pertama."
+images = ["/images/memulai-usaha-petshop.webp"]
 +++
 
 Industri hewan peliharaan terus tumbuh, tapi membuka petshop butuh persiapan matang. Empat hal berikut layak jadi perhatian utama.

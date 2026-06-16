@@ -5,6 +5,7 @@ categories = ["Kesehatan Kucing"]
 tags = ["kucing", "kesehatan", "grooming"]
 hewan = ["kucing"]
 summary = "Bulu yang berkilau bukan sekadar penampilan—ini cermin kesehatan kulit dan nutrisi anabul. Kenali lima tandanya."
+images = ["/images/5-tanda-bulu-kucing-sehat.webp"]
 +++
 
 Bulu kucing adalah salah satu indikator kesehatan yang paling mudah diamati di rumah. Berikut lima tanda bulu yang sehat dan apa artinya bagi anabul Anda.
