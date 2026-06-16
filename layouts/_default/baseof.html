@@ -350,6 +350,15 @@ nav.main a[href="/cari/"]{display:none}
 .hewan-chip__nm{font-weight:600;color:var(--text)}
 .hewan-chip__ct{font-size:.78rem;font-weight:700;color:var(--brand);background:var(--brand-soft);padding:3px 10px;border-radius:999px;white-space:nowrap}
   </style>
+  {{/* OneSignal Web Push (v16) — tawaran notifikasi berita terbaru. SDK di-load `defer`
+       agar tidak memblokir render (jaga skor Lighthouse). Service worker: /OneSignalSDKWorker.js */}}
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({ appId: "844d69d1-7c8c-4fca-a45d-9f6cccd1a6b6" });
+    });
+  </script>
 </head>
 <body>
   <header class="site">
