@@ -183,7 +183,7 @@
     .terkini .lbl{flex-shrink:0;display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#e23b3b}
     .terkini .pulse{width:8px;height:8px;border-radius:50%;background:#e23b3b;animation:ccpulse 2s infinite}
     .ticker{flex:1;overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent,#000 24px,#000 calc(100% - 24px),transparent);mask-image:linear-gradient(to right,transparent,#000 24px,#000 calc(100% - 24px),transparent)}
-    .ticker__track{display:inline-flex;align-items:center;white-space:nowrap;width:max-content;animation:ccticker 40s linear infinite}
+    .ticker__track{display:inline-flex;align-items:center;white-space:nowrap;width:max-content;animation:ccticker 60s linear infinite}
     .ticker__track a{font-size:.9rem;font-weight:500;color:var(--text-muted);text-decoration:none;margin-right:34px}
     .ticker__track a:hover{color:var(--brand)}
     .ticker:hover .ticker__track{animation-play-state:paused}
@@ -205,6 +205,8 @@
     .hamburger{display:none}
     .menu-overlay{display:none}
     @media (max-width:768px){
+      /* Layar mobile lebih kecil -> ticker harus lebih lambat agar mudah dibaca */
+      .ticker__track{animation-duration:90s}
       .topbar{flex-wrap:nowrap;justify-content:space-between}
       #cc-theme-toggle{display:none !important}
       #cc-theme-toggle-m{display:inline-grid;margin:0 0 14px 0;border-color:rgba(255,255,255,.4)}
