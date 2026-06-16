@@ -1,11 +1,15 @@
 name: Auto Draft Artikel (AI)
 
 on:
-  # Jadwal otomatis: Senin–Sabtu pukul 08:17 WIB (01:17 UTC).
-  # Menit ganjil (:17) agar tak bentrok beban puncak GitHub di menit :00.
+  # Jadwal otomatis: Senin–Sabtu pagi WIB. GitHub kadang MENUNDA/MELEWATI cron
+  # saat beban tinggi, jadi disediakan 3 waktu berdekatan sebagai cadangan.
+  # Guard anti-dobel (job di bawah) menjaga tetap maksimal 1 artikel/hari.
+  # Menit ganjil agar tak bentrok beban puncak GitHub di menit :00.
   # Script memilih kategori sesuai hari (Minggu libur -> tidak jalan).
   schedule:
-    - cron: "17 1 * * 1-6"
+    - cron: "17 1 * * 1-6"   # 08:17 WIB
+    - cron: "37 1 * * 1-6"   # 08:37 WIB (cadangan)
+    - cron: "57 1 * * 1-6"   # 08:57 WIB (cadangan)
   # Bisa juga dijalankan manual dari tab Actions.
   workflow_dispatch:
     inputs:
@@ -44,7 +48,30 @@ jobs:
       - name: Install dependencies
         run: pip install requests pillow
 
+      # Guard anti-dobel: HANYA saat event 'schedule'. Bila sudah ada PR berlabel
+      # ai-draft yang DIBUAT hari ini (UTC, segala status), cron ini = cadangan,
+      # dilewati DENGAN SUKSES (job tetap hijau, tanpa email gagal).
+      # Trigger manual (workflow_dispatch) TIDAK kena guard → selalu boleh memaksa.
+      - name: Guard anti-dobel (skip bila draf hari ini sudah ada)
+        id: guard
+        if: success() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          today="$(date -u +%Y-%m-%d)"
+          count="$(gh api -X GET search/issues \
+            -f q="repo:${GITHUB_REPOSITORY} is:pr label:ai-draft created:>=${today}" \
+            --jq '.total_count')"
+          echo "Jumlah PR ai-draft dibuat hari ini ($today): ${count:-0}"
+          if [ "${count:-0}" -gt 0 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Draf hari ini sudah ada — cron cadangan dilewati (sukses)."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Generate draft(s)
+        if: success() && steps.guard.outputs.skip != 'true'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
@@ -54,6 +81,7 @@ jobs:
         run: python scripts/generate_drafts.py
 
       - name: Buka Pull Request untuk review
+        if: success() && steps.guard.outputs.skip != 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           commit-message: "Draf artikel AI baru"
