@@ -11,7 +11,7 @@
         <span>{{ .ReadingTime }} menit baca</span>
       </div>
     </header>
-    {{ with .Params.images }}<img class="post-hero" src="{{ index . 0 }}" alt="{{ $.Title }}">{{ end }}
+    {{ with .Params.images }}<img class="post-hero" src="{{ index . 0 }}" alt="{{ $.Title }}" loading="eager" fetchpriority="high">{{ end }}
     {{ if eq .Params.tipe "kisah-sukses" }}
     <aside class="cc-narsum">
       <div class="cc-narsum__info">

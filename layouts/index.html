@@ -25,7 +25,7 @@
     <div class="feat-grid">
       {{ $f := index $top 0 }}
       <a class="feat" href="{{ $f.RelPermalink }}">
-        {{ with $f.Params.images }}<img src="{{ index . 0 }}" alt="{{ $f.Title }}">{{ else }}<div class="cc-noimg"><svg class="cc-cat" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5l3 3M20 5l-3 3M5 8c-1 3-1 6 1 8 1.5 1.5 3 2 6 2s4.5-.5 6-2c2-2 2-5 1-8M9 13h.01M15 13h.01M11 16c.5.5 1.5.5 2 0"/></svg></div>{{ end }}
+        {{ with $f.Params.images }}<img src="{{ index . 0 }}" alt="{{ $f.Title }}" loading="eager" fetchpriority="high">{{ else }}<div class="cc-noimg"><svg class="cc-cat" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5l3 3M20 5l-3 3M5 8c-1 3-1 6 1 8 1.5 1.5 3 2 6 2s4.5-.5 6-2c2-2 2-5 1-8M9 13h.01M15 13h.01M11 16c.5.5 1.5.5 2 0"/></svg></div>{{ end }}
         <div class="scrim"></div>
         <div class="ft">
           <span class="pill-light pill-light--{{ $f.Section }}">{{ with $f.Params.categories }}{{ index . 0 }}{{ else }}{{ $f.Section | humanize }}{{ end }}</span>
@@ -38,7 +38,7 @@
         {{ range after 1 $top }}
         {{ $s := . }}
         <a class="scard" href="{{ .RelPermalink }}">
-          {{ with .Params.images }}<img src="{{ index . 0 }}" alt="{{ $s.Title }}">{{ else }}<div class="cc-noimg"><svg class="cc-cat" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5l3 3M20 5l-3 3M5 8c-1 3-1 6 1 8 1.5 1.5 3 2 6 2s4.5-.5 6-2c2-2 2-5 1-8M9 13h.01M15 13h.01M11 16c.5.5 1.5.5 2 0"/></svg></div>{{ end }}
+          {{ with .Params.images }}<img src="{{ index . 0 }}" alt="{{ $s.Title }}" loading="lazy">{{ else }}<div class="cc-noimg"><svg class="cc-cat" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5l3 3M20 5l-3 3M5 8c-1 3-1 6 1 8 1.5 1.5 3 2 6 2s4.5-.5 6-2c2-2 2-5 1-8M9 13h.01M15 13h.01M11 16c.5.5 1.5.5 2 0"/></svg></div>{{ end }}
           <div class="scrim"></div>
           <div class="ft">
             <span class="pill-light pill-light--{{ .Section }}">{{ with .Params.categories }}{{ index . 0 }}{{ else }}{{ .Section | humanize }}{{ end }}</span>
