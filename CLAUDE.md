@@ -229,10 +229,9 @@ manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit,
   - Selasa & Jumat → **Panduan & Tips**
   - Rabu → **Bisnis Hewan**
   - Sabtu → **Berita & Tren**
-- **Gambar (kondisional):** kategori **Berita & Tren** = **foto asli (Pexels)** (fallback ke
-  ilustrasi Pixabay bila kosong). Kategori **non-berita** = **dicampur acak** antara
-  **foto (Pexels)** & **ilustrasi/kartun (Pixabay)** dengan **saling fallback**, supaya gambar
-  bervariasi (kadang foto, kadang kartun) tapi tetap relevan. Kata kunci gambar dibuat
+- **Gambar (foto-first):** **SEMUA kategori** mengutamakan **foto asli (Pexels)** agar tampilan
+  profesional & konsisten. **Ilustrasi/kartun (Pixabay)** hanya dipakai sebagai **cadangan terakhir**
+  bila Pexels tidak punya hasil untuk query tsb (supaya artikel tetap punya gambar). Kata kunci gambar dibuat
   **konkret/visual** dan **mengikuti HEWAN/SUBJEK artikel** (mis. kucing, anjing, kelinci,
   ayam) — **tidak dipaksa selalu kucing**. Semua dikonversi **WebP ≤1200px**
   (patuh Aturan Performa Bagian 4).

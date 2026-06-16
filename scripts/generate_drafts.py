@@ -9,8 +9,8 @@ Fitur:
       Rabu           -> Bisnis Hewan (peliharaan + ternak HALAL)
       Sabtu          -> Berita & Tren
       Minggu         -> libur (tidak membuat artikel)
-  - Gambar: kategori "Berita & Tren" pakai FOTO asli (Pexels);
-            kategori lain pakai ILUSTRASI/kartun (Pixabay).
+  - Gambar: SEMUA kategori utamakan FOTO asli (Pexels); ilustrasi Pixabay
+            hanya cadangan terakhir bila Pexels tidak punya hasil.
   - Gemini menulis original, gaya answer-first, + FAQ (dipaksa via schema).
   - Output: file Markdown Hugo (draft=false) -> dijadikan Pull Request utk review.
 
@@ -28,7 +28,6 @@ import re
 import io
 import sys
 import json
-import random
 import datetime
 import pathlib
 
@@ -268,23 +267,13 @@ def fetch_illustration_pixabay(query, slug):
         return None, None
 
 
-def fetch_image(query, slug, want_photo):
-    """Berita & Tren -> foto asli (Pexels). Non-berita -> KONDISIONAL:
-    coba ilustrasi (Pixabay) & foto (Pexels) bergantian acak, dengan saling fallback,
-    supaya gambar bervariasi (kadang kartun, kadang foto) tapi tetap relevan."""
-    if want_photo:
-        path, credit = fetch_photo_pexels(query, slug)
-        if not path:
-            path, credit = fetch_illustration_pixabay(query, slug)
-        return path, credit
-    if random.choice([True, False]):
+def fetch_image(query, slug):
+    """Semua kategori: UTAMAKAN FOTO ASLI (Pexels). Ilustrasi Pixabay hanya
+    dipakai sebagai cadangan terakhir bila Pexels tidak punya hasil, supaya
+    setiap artikel tetap punya gambar yang relevan & profesional."""
+    path, credit = fetch_photo_pexels(query, slug)
+    if not path:
         path, credit = fetch_illustration_pixabay(query, slug)
-        if not path:
-            path, credit = fetch_photo_pexels(query, slug)
-    else:
-        path, credit = fetch_photo_pexels(query, slug)
-        if not path:
-            path, credit = fetch_illustration_pixabay(query, slug)
     return path, credit
 
 
@@ -297,8 +286,7 @@ def write_article(section, data):
         slug = f"{slug}-{stamp}"
         path = CONTENT / section / f"{slug}.md"
 
-    want_photo = (section == "berita-tren")
-    img_path, credit = fetch_image(data.get("image_query", ""), slug, want_photo)
+    img_path, credit = fetch_image(data.get("image_query", ""), slug)
 
     now = datetime.datetime.now(WIB)
     date_str = now.strftime("%Y-%m-%dT%H:%M:%S") + "+07:00"
