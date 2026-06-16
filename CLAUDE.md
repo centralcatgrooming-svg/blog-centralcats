@@ -89,7 +89,14 @@ Kecepatan = pengalaman pengguna + ranking SEO. Patuhi ini:
 
 - **Gambar:** gunakan format **WebP** (atau JPG terkompres). Kompres sebelum upload.
   Lebar maksimal wajar (mis. ≤1600px). Selalu sertakan dimensi bila memungkinkan.
-- **Lazy loading:** gambar di luar layar harus `loading="lazy"` (kartu sudah menerapkan ini).
+  Gambar auto-draft sudah dikonversi WebP q80 ≤1200px oleh `generate_drafts.py`.
+- **Lazy loading & LCP (Tahap 7 lanjutan):** SEMUA `<img>` konten punya `loading="lazy"`
+  KECUALI elemen **LCP** yang justru `loading="eager" fetchpriority="high"`:
+  **featured #1 di homepage** (`index.html`, kartu besar paling atas) & **hero artikel**
+  (`single.html`, `img.post-hero`). Kartu grid (`card.html`), scard (`index.html`), dan
+  logo footer (`baseof.html`) = `lazy`; logo header tetap eager (di atas layar).
+  Ukuran gambar dijamin lewat `aspect-ratio`/`object-fit` di CSS — **jangan tambah**
+  `width`/`height` di `<img>` (berisiko bentrok). Belum pakai `srcset` responsif (opsional).
 - **Jangan tambah library JavaScript berat** (jQuery, framework, slider besar, dll) tanpa
   alasan kuat. Blog ini sengaja ringan dengan CSS inline + JS minimal.
 - **Jangan tambah banyak font eksternal.** Saat ini pakai system font (cepat, nol request).
@@ -220,9 +227,18 @@ Pipeline pembuat draf artikel otomatis. **Output selalu berupa Pull Request** un
 manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit, Close = buang.
 
 - **Jadwal otomatis** (GitHub Actions, `.github/workflows/auto-draft.yml`):
-  cron `17 1 * * 1-6` = **Senin–Sabtu 08:17 WIB** (01:17 UTC). **Minggu libur.**
-  (Menit ganjil `:17` dipilih agar tak bentrok beban puncak GitHub di menit `:00`.)
+  **3 cron** Senin–Sabtu = `17 1 * * 1-6` (**08:17 WIB**) + cadangan `37 1 * * 1-6`
+  (**08:37**) & `57 1 * * 1-6` (**08:57**). **Minggu libur.** (Menit ganjil agar tak
+  bentrok beban puncak GitHub di menit `:00`.) Cron cadangan ada karena scheduler GitHub
+  kadang **menunda/melewati** cron saat beban tinggi.
   Bisa juga dijalankan manual dari tab Actions (input `jumlah` & `kategori`).
+- **Guard anti-dobel (maks 1 artikel/hari):** langkah "Guard anti-dobel" di workflow aktif
+  **HANYA saat `event_name == 'schedule'`**. Ia cek via GitHub Search apakah sudah ada PR
+  berlabel `ai-draft` yang **dibuat hari ini** (UTC); bila ada → langkah Generate & buka-PR
+  **dilewati dengan sukses** (job hijau, pakai `::notice::`, tanpa email gagal). Jadi dari 3
+  cron, hanya yang pertama membuat artikel. **Trigger manual (`workflow_dispatch`) BEBAS guard**
+  → tetap bisa memaksa buat artikel kapan saja untuk tes. Jangan ubah `generate_drafts.py`
+  untuk dedup ini — guard murni di level workflow.
 - **Kategori mengikuti hari** (zona WIB), dipilih otomatis oleh `scripts/generate_drafts.py`
   (env `SECTION="auto"`/kosong), atau dipaksa lewat input `kategori` saat run manual:
   - Senin & Kamis → **Kesehatan Hewan**
