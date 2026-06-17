@@ -59,6 +59,7 @@ req = urllib.request.Request(
 )
 req.add_header("Authorization", "Bearer " + API_KEY)
 req.add_header("Content-Type", "application/json")
+req.add_header("User-Agent", "central-cats-blog-automation/1.0")
 
 try:
     with urllib.request.urlopen(req, timeout=30) as r:
