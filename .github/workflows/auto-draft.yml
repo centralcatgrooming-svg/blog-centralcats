@@ -81,6 +81,7 @@ jobs:
         run: python scripts/generate_drafts.py
 
       - name: Buka Pull Request untuk review
+        id: cpr
         if: success() && steps.guard.outputs.skip != 'true'
         uses: peter-evans/create-pull-request@v6
         with:
@@ -92,10 +93,19 @@ jobs:
           body: |
             Draf artikel dibuat otomatis oleh AI (Gemini).
 
-            **Cara review:**
-            - Buka tab **Files changed** untuk membaca artikel.
-            - Cocok? Klik **Merge pull request** untuk menerbitkan.
-            - Tidak cocok? Klik **Close pull request** untuk menolak.
+            Tinjau & setujui lewat **Pusat Konten** di POS:
+            https://app.centralcats.id/technology-system
+
+            (Alternatif manual: tab **Files changed** → **Merge** untuk terbit / **Close** untuk tolak.)
 
             Gambar: ilustrasi (Pixabay) untuk non-berita, foto asli (Pexels) untuk Berita & Tren.
-          assignees: centralcatgrooming-svg
+
+      # Email PENGINGAT ke admin: draf baru siap ditinjau di POS (Pusat Konten).
+      # Pengganti email generik GitHub (assignees dihapus). Pakai Resend
+      # (RESEND_API_KEY = secret repo). Non-blocking: gagal email tak gagalkan job.
+      - name: Email pengingat (Resend)
+        if: success() && steps.guard.outputs.skip != 'true' && steps.cpr.outputs.pull-request-number != ''
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        run: python3 scripts/notify_draft_email.py || true
