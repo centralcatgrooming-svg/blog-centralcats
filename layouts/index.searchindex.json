@@ -1,0 +1,15 @@
+{{- $items := slice -}}
+{{- range (.Site.RegularPages.ByDate.Reverse) -}}
+  {{- if .Section -}}
+    {{- $cat := .Section | humanize -}}
+    {{- with .Params.categories }}{{ $cat = index . 0 }}{{ end -}}
+    {{- $sum := .Params.summary | default (.Summary | plainify) -}}
+    {{- $items = $items | append (dict
+        "title" .Title
+        "url" .RelPermalink
+        "summary" $sum
+        "category" $cat
+    ) -}}
+  {{- end -}}
+{{- end -}}
+{{ $items | jsonify }}

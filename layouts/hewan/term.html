@@ -1,0 +1,9 @@
+{{ define "main" }}
+  <h1 class="page-title">Artikel tentang {{ .Title | humanize }}</h1>
+  <p class="lead">Kumpulan artikel yang membahas {{ .Title | humanize }} di blog Central Cat's.</p>
+  <div class="grid">
+    {{ range .Pages.ByDate.Reverse }}
+      {{ if .IsPage }}{{ partial "card.html" . }}{{ end }}
+    {{ end }}
+  </div>
+{{ end }}

@@ -1,0 +1,61 @@
+baseURL = "https://blog.centralcats.id/"
+languageCode = "id-id"
+defaultContentLanguage = "id"
+title = "Central Cat's News"
+timeZone = "Asia/Jakarta"
+enableRobotsTXT = false
+
+[params]
+  description = "Berita, tips kesehatan, dan panduan merawat hewan peliharaan dari Central Cat's."
+  brandColor = "#1e3a8a"
+  mainSite = "https://www.centralcats.id"
+
+# Kategori utama = folder di /content (section). Subkategori = isi field "categories" di artikel.
+[taxonomies]
+  category = "categories"
+  tag = "tags"
+  hewan = "hewan"
+
+# Format output kustom untuk indeks pencarian (menghasilkan search-index.json di root situs)
+[outputFormats.SearchIndex]
+  mediaType = "application/json"
+  baseName = "search-index"
+  isPlainText = true
+  notAlternative = true
+
+# Penting: home menghasilkan index.json (feed yang ditarik situs utama centralcats.id)
+[outputs]
+  home = ["HTML", "RSS", "JSON", "SearchIndex"]
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+# Menu navigasi (4 kategori utama)
+[[menu.main]]
+  name = "Berita & Tren"
+  url = "/berita-tren/"
+  weight = 1
+[[menu.main]]
+  name = "Kesehatan Hewan"
+  url = "/kesehatan-hewan/"
+  weight = 2
+[[menu.main]]
+  name = "Bisnis Hewan"
+  url = "/bisnis-hewan/"
+  weight = 3
+[[menu.main]]
+  name = "Panduan & Tips"
+  url = "/panduan-tips/"
+  weight = 4
+[[menu.main]]
+  name = "Indeks Hewan"
+  url = "/hewan/"
+  weight = 5
+[[menu.main]]
+  name = "Tentang"
+  url = "/tentang/"
+  weight = 6
+[[menu.main]]
+  name = "Cari"
+  url = "/cari/"
+  weight = 7

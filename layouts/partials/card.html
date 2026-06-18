@@ -1,0 +1,10 @@
+<article class="card">
+  {{ with .Params.images }}<a href="{{ $.RelPermalink }}"><img src="{{ index . 0 }}" alt="{{ $.Title }}" loading="lazy"></a>
+  {{ else }}<a href="{{ .RelPermalink }}"><div class="cc-noimg"><svg class="cc-cat" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5l3 3M20 5l-3 3M5 8c-1 3-1 6 1 8 1.5 1.5 3 2 6 2s4.5-.5 6-2c2-2 2-5 1-8M9 13h.01M15 13h.01M11 16c.5.5 1.5.5 2 0"/></svg></div></a>{{ end }}
+  <div class="body">
+    <span class="badge badge--{{ .Section }}">{{ with .Params.categories }}{{ index . 0 }}{{ else }}{{ .Section | humanize }}{{ end }}</span>
+    <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+    <p>{{ .Summary | plainify | truncate 120 }}</p>
+    <span class="date">{{ time.Format ":date_long" .Date }}</span>
+  </div>
+</article>

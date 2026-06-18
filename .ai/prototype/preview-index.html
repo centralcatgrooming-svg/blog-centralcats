@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Indeks Hewan A-Z — Central Cat's News</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fbfaf8;--surface:#ffffff;--surface-2:#f4f2ee;--text:#16213e;--muted:#5d6b82;--brand:#1e3a8a;--brand-2:#162d6b;--brand-soft:#eef2ff;--accent:#e23b3b;--border:#eceae5;--shadow:0 1px 3px rgba(20,30,50,.06),0 10px 30px rgba(20,30,50,.06);--serif:'Fraunces',Georgia,serif;--sans:'Inter',system-ui,sans-serif}
+[data-theme="dark"]{--bg:#0e1320;--surface:#151b2b;--surface-2:#1b2333;--text:#e9ecf4;--muted:#9aa6bd;--brand:#8ba3ff;--brand-2:#aebdff;--brand-soft:#1b2540;--accent:#ff6b6b;--border:#27314a;--shadow:0 1px 3px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;transition:background .35s,color .35s}
+a{text-decoration:none;color:inherit}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid var(--border)}
+.bar{display:flex;align-items:center;justify-content:space-between;height:68px;max-width:1140px;margin:0 auto;padding:0 24px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:20px;letter-spacing:-.02em}
+.brand b{color:var(--accent)}.brand .paw{width:30px;height:30px;border-radius:8px;background:var(--brand);display:grid;place-items:center;color:#fff;font-size:16px}
+nav{display:flex;align-items:center;gap:24px}
+nav a.navlink{color:var(--muted);font-size:15px;font-weight:500}nav a.navlink:hover,nav a.navlink.active{color:var(--brand)}
+.toggle{width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;display:grid;place-items:center}.toggle svg{width:20px;height:20px}
+.moon{display:none}[data-theme="dark"] .moon{display:block}[data-theme="dark"] .sun{display:none}
+@media(max-width:760px){nav .navlink{display:none}}
+
+.head{padding:48px 0 8px;text-align:center}
+.head h1{font-family:var(--serif);font-weight:600;font-size:clamp(32px,5vw,46px);letter-spacing:-.02em}
+.head p{color:var(--muted);margin-top:10px;font-size:17px}
+
+.azbar{position:sticky;top:68px;z-index:40;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:16px 0;margin-top:18px;border-bottom:1px solid var(--border)}
+.azbar a{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;font-weight:600;font-size:14px;color:var(--muted)}
+.azbar a.on{color:var(--brand);background:var(--brand-soft)}
+.azbar a.on:hover{background:var(--brand);color:#fff}
+.azbar a.off{opacity:.35;pointer-events:none}
+
+.group{margin:40px 0 0}
+.group .letter{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--brand);border-bottom:2px solid var(--border);padding-bottom:8px;margin-bottom:18px}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.chip{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
+.chip:hover{transform:translateY(-3px);border-color:var(--brand)}
+.chip .nm{display:flex;align-items:center;gap:10px;font-weight:500}
+.chip .ic{width:34px;height:34px;border-radius:9px;background:var(--surface-2);display:grid;place-items:center}
+.chip .ic svg{width:20px;height:20px;stroke:var(--brand)}
+.chip .ct{font-size:13px;font-weight:600;color:var(--brand);background:var(--brand-soft);padding:3px 10px;border-radius:999px}
+
+footer{margin-top:72px;background:var(--brand-2);color:#cdd6f4;padding:46px 24px;text-align:center}
+[data-theme="dark"] footer{background:#0a0f1a;border-top:1px solid var(--border)}
+footer .fbrand{color:#fff;font-weight:600;font-size:18px;margin-bottom:6px}footer a{color:#fff;text-decoration:underline}
+.note{max-width:1000px;margin:18px auto 0;padding:0 24px}
+.note .tag2{background:var(--brand-soft);color:var(--brand);font-size:13px;font-weight:600;padding:4px 10px;border-radius:8px}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand"><span class="paw">🐾</span> Central <b>Cat's</b></div>
+    <nav>
+      <a class="navlink" href="#">Beranda</a>
+      <a class="navlink active" href="#">Indeks Hewan</a>
+      <a class="navlink" href="#">Kesehatan</a>
+      <a class="navlink" href="#">Bisnis</a>
+      <button class="toggle" id="tg" aria-label="Mode gelap/terang">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<div class="note"><p style="color:var(--muted);font-size:14px;margin:18px 0 0"><span class="tag2">PRATINJAU</span> &nbsp;Indeks Hewan A-Z — klik 🌙 untuk mode gelap.</p></div>
+
+<div class="wrap">
+  <div class="head">
+    <h1>Indeks Hewan A-Z</h1>
+    <p>Jelajahi artikel berdasarkan jenis hewan peliharaan & ternak.</p>
+  </div>
+
+  <div class="azbar">
+    <a class="on" href="#A">A</a><a class="on" href="#B">B</a><a class="off">C</a><a class="off">D</a><a class="off">E</a><a class="off">F</a><a class="off">G</a><a class="on" href="#H">H</a><a class="on" href="#I">I</a><a class="off">J</a><a class="on" href="#K">K</a><a class="off">L</a><a class="on" href="#M">M</a><a class="off">N</a><a class="off">O</a><a class="off">P</a><a class="off">Q</a><a class="off">R</a><a class="on" href="#S">S</a><a class="off">T</a><a class="off">U</a><a class="off">V</a><a class="off">W</a><a class="off">X</a><a class="off">Y</a><a class="off">Z</a>
+  </div>
+
+  <div class="group" id="A">
+    <div class="letter">A</div>
+    <div class="chips">
+      <a class="chip"><span class="nm"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><path d="M5 11c-1-2 0-4 2-4 1 0 2 1 2 2M19 11c1-2 0-4-2-4-1 0-2 1-2 2M7 11c-1 3 0 7 5 7s6-4 5-7M10 14h.01M14 14h.01"/></svg></span> Anjing</span><span class="ct">2 artikel</span></a>
+      <a class="chip"><span class="nm"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><path d="M12 4c2 0 3 1 3 3 2 0 3 1 3 3s-2 4-6 6-6-4-6-6 1-3 3-3c0-2 1-3 3-3zM9 18l-1 2M15 18l1 2"/></svg></span> Ayam</span><span class="ct">3 artikel</span></a>
+    </div>
+  </div>
+
+  <div class="group" id="B">
+    <div class="letter">B</div>
+    <div class="chips">
+      <a class="chip"><span class="nm"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><path d="M16 7a4 4 0 00-8 0c0 3-3 4-3 7 0 2 2 3 4 3M16 7c2 1 3 3 3 6 0 3-3 5-7 5M11 9h.01"/></svg></span> Bebek</span><span class="ct">1 artikel</span></a>
+      <a class="chip"><span class="nm"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><path d="M14 6a3 3 0 00-6 0c0 4-4 5-4 9 0 2 2 3 5 3s6-2 8-6c1-2 2-3 3-3-2 0-3-1-3-3M10 8h.01"/></svg></span> Burung</span><span class="ct">2 artikel</span></a>
+    </div>
+  </div>
+
+  <div class="group" id="H">
+    <div class="letter">H</div>
+    <div class="chips">
+      <a class="chip"><span class="nm"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><circle cx="12" cy="13" r="7"/><path d="M9 11h.01M15 11h.01M10 15c1 1 3 1 4 0"/></svg></span> Hamster</span><span class="ct">1 artikel</span></a>
+    </div>
+  </div>
+
+  <div class="group" id="I">
+    <div class="letter">I</div>
+    <div class="chips">
+      <a class="chip"><span class="nm"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><path d="M3 12c3-5 11-5 15 0-4 5-12 5-15 0zM18 12l3-2v4l-3-2zM8 11h.01"/></svg></span> Ikan</span><span class="ct">1 artikel</span></a>
+    </div>
+  </div>
+
+  <div class="group" id="K">
+    <div class="letter">K</div>
+    <div class="chips">
+      <a class="chip"><span class="nm"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><path d="M7 6l2 3M17 6l-2 3M6 11c-1 4 1 8 6 8s7-4 6-8c-1-2-3-3-6-3s-5 1-6 3zM10 13h.01M14 13h.01"/></svg></span> Kambing</span><span class="ct">2 artikel</span></a>
+      <a class="chip"><span class="nm"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><path d="M9 3c-1 2-1 5 0 7M15 3c1 2 1 5 0 7M6 13c0 4 2 7 6 7s6-3 6-7-2-5-6-5-6 1-6 5zM10 14h.01M14 14h.01"/></svg></span> Kelinci</span><span class="ct">2 artikel</span></a>
+      <a class="chip"><span class="nm"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><path d="M4 5l3 3M20 5l-3 3M5 8c-1 3-1 6 1 8 1.5 1.5 3 2 6 2s4.5-.5 6-2c2-2 2-5 1-8M9 13h.01M15 13h.01M11 16c.5.5 1.5.5 2 0"/></svg></span> Kucing</span><span class="ct">5 artikel</span></a>
+    </div>
+  </div>
+
+  <div class="group" id="M">
+    <div class="letter">M</div>
+    <div class="chips">
+      <a class="chip"><span class="nm"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><circle cx="12" cy="13" r="7"/><path d="M9 11h.01M15 11h.01M10 15c1 1 3 1 4 0"/></svg></span> Marmut</span><span class="ct">1 artikel</span></a>
+    </div>
+  </div>
+
+  <div class="group" id="S">
+    <div class="letter">S</div>
+    <div class="chips">
+      <a class="chip"><span class="nm"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><path d="M6 7l-1 3M18 7l1 3M5 10c0 5 3 8 7 8s7-3 7-8c0-2-2-3-7-3s-7 1-7 3zM9 13h.01M15 13h.01"/></svg></span> Sapi</span><span class="ct">2 artikel</span></a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="fbrand">🐾 Central Cat's</div>
+  <p>Grooming, treatment, cat hotel &amp; petshop kucing terpercaya di Tangerang sejak 2020.</p>
+  <p style="margin-top:12px"><a href="#">Kunjungi situs utama →</a></p>
+</footer>
+
+<script>
+(function(){var root=document.documentElement,tg=document.getElementById('tg');
+try{var s=localStorage.getItem('theme');if(s)root.setAttribute('data-theme',s);else if(matchMedia('(prefers-color-scheme:dark)').matches)root.setAttribute('data-theme','dark');}catch(e){}
+tg.addEventListener('click',function(){var n=root.getAttribute('data-theme')==='dark'?'light':'dark';root.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}});})();
+</script>
+</body>
+</html>

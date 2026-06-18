@@ -1,0 +1,33 @@
+name: Backup blog bulanan
+
+# Membuat arsip ZIP seluruh isi blog (artikel + foto + kode) tiap bulan,
+# lalu menyimpannya sebagai "artifact" yang bisa Anda unduh kapan saja.
+# Catatan: repo GitHub sendiri sudah jadi backup utama; ini salinan tambahan.
+
+on:
+  workflow_dispatch:          # bisa dijalankan manual kapan saja
+  schedule:
+    - cron: "0 2 1 * *"       # otomatis tiap tanggal 1, 09:00 WIB (02:00 UTC)
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Buat arsip ZIP
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          echo "DATE=$DATE" >> "$GITHUB_ENV"
+          zip -rq "backup-blog-$DATE.zip" . -x '.git/*'
+
+      - name: Unggah arsip (bisa diunduh dari halaman run ini)
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-blog-${{ env.DATE }}
+          path: backup-blog-*.zip
+          retention-days: 90

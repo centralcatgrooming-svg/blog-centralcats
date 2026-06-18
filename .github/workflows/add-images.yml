@@ -1,0 +1,52 @@
+name: Tambah Gambar Artikel Lama (non-destruktif)
+
+# Jalankan MANUAL dari tab Actions. Mengambil 1 foto relevan (Pexels, fallback
+# Pixabay) untuk setiap artikel yang BELUM punya field `images`, lalu menyisipkan
+# baris images = [...] TANPA mengubah teks/slug/URL artikel. Output = Pull Request.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  add-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests pillow
+
+      - name: Tambah gambar ke artikel tanpa gambar
+        env:
+          # GEMINI hanya agar import generate_drafts.py lolos (tidak dipakai di sini).
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+        run: python scripts/add_images.py
+
+      - name: Buka Pull Request untuk review
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "Tambah gambar untuk artikel lama (non-destruktif)"
+          branch: add-images/run-${{ github.run_id }}
+          delete-branch: true
+          labels: ai-draft
+          title: "🖼️ Tambah gambar artikel lama — siap direview"
+          body: |
+            Menambahkan foto (Pexels, fallback Pixabay) ke artikel yang sebelumnya
+            tanpa gambar. **Teks, slug, URL, dan tanggal artikel tidak diubah.**
+
+            **Cara review:**
+            - Buka tab **Files changed** — pastikan hanya ada penambahan `images = [...]`
+              di front matter + file `.webp` baru.
+            - Cocok? **Merge** untuk menerapkan.
+            - Ada foto yang kurang pas? **Close**, lalu beri tahu agar query-nya disesuaikan.

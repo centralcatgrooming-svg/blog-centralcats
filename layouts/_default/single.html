@@ -1,0 +1,68 @@
+{{ define "main" }}
+  <article class="post">
+    <header class="post-head">
+      {{ if .Section }}<span class="badge badge--{{ .Section }}">{{ with .Params.categories }}{{ index . 0 }}{{ else }}{{ .Section | humanize }}{{ end }}</span>{{ end }}
+      <h1>{{ .Title }}</h1>
+      <div class="post-meta">
+        <span>Ditulis oleh {{ .Params.author | default "Team Central Cat's" }}</span>
+        <span class="dot"></span>
+        <span>{{ time.Format ":date_long" .Date }}</span>
+        <span class="dot"></span>
+        <span>{{ .ReadingTime }} menit baca</span>
+      </div>
+    </header>
+    {{ with .Params.images }}<img class="post-hero" src="{{ index . 0 }}" alt="{{ $.Title }}" loading="eager" fetchpriority="high">{{ end }}
+    {{ if eq .Params.tipe "kisah-sukses" }}
+    <aside class="cc-narsum">
+      <div class="cc-narsum__info">
+        <span class="cc-narsum__label">Narasumber</span>
+        <span class="cc-narsum__nama">{{ .Params.narasumber }}</span>
+      </div>
+      <div class="cc-narsum__links">
+        {{ with .Params.instagram }}<a href="{{ . }}" target="_blank" rel="noopener" class="cc-narsum__btn">Instagram</a>{{ end }}
+        {{ with .Params.youtube }}<a href="{{ . }}" target="_blank" rel="noopener" class="cc-narsum__btn">YouTube</a>{{ end }}
+        {{ with .Params.tiktok }}<a href="{{ . }}" target="_blank" rel="noopener" class="cc-narsum__btn">TikTok</a>{{ end }}
+        {{ with .Params.situs }}<a href="{{ . }}" target="_blank" rel="noopener" class="cc-narsum__btn">Situs Web</a>{{ end }}
+      </div>
+    </aside>
+    {{ end }}
+    {{ .Content }}
+    {{ with .Params.faq }}
+    <section class="cc-faq">
+      <h2>Pertanyaan yang Sering Diajukan</h2>
+      {{ range . }}
+      <details class="cc-faq__item">
+        <summary class="cc-faq__q">{{ .q }}</summary>
+        <div class="cc-faq__a">{{ .a | markdownify }}</div>
+      </details>
+      {{ end }}
+    </section>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {{- range $i, $e := . }}{{ if $i }},{{ end }}
+        {"@type": "Question", "name": {{ $e.q | jsonify }}, "acceptedAnswer": {"@type": "Answer", "text": {{ $e.a | jsonify }}}}
+        {{- end }}
+      ]
+    }
+    </script>
+    {{ end }}
+    {{ $rel := first 3 (where (where .Site.RegularPages "Section" .Section) "Permalink" "!=" .Permalink) }}
+    {{ with $rel }}
+    <section class="cc-related">
+      <h2>Artikel Terkait</h2>
+      <div class="cc-related__grid">
+        {{ range . }}
+        <a class="cc-related__item" href="{{ .RelPermalink }}">
+          <span class="cc-related__cat">{{ with .Params.categories }}{{ index . 0 }}{{ else }}{{ .Section | humanize }}{{ end }}</span>
+          <span class="cc-related__title">{{ .Title }}</span>
+        </a>
+        {{ end }}
+      </div>
+    </section>
+    {{ end }}
+    <p style="margin-top:40px"><a href="/">← Kembali ke semua artikel</a></p>
+  </article>
+{{ end }}
