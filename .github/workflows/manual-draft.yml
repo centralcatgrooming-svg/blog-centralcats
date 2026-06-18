@@ -1,0 +1,70 @@
+name: Manual draft (Tulis Manual dari Pusat Konten)
+
+# Dipicu oleh POS (Pusat Konten) via GitHub API workflow_dispatch setelah penulis
+# mengisi form "Tulis Manual" + upload gambar ke Supabase Storage. Skrip merapikan
+# bahan jadi artikel + memproses gambar (cover + galeri) -> Pull Request (ai-draft),
+# review sama seperti auto-draft di POS.
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_url:
+        description: "URL public manifest.json di Supabase Storage (bucket blog-manual)"
+        required: true
+      job_id:
+        description: "Job id (untuk log/penelusuran)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  manual-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests pillow pillow-heif
+
+      - name: Generate manual draft
+        id: gen
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          MANIFEST_URL: ${{ github.event.inputs.manifest_url }}
+          JOB_ID: ${{ github.event.inputs.job_id }}
+        run: python scripts/generate_manual_draft.py
+
+      - name: Buka Pull Request untuk review
+        id: cpr
+        if: success()
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "Draf artikel manual (dari Pusat Konten)"
+          branch: manual-draft/run-${{ github.run_id }}
+          delete-branch: true
+          labels: ai-draft
+          title: "✍️ Draf artikel manual — siap direview"
+          body: |
+            Draf artikel dari **Tulis Manual** (Pusat Konten POS) — bahan penulis
+            dirapikan AI (Gemini), gambar penulis dipakai sebagai cover + galeri.
+
+            Tinjau & setujui lewat **Pusat Konten** di POS:
+            https://app.centralcats.id/technology-system
+
+            (Alternatif manual: tab **Files changed** → **Merge** untuk terbit / **Close** untuk tolak.)
+
+      # Email pengingat ke admin (reuse skrip auto-draft). Non-blocking.
+      - name: Email pengingat (Resend)
+        if: success() && steps.cpr.outputs.pull-request-number != ''
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        run: python3 scripts/notify_draft_email.py || true
