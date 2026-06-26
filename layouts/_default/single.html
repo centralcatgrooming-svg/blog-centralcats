@@ -38,15 +38,9 @@
       {{ end }}
     </section>
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {{- range $i, $e := . }}{{ if $i }},{{ end }}
-        {"@type": "Question", "name": {{ $e.q | jsonify }}, "acceptedAnswer": {"@type": "Answer", "text": {{ $e.a | jsonify }}}}
-        {{- end }}
-      ]
-    }
+    {{- $items := slice -}}
+    {{- range . }}{{ $items = $items | append (dict "@type" "Question" "name" .q "acceptedAnswer" (dict "@type" "Answer" "text" .a)) }}{{ end -}}
+    {{ (dict "@context" "https://schema.org" "@type" "FAQPage" "mainEntity" $items) | jsonify (dict "indent" "  ") | safeJS }}
     </script>
     {{ end }}
     {{ $rel := first 3 (where (where .Site.RegularPages "Section" .Section) "Permalink" "!=" .Permalink) }}
