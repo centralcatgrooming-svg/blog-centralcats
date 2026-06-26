@@ -111,6 +111,11 @@ ATURAN WAJIB:
 9. Bila wajar, rumuskan judul & beberapa subjudul sebagai PERTANYAAN yang benar-benar diketik orang. Gunakan kalimat ringkas & mudah dipindai.
 10. ATURAN HALAL (khusus kategori Bisnis Hewan): topik boleh mencakup hewan peliharaan dan ternak HALAL (mis. ayam, bebek, kambing, sapi, domba, kelinci, ikan, lebah madu). DILARANG KERAS mengangkat konten yang berpusat pada hewan haram dalam Islam (mis. babi/celeng) maupun budidaya/produk turunannya.
 11. CAKUPAN HEWAN: kucing adalah TEMA UTAMA blog (mayoritas artikel), tetapi artikel BOLEH membahas hewan peliharaan lain (anjing, kelinci, hamster, burung, ikan, dll) bila relevan & bermanfaat — tidak harus selalu kucing. Sesuaikan isi dengan hewan yang dibahas.
+12. TAUTAN KE LAYANAN (internal natural, BUKAN keyword stuffing): bila relevan dengan topik, sisipkan 1 (maksimal 2) tautan Markdown ke layanan Central Cat's di dalam body, HANYA dari daftar URL berikut — JANGAN mengarang URL lain, JANGAN menaut ke blog ini sendiri:
+   - Grooming / treatment kutu / cat hotel: https://www.centralcats.id/layanan
+   - Booking layanan: https://app.centralcats.id/booking
+   - Lokasi & antar-jemput: https://www.centralcats.id/lokasi
+   Tempatkan secara WAJAR di tengah atau akhir artikel sebagai ajakan halus (mis. "...bisa dibantu lewat [layanan grooming Central Cat's](https://www.centralcats.id/layanan)..."), TIDAK memaksa dan TIDAK di setiap paragraf. Lewati saja bila benar-benar tidak relevan dengan topik.
 
 Balas HANYA satu objek JSON valid dengan struktur:
 {"title": "...", "slug": "...", "subcategory": "...", "tags": ["...","..."], "summary": "...", "image_query": "...", "hewan": ["..."], "body": "...", "faq": [{"q": "...", "a": "..."}]}

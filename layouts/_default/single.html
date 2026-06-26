@@ -43,6 +43,14 @@
     {{ (dict "@context" "https://schema.org" "@type" "FAQPage" "mainEntity" $items) | jsonify (dict "indent" "  ") | safeJS }}
     </script>
     {{ end }}
+    <aside class="cc-cta">
+      <p class="cc-cta__lead">Perlu perawatan langsung untuk anabul?</p>
+      <p class="cc-cta__desc">Central Cat's melayani grooming, treatment kutu, &amp; cat hotel dengan antar-jemput di area Tangerang (Pasar Kemis &amp; Rajeg).</p>
+      <div class="cc-cta__btns">
+        <a class="cc-cta__btn cc-cta__btn--primary" href="https://www.centralcats.id/layanan">Lihat Layanan</a>
+        <a class="cc-cta__btn" href="https://app.centralcats.id/booking">Booking Sekarang</a>
+      </div>
+    </aside>
     {{ $rel := first 3 (where (where .Site.RegularPages "Section" .Section) "Permalink" "!=" .Permalink) }}
     {{ with $rel }}
     <section class="cc-related">
