@@ -270,6 +270,35 @@ manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit,
   Sabtu memakai pengetahuan Gemini + foto Pexels (bukan berita real-time). Akan disambungkan
   saat URL portal RSS tersedia.
 
+### 8a. RENCANA: gambar pindah ke Cloudflare R2 (DITUNDA — belum urgent)
+
+> **Status 28 Jun 2026: DITUNDA, bukan dibatalkan.** Belum urgent — repo ~3 MB, `static/images/`
+> baru **30 file `.webp` (1,76 MB)**, jauh dari limit GitHub Pages (1 GB site / 100 GB-bln bandwidth).
+> Aktivasi R2 sempat terhalang **kartu debit** (Cloudflare butuh kartu kredit / virtual card).
+> Kerjakan saat ada kartu yang jalan **ATAU** trigger nyata (repo membengkak / butuh banyak gambar).
+
+**Kondisi sekarang:** gambar `.webp` **di-commit ke git** di `static/images/` lalu di-serve GitHub
+Pages. Tiap artikel = +1 gambar di **history git selamanya** (biner di git tak pernah menyusut) →
+bloat jangka panjang + build `hugo.yml` (`fetch-depth: 0`) melambat seiring waktu.
+
+**Rencana:** offload gambar ke **Cloudflare R2** (object storage S3-compatible, **egress gratis**,
+free tier 10 GB) → repo tetap ramping (cuma markdown + template), gambar di-serve via CDN /
+`img.centralcats.id`. **Target = R2, BUKAN Supabase Storage** (jangan bebani DB POS yang dijaga ringan).
+
+**Titik rewire saat dikerjakan:**
+1. `scripts/generate_drafts.py` + `scripts/add_images.py` → setelah konversi WebP, **upload ke R2**
+   (boto3/S3-compat) + tulis **URL R2 penuh** di front-matter `images = [...]` (bukan simpan ke `static/images/`).
+2. Template Hugo yang baca `images[0]` (lihat Bagian 5: `$img` di-`absURL`; JSON-LD `Article` + Open Graph)
+   → **deteksi URL absolut**: kalau `images[0]` diawali `http` → pakai apa adanya (JANGAN `absURL`); path
+   lokal lama → perilaku sekarang. (Pola backward-compat sama spt `assetUrl()` di repo POS.)
+3. `.gitignore` → tambah `/static/images/` (stop commit gambar baru).
+4. Migrasi **30 gambar lama** → upload ke R2 + rewrite `images = [...]` di artikel terkait (one-off).
+5. GitHub Secrets baru: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`,
+   `R2_BUCKET` (`blog-centralcats-images`), `R2_PUBLIC_URL`.
+
+**Catatan:** project **Cloudflare Pages** (dibuat 28 Jun) = **HOSTING, BUKAN ini** — tak meng-offload
+gambar. Biarkan tak tersambung ke domain (blog tetap di GitHub Pages) sampai diputuskan terpisah.
+
 ---
 
 ## 9. Pencarian Artikel
