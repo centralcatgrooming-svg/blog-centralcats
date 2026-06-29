@@ -272,10 +272,24 @@ manusia sebelum tayang (lihat larangan "AI mentah" Bagian 6) — Merge = terbit,
 
 ### 8a. RENCANA: gambar pindah ke Cloudflare R2 (DITUNDA — belum urgent)
 
-> **Status 28 Jun 2026: DITUNDA, bukan dibatalkan.** Belum urgent — repo ~3 MB, `static/images/`
-> baru **30 file `.webp` (1,76 MB)**, jauh dari limit GitHub Pages (1 GB site / 100 GB-bln bandwidth).
-> Aktivasi R2 sempat terhalang **kartu debit** (Cloudflare butuh kartu kredit / virtual card).
-> Kerjakan saat ada kartu yang jalan **ATAU** trigger nyata (repo membengkak / butuh banyak gambar).
+> **Status 29 Jun 2026: DICOBA lalu DIBATALKAN (gambar tetap di GitHub Pages).** Implementasi R2
+> sempat dikerjakan penuh (rewire skrip + template + 5 GitHub Secrets + bucket `blog-centralcats-images`
+> aktif), TAPI saat diuji ketahuan **ISP Indonesia (terbukti di XL Axiata) MEMBLOKIR domain `*.r2.dev`
+> di level DNS** → `pub-….r2.dev` di-resolve ke `blockpage.xlaxiata.id`. Artinya URL publik `r2.dev`
+> **TIDAK BISA dipakai** host gambar untuk pengunjung Indonesia (gambar artikel gagal tampil).
+> Endpoint upload `…r2.cloudflarestorage.com` TIDAK diblokir (upload jalan) — yang mati hanya read publik.
+> **Keputusan: semua perubahan R2 di-revert, gambar baru tetap `static/images/` → GitHub Pages.**
+>
+> ⚠️ **JANGAN ulang jalur `r2.dev`.** Kalau R2 dikerjakan lagi nanti, **WAJIB pakai custom domain di
+> Cloudflare** (mis. `img.centralcats.id`) — yang TIDAK diblokir. Itu mensyaratkan **zona DNS ada di
+> Cloudflare**: entah pindahkan zona `centralcats.id` dari Hostinger ke Cloudflare (migrasi penuh,
+> hati-hati record email/MX), atau pakai **domain terpisah** khusus CDN yang ditaruh di Cloudflare
+> (`centralcats.id` tetap utuh di Hostinger). Rencana ini dikaitkan ke rencana pakai Cloudflare untuk
+> proyek **shop** ke depan.
+>
+> Belum urgent juga: repo ~3 MB, `static/images/` baru **~32 file `.webp` (~1,8 MB)**, jauh dari limit
+> GitHub Pages (1 GB site / 100 GB-bln bandwidth). Kerjakan saat ada custom domain Cloudflare siap
+> **ATAU** trigger nyata (repo membengkak / butuh banyak gambar).
 
 **Kondisi sekarang:** gambar `.webp` **di-commit ke git** di `static/images/` lalu di-serve GitHub
 Pages. Tiap artikel = +1 gambar di **history git selamanya** (biner di git tak pernah menyusut) →
