@@ -20,7 +20,7 @@ Env:
   PIXABAY_API_KEY (opsional) - ilustrasi/kartun utk non-berita
   NUM_ARTICLES    (opsional) - default 1
   SECTION         (opsional) - paksa kategori tertentu; "auto"/kosong = ikut hari
-  GEMINI_MODEL    (opsional) - default gemini-2.5-flash
+  GEMINI_MODEL    (opsional) - default gemini-3.5-flash
 """
 
 import os
@@ -45,7 +45,7 @@ except ImportError:
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 PEXELS_KEY = os.environ.get("PEXELS_API_KEY")
 PIXABAY_KEY = os.environ.get("PIXABAY_API_KEY")
-MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
 NUM = int(os.environ.get("NUM_ARTICLES", "1") or "1")
 SECTION_OVERRIDE = (os.environ.get("SECTION", "") or "").strip()
 
