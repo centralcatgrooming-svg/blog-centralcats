@@ -395,3 +395,53 @@ tiap artikel baru terbit. Situs statis (tanpa backend), jadi pakai **OneSignal**
   **Belum** dikonfirmasi terkirim ke device karena uji pertama 0 subscriber (kebetulan
   subscribe via incognito — tidak persisten). Uji ulang: subscribe di **jendela normal**,
   verifikasi 1 "Subscribed" di dashboard, lalu terbitkan/kirim ulang.
+
+---
+
+## 12. RENCANA (Next Project): Auto-posting Instagram saat artikel baru
+
+> **Status 30 Jun 2026: DIRENCANAKAN, belum dikerjakan.** Disepakati dikerjakan "besok" /
+> sesi berikutnya. Tujuan: tiap artikel baru terbit → **otomatis posting foto + caption ke
+> Instagram** Central Cat's, mirip mekanisme notifikasi OneSignal (Section 11).
+
+**Akun (sudah dikonfirmasi ADA):**
+- Instagram: **@centralcat_official** (nama tampil "Central Cats Official").
+- Facebook Page: **Centralcatsofficial** (`https://www.facebook.com/Centralcatsofficial/`).
+- ✅ **IG sudah TERTAUT ke Facebook Page** (dikonfirmasi user). Prasyarat penting ini lolos.
+- ⚠️ **Tipe akun (harus Business)** belum 100% dipastikan — user "kayaknya Business". TAK perlu
+  diblokir: API publishing akan menolak bila ternyata **Creator**, lalu tinggal switch ke
+  **Business** (gratis/instan, tak hilang foto/follower). **Personal** juga harus dijadikan Business.
+
+**API:** **Instagram Graph API — Content Publishing** (Meta, **gratis**). Publish = 2 langkah:
+`POST /{ig-user-id}/media` (buat container, butuh `image_url` **publik**) → `POST /{ig-user-id}/media_publish`.
+- ✅ **Gambar artikel kita ada di GitHub Pages (URL publik)** → syarat `image_url` publik terpenuhi.
+- **App Review 2–4 minggu** itu untuk app yang melayani BANYAK akun orang lain. Kita cuma posting ke
+  **akun sendiri** → besar kemungkinan cukup jalankan **Meta app di "Development mode"** dgn akun
+  sendiri sbg admin/tester (≤25 test users) → **tak perlu App Review panjang.** (Konfirmasi saat setup.)
+
+**Batasan IG yang harus diingat:**
+- **Link di caption TIDAK bisa diklik** → untuk klik ke blog tetap andalkan "link di bio". Caption =
+  judul + ringkasan + ajakan + "link di bio". Auto-post ini bagus untuk **jangkauan/branding**, bukan klik langsung.
+- Batas **50 post / 24 jam** (jauh lebih dari cukup).
+
+**Langkah setup (sekali, dipandu — klik di situs Meta oleh user):**
+1. `developers.facebook.com` → login akun FB yang **mengelola Page Centralcatsofficial** → My Apps →
+   Create App → tipe **Business**.
+2. Tambah produk **Instagram** (Graph API) + hubungkan ke Page/IG.
+3. Ambil **IG Business Account ID** + **token akses**. **Target = Page access token yang PERMANEN**
+   (turunan dari long-lived user token) supaya **tak perlu refresh** rutin. Permission yang dibutuhkan:
+   `instagram_basic`, `instagram_content_publish`, `pages_show_list`, `pages_read_engagement`,
+   `business_management`.
+   - Catatan: token user long-lived ~60 hari; **Page token bisa permanen** → kejar yang ini agar maintenance ~nol.
+4. Simpan sebagai **GitHub Secrets** (mis. `IG_USER_ID`, `IG_ACCESS_TOKEN`). **JANGAN** di kode/commit.
+
+**Implementasi (kerjaan Claude, kode):**
+5. Skrip baru `scripts/post_instagram.py` (pustaka standar / `requests`) — terima judul, summary,
+   URL gambar (absolut, GitHub Pages), permalink → jalankan 2-langkah publish.
+6. Pasang ke **deteksi artikel baru yang SUDAH ADA**: pola sama `notify-new-post.yml`
+   (`git diff --diff-filter=A` atas `content/**`). Bisa **tambah step** di workflow notify itu, atau
+   workflow terpisah `post-instagram.yml`. Non-blocking: gagal posting IG jangan gagalkan job lain.
+7. Aman bila token kosong/expired (skip dgn `::notice::`, jangan error).
+
+**Resume dari mana:** mulai **Langkah 1** (buat Meta app Business). Lihat juga referensi infra serupa:
+`scripts/notify_new_post.py` + `.github/workflows/notify-new-post.yml` (pola deteksi artikel baru → kirim API).
