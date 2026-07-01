@@ -292,6 +292,20 @@ def fetch_image(query, slug):
     return path, credit
 
 
+def fix_escapes(s):
+    """Gemini kadang men-DOUBLE-escape newline/tab di dalam string JSON
+    (mis. menulis "\\n\\n"), sehingga setelah json.loads tersisa literal
+    backslash-n — bukan baris baru asli — dan Markdown jadi satu paragraf
+    gepeng. Normalkan urutan escape umum ke karakter aslinya. Aman untuk
+    teks Indonesia (hanya menyentuh \\n, \\r, \\t; tak menyentuh unicode)."""
+    if not s:
+        return s
+    return (s.replace("\\r\\n", "\n")
+             .replace("\\n", "\n")
+             .replace("\\r", "\n")
+             .replace("\\t", "\t"))
+
+
 def write_article(section, data):
     title = (data.get("title") or "Artikel Tanpa Judul").strip()
     slug = slugify(data.get("slug") or title)
@@ -338,11 +352,13 @@ def write_article(section, data):
 
     summary = (data.get("summary") or "").replace('"', "'").strip()
     title_esc = title.replace('"', "'")
-    body = (data.get("body") or "").strip()
+    body = fix_escapes(data.get("body") or "").strip()
     images_toml = f'"{img_path}"' if img_path else ""
 
     def _clean(s):
-        return " ".join(str(s).split()).replace('"', "'").strip()
+        # buang escape literal (mis. "\n") jadi spasi agar FAQ 1-baris tetap rapi
+        s = str(s).replace("\\r\\n", " ").replace("\\n", " ").replace("\\r", " ").replace("\\t", " ")
+        return " ".join(s.split()).replace('"', "'").strip()
     faq_toml = ""
     for item in (data.get("faq") or []):
         q = _clean(item.get("q", "")) if isinstance(item, dict) else ""
