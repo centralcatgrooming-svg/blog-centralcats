@@ -48,6 +48,7 @@ PIXABAY_KEY = os.environ.get("PIXABAY_API_KEY")
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
 NUM = int(os.environ.get("NUM_ARTICLES", "1") or "1")
 SECTION_OVERRIDE = (os.environ.get("SECTION", "") or "").strip()
+MAX_RETRY = 3  # berapa kali coba ulang bila Gemini mengembalikan topik yang sudah ada
 
 if not GEMINI_KEY:
     sys.exit("GEMINI_API_KEY belum diset (cek GitHub Secrets).")
@@ -94,6 +95,12 @@ ANIMAL_EN = {
     "kura-kura": "turtle", "marmut": "guinea pig", "ular": "snake", "lebah": "bee",
     "landak": "hedgehog", "sugar-glider": "sugar glider", "iguana": "iguana",
 }
+
+# Untuk MENDORONG VARIASI HEWAN di kategori yang mudah jatuh ke "kucing terus"
+# (Berita & Tren, Bisnis Hewan). Pets + ternak HALAL (tanpa babi/celeng).
+VARIETY_PETS = ["anjing", "kelinci", "hamster", "burung", "ikan hias", "marmut", "kura-kura"]
+VARIETY_LIVESTOCK = ["ayam", "bebek", "kambing", "domba", "sapi", "ikan lele",
+                     "burung puyuh", "lebah madu"]
 
 WIB = datetime.timezone(datetime.timedelta(hours=7))
 
@@ -167,28 +174,91 @@ def slugify(text):
     return text[:80] or "artikel"
 
 
-def existing_titles():
-    titles = []
+def _norm(s):
+    """Normalisasi judul untuk pembanding duplikat: huruf kecil, tanpa tanda baca."""
+    s = re.sub(r"[^a-z0-9]+", " ", (s or "").lower())
+    return " ".join(s.split()).strip()
+
+
+def existing_index():
+    """Kumpulkan (daftar judul, set slug, set judul ternormalisasi) dari SEMUA
+    artikel yang sudah ada — KECUALI _index.md. Dipakai untuk mencegah duplikat
+    topik (bandingkan ke seluruh katalog, bukan cuma 40 terakhir)."""
+    titles, slugs, norm_titles = [], set(), set()
     if not CONTENT.exists():
-        return titles
+        return titles, slugs, norm_titles
     for p in CONTENT.rglob("*.md"):
+        if p.name == "_index.md":
+            continue
+        slugs.add(p.stem.lower())
         try:
             txt = p.read_text(encoding="utf-8")
         except Exception:
             continue
         m = re.search(r'title\s*=\s*"([^"]+)"', txt) or re.search(r'^title:\s*"?([^"\n]+)"?', txt, re.M)
         if m:
-            titles.append(m.group(1).strip())
-    return titles
+            t = m.group(1).strip()
+            titles.append(t)
+            norm_titles.add(_norm(t))
+    return titles, slugs, norm_titles
+
+
+def section_hewan_counts(section):
+    """Hitung berapa artikel per hewan dalam satu kategori (untuk dorong variasi)."""
+    counts = {}
+    d = CONTENT / section
+    if not d.exists():
+        return counts
+    for p in d.glob("*.md"):
+        if p.name == "_index.md":
+            continue
+        try:
+            txt = p.read_text(encoding="utf-8")
+        except Exception:
+            continue
+        m = re.search(r"hewan\s*=\s*\[([^\]]*)\]", txt)
+        if m:
+            for h in re.findall(r'"([^"]+)"', m.group(1)):
+                counts[h] = counts.get(h, 0) + 1
+    return counts
+
+
+def is_duplicate(data, slugs, norm_titles):
+    """True bila slug atau judul (ternormalisasi) sudah ada di katalog."""
+    slug = slugify(data.get("slug") or data.get("title") or "")
+    if slug in slugs:
+        return True, f"slug '{slug}' sudah ada"
+    nt = _norm(data.get("title", ""))
+    if nt and nt in norm_titles:
+        return True, f"judul '{data.get('title')}' mirip artikel yang sudah ada"
+    return False, ""
 
 
 def gemini_article(section, avoid):
     subcats = SUBCATS[section]
-    avoid_txt = "; ".join(avoid[-40:]) if avoid else "(belum ada)"
+    avoid_txt = "; ".join(avoid[-80:]) if avoid else "(belum ada)"
     extra = ""
     if section == "bisnis-hewan":
-        extra = ("Topik boleh bisnis hewan peliharaan ATAU ternak HALAL "
-                 "(ayam, kambing, sapi, domba, kelinci, ikan, dll). DILARANG babi/hewan haram.\n")
+        extra += ("Topik boleh bisnis hewan peliharaan ATAU ternak HALAL "
+                  "(ayam, kambing, sapi, domba, kelinci, ikan, dll). DILARANG babi/hewan haram.\n")
+
+    # Dorong VARIASI HEWAN untuk kategori yang mudah jatuh ke "kucing terus".
+    # Berita & Tren + Bisnis Hewan boleh mengangkat hewan peliharaan lain atau ternak halal.
+    if section in ("berita-tren", "bisnis-hewan"):
+        counts = section_hewan_counts(section)
+        total = sum(counts.values())
+        cat = counts.get("kucing", 0)
+        pool = ", ".join(VARIETY_PETS + VARIETY_LIVESTOCK)
+        if total >= 3 and cat >= total * 0.5:
+            extra += ("PENTING — kategori ini SUDAH kebanyakan artikel tentang kucing. "
+                      "Kali ini JANGAN pilih kucing. WAJIB angkat hewan peliharaan lain "
+                      f"atau ternak halal, mis.: {pool}. Set field \"hewan\" ke hewan itu (bukan kucing).\n")
+        else:
+            extra += ("Variasikan hewan yang dibahas — TIDAK harus kucing. Boleh hewan "
+                      f"peliharaan lain atau ternak halal ({pool}).\n")
+    if section == "berita-tren":
+        extra += ("Jika berita/tren ini juga menyangkut PELUANG USAHA/BISNIS, tambahkan tag "
+                  "\"bisnis\" pada field tags agar mudah ditemukan lintas-topik.\n")
     user = (
         f"Tulis SATU artikel blog original untuk kategori utama \"{SECTIONS[section]}\".\n"
         f"Pilih SATU subkategori dari: {subcats}.\n"
@@ -311,9 +381,9 @@ def write_article(section, data):
     slug = slugify(data.get("slug") or title)
     path = CONTENT / section / f"{slug}.md"
     if path.exists():
-        stamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        slug = f"{slug}-{stamp}"
-        path = CONTENT / section / f"{slug}.md"
+        # Tak seharusnya terjadi (sudah dicek is_duplicate). Jangan buat file kembar
+        # bertimestamp — lempar error agar artikel ini DILEWATI, bukan jadi duplikat.
+        raise FileExistsError(f"slug '{slug}' sudah ada — batal menulis duplikat")
 
     now = datetime.datetime.now(WIB)
     date_str = now.strftime("%Y-%m-%dT%H:%M:%S") + "+07:00"
@@ -397,18 +467,38 @@ def main():
         return
     print(f"Kategori hari ini: {SECTIONS[section]} ({section})")
 
-    avoid = existing_titles()
+    avoid, slugs, norm_titles = existing_index()
     created = []
     for i in range(max(1, NUM)):
+        data = None
+        for attempt in range(1, MAX_RETRY + 1):
+            try:
+                d = gemini_article(section, avoid)
+            except Exception as e:
+                print(f"[GAGAL] artikel ke-{i+1} (percobaan {attempt}): {e}", file=sys.stderr)
+                continue
+            dup, why = is_duplicate(d, slugs, norm_titles)
+            if not dup:
+                data = d
+                break
+            print(f"  (percobaan {attempt}: DUPLIKAT — {why}; regenerasi)", file=sys.stderr)
+            avoid.append(d.get("title", ""))  # supaya percobaan berikutnya menghindarinya
+        if not data:
+            print(f"[GAGAL] artikel ke-{i+1}: tetap duplikat setelah {MAX_RETRY} percobaan — dilewati.",
+                  file=sys.stderr)
+            continue
         try:
-            data = gemini_article(section, avoid)
             p, has_img = write_article(section, data)
-            avoid.append(data.get("title", ""))
-            mark = "[img]" if has_img else "[teks]"
-            created.append(str(p.relative_to(ROOT)))
-            print(f"[OK] {mark} {p.relative_to(ROOT)}")
         except Exception as e:
             print(f"[GAGAL] artikel ke-{i+1}: {e}", file=sys.stderr)
+            continue
+        # Perbarui indeks in-run agar artikel di run yang sama tak saling menduplikasi.
+        avoid.append(data.get("title", ""))
+        slugs.add(p.stem.lower())
+        norm_titles.add(_norm(data.get("title", "")))
+        mark = "[img]" if has_img else "[teks]"
+        created.append(str(p.relative_to(ROOT)))
+        print(f"[OK] {mark} {p.relative_to(ROOT)}")
 
     if not created:
         sys.exit("Tidak ada artikel yang berhasil dibuat.")
