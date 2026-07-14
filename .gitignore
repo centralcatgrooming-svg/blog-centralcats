@@ -4,3 +4,6 @@
 .DS_Store
 __pycache__/
 *.pyc
+
+# Panduan internal Claude Code — jangan publikasikan ke repo publik
+/CLAUDE.md
