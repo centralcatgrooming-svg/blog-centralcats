@@ -12,6 +12,7 @@
       </div>
     </header>
     {{ with .Params.images }}<img class="post-hero" src="{{ index . 0 }}" alt="{{ $.Title }}" loading="eager" fetchpriority="high">{{ end }}
+    {{ partial "share.html" (dict "page" . "variant" "top") }}
     {{ if eq .Params.tipe "kisah-sukses" }}
     <aside class="cc-narsum">
       <div class="cc-narsum__info">
@@ -43,6 +44,7 @@
     {{ (dict "@context" "https://schema.org" "@type" "FAQPage" "mainEntity" $items) | jsonify (dict "indent" "  ") | safeJS }}
     </script>
     {{ end }}
+    {{ partial "share.html" (dict "page" . "variant" "bottom") }}
     <aside class="cc-cta">
       <p class="cc-cta__lead">Perlu perawatan langsung untuk anabul?</p>
       <p class="cc-cta__desc">Central Cat's melayani grooming, treatment kutu, &amp; cat hotel dengan antar-jemput di area Tangerang (Pasar Kemis &amp; Rajeg).</p>

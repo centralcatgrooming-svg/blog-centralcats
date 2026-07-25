@@ -5,5 +5,8 @@
 __pycache__/
 *.pyc
 
+# Perkakas test (Vitest) — dev-only, tidak dipakai saat build Hugo
+/node_modules/
+
 # Panduan internal Claude Code — jangan publikasikan ke repo publik
 /CLAUDE.md

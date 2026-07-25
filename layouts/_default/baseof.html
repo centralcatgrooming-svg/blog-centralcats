@@ -144,7 +144,27 @@
     .cc-cta__btn:hover{background:var(--brand);color:#fff;border-color:var(--brand);text-decoration:none}
     .cc-cta__btn--primary{background:var(--brand);color:#fff;border-color:var(--brand)}
     .cc-cta__btn--primary:hover{background:var(--brand-strong)}
-    @media (prefers-reduced-motion:reduce){.card{transition:none}}
+    /* Tombol bagikan artikel (gaya portal berita) — lihat partials/share.html */
+    .cc-share{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:22px 0}
+    .cc-share--top{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0}
+    .cc-share--bottom{margin:36px 0 8px;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;flex-direction:column;align-items:flex-start;gap:10px}
+    .cc-share__label{font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted)}
+    .cc-share--bottom .cc-share__label{font-family:var(--serif);font-size:1.05rem;font-weight:600;letter-spacing:0;text-transform:none;color:var(--brand-dark)}
+    .cc-share__btns{display:flex;gap:8px;flex-wrap:wrap}
+    .cc-share__btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--sans);font-size:.85rem;font-weight:600;line-height:1;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:9px 14px;cursor:pointer;text-decoration:none;transition:background .18s,color .18s,border-color .18s}
+    .cc-share__btn svg{width:16px;height:16px;flex:none}
+    .cc-share__btn:hover{background:var(--sc,var(--brand));border-color:var(--sc,var(--brand));color:#fff;text-decoration:none}
+    .cc-share__btn--wa{--sc:#25d366}
+    .cc-share__btn--fb{--sc:#1877f2}
+    .cc-share__btn--x{--sc:#0f1419}
+    .cc-share__btn--tg{--sc:#229ed9}
+    .cc-share__btn.is-done{background:#25d366;border-color:#25d366;color:#fff}
+    /* Di layar sempit tombol jadi ikon saja biar muat satu baris */
+    @media (max-width:560px){
+      .cc-share--top .cc-share__nm{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+      .cc-share--top .cc-share__btn{padding:9px 11px}
+    }
+    @media (prefers-reduced-motion:reduce){.card{transition:none}.cc-share__btn{transition:none}}
 
     /* ===== Featured grid homepage (Tahap 2a) — pakai token warna yang ada ===== */
     .feat-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;margin:6px 0 40px}
@@ -449,6 +469,7 @@ nav.main a[href="/cari/"]{display:none}
     })();
   </script>
   <script>(function(){var btns=[document.getElementById('cc-theme-toggle'),document.getElementById('cc-theme-toggle-m')].filter(Boolean);if(!btns.length)return;function flip(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}}btns.forEach(function(b){b.addEventListener('click',flip);});})();</script>
+  {{ with resources.Get "js/share.js" | minify }}<script>{{ .Content | safeJS }}</script>{{ end }}
   <script>(function(){
     var data=[],loaded=false,loading=false,waiters=[];
     function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
