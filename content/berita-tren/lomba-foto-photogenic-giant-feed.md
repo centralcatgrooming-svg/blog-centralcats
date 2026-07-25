@@ -40,7 +40,7 @@ Cara berpartisipasi dalam lomba ini sangat mudah dan praktis. Anda hanya perlu m
 1. **Ambil Foto Terbaik**: Ambil foto Anda bersama kelinci kesayangan serta produk Giant Feed saat melakukan aktivitas beternak atau merawat kelinci. Pastikan logo pada kemasan Giant Feed terlihat dengan jelas di dalam foto.
 2. **Unggah ke Media Sosial**: Unggah foto tersebut ke akun Instagram (IG) atau Facebook (FB) pribadi Anda.
 3. **Tulis Cerita Menarik**: Pada kolom caption, ceritakan pengalaman seru atau kesan positif Anda selama menggunakan produk Giant Feed untuk kelinci kesayangan.
-4. **Tag & Mention**: Tag akun resmi Giant Feed, mention 3 orang teman Anda untuk ikut meramaikan keseruan ini, dan gunakan hashtag wajib: `#GiantFeed` `#FotoGiantFeed` `#PeternakHebat`.
+4. **Tag & Mention**: Tag [akun resmi Giant Feed (@giantfeedofficial)](https://www.instagram.com/giantfeedofficial/), mention 3 orang teman Anda untuk ikut meramaikan keseruan ini, dan gunakan hashtag wajib: `#GiantFeed` `#FotoGiantFeed` `#PeternakHebat`.
 5. **Atur Akun Publik**: Pastikan akun media sosial Anda tidak dikunci atau di-private selama periode lomba agar panitia dapat melihat dan menilai unggahan Anda dengan mudah.
 
 ## Kapan Periode Lomba Ini Berlangsung?
