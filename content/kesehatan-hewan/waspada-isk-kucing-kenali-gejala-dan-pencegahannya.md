@@ -1,5 +1,5 @@
 +++
-title = "Waspada ISK pada Kucing: Kenali Gejala dan Pencegahannya"
+title = "ISK (Infeksi Saluran Kemih) pada Kucing: Gejala & Pencegahan"
 date = 2026-06-15T08:44:48+07:00
 draft = false
 categories = ["Penyakit & Pencegahan"]
@@ -29,7 +29,7 @@ q = "Kapan saya harus membawa kucing ke dokter hewan jika curiga ISK?"
 a = "Segera setelah Anda melihat gejala seperti sering buang air kecil, mengejan, ada darah di urine, atau perubahan perilaku lainnya. Jangan menunda untuk menghindari komplikasi serius."
 +++
 
-Sebagai pemilik anabul, kita tentu ingin mereka selalu sehat dan ceria. Namun, tahukah Anda bahwa infeksi saluran kemih (ISK) adalah salah satu masalah kesehatan yang sering menyerang kucing? ISK bisa sangat mengganggu dan menyakitkan bagi anabul kita, bahkan berpotensi menyebabkan komplikasi serius jika tidak ditangani dengan cepat dan tepat. Mengenali gejala dan memahami cara pencegahannya adalah kunci untuk menjaga kesehatan saluran kemih kucing kesayangan Anda.
+Infeksi Saluran Kemih (ISK) pada kucing adalah peradangan atau infeksi pada saluran kemih—mulai dari kandung kemih, uretra, hingga ginjal—yang membuat anabul kesakitan saat buang air kecil. ISK termasuk masalah kesehatan yang sering menyerang kucing dan bisa berujung komplikasi serius, terutama sumbatan uretra pada kucing jantan, bila tidak ditangani cepat. Karena itu, mengenali gejala ISK sejak dini dan memahami cara pencegahannya sangat penting untuk menjaga kesehatan saluran kemih kucing kesayangan Anda.
 
 ## Apa Itu Infeksi Saluran Kemih (ISK) pada Kucing?
 
@@ -76,8 +76,8 @@ Kucing yang lebih tua atau memiliki kondisi medis tertentu seperti diabetes, pen
 
 Pencegahan adalah kunci terbaik untuk menjaga kesehatan saluran kemih anabul Anda. Berikut beberapa tips praktis yang bisa Anda terapkan:
 
-1.  **Pastikan Anabul Cukup Minum:** Sediakan air bersih dan segar di beberapa tempat dalam rumah. Gunakan mangkuk air yang lebar atau _water fountain_ khusus kucing untuk menarik minat mereka minum lebih banyak. Makanan basah (wet food) juga sangat direkomendasikan untuk meningkatkan asupan cairan.
-2.  **Jaga Kebersihan Kotak Pasir:** Bersihkan kotak pasir setiap hari. Pastikan jumlah kotak pasir mencukupi (ideal: jumlah kucing + 1) dan letakkan di tempat yang tenang dan mudah dijangkau.
+1.  **Pastikan Anabul Cukup Minum:** Sediakan air bersih dan segar di beberapa tempat dalam rumah. Gunakan mangkuk air yang lebar atau _water fountain_ khusus kucing untuk menarik minat mereka minum lebih banyak. Makanan basah (wet food) juga sangat direkomendasikan untuk meningkatkan asupan cairan. Kenali pula [tanda-tanda kucing dehidrasi](/kesehatan-hewan/tanda-kucing-dehidrasi-dan-cara-mengatasinya/) sejak dini.
+2.  **Jaga Kebersihan Kotak Pasir:** Bersihkan kotak pasir setiap hari. Pastikan jumlah kotak pasir mencukupi (ideal: jumlah kucing + 1) dan letakkan di tempat yang tenang dan mudah dijangkau. Simak [panduan memilih litter box dan pasir kucing yang tepat](/panduan-tips/panduan-memilih-litter-box-dan-pasir-kucing-tepat/) agar anabul nyaman.
 3.  **Berikan Makanan Berkualitas:** Konsultasikan dengan dokter hewan mengenai diet terbaik untuk kucing Anda. Beberapa makanan diformulasikan khusus untuk menjaga kesehatan saluran kemih dan mencegah pembentukan kristal.
 4.  **Minimalkan Stres:** Ciptakan lingkungan yang tenang dan nyaman bagi anabul. Sediakan tempat persembunyian, mainan, dan waktu bermain yang cukup untuk mengurangi stres.
 5.  **Periksakan Rutin ke Dokter Hewan:** Pemeriksaan kesehatan rutin memungkinkan deteksi dini masalah kesehatan, termasuk ISK, sebelum menjadi parah.

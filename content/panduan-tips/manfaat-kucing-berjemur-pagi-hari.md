@@ -26,7 +26,7 @@ q = "Apakah kucing putih lebih sensitif terhadap sinar matahari?"
 a = "Ya, kucing berbulu putih atau berwarna terang memiliki pigmen kulit yang lebih sedikit sehingga lebih rentan mengalami luka bakar matahari (sunburn) jika berjemur terlalu lama."
 +++
 
-Mengajak kucing berjemur di bawah sinar matahari pagi adalah cara alami dan efektif untuk menjaga kesehatan bulu, membunuh bakteri, serta meningkatkan suasana hati anabul. Kegiatan sederhana ini memberikan kehangatan yang mendukung sistem kekebalan tubuh dan metabolisme kucing secara keseluruhan. Meskipun kucing dikenal sebagai hewan yang gemar mencari kehangatan, proses berjemur ini tetap memerlukan pengawasan agar anabul tidak mengalami dehidrasi atau sengatan panas (*heatstroke*).
+Mengajak kucing berjemur di bawah sinar matahari pagi adalah cara alami dan efektif untuk menjaga kesehatan bulu, membunuh bakteri, serta meningkatkan suasana hati anabul. Waktu ideal menjemur kucing adalah sekitar **10–15 menit** pada pagi hari, antara **pukul 07.00–09.00**, saat sinar matahari masih lembut dan indeks UV-nya aman. Kegiatan sederhana ini memberikan kehangatan yang mendukung sistem kekebalan tubuh dan metabolisme kucing secara keseluruhan. Meskipun kucing dikenal sebagai hewan yang gemar mencari kehangatan, proses berjemur ini tetap memerlukan pengawasan agar anabul tidak mengalami dehidrasi atau sengatan panas (*heatstroke*).
 
 Sebagai pemilik kucing, Anda pasti sering melihat anabul meringkuk di area lantai yang terkena sorotan matahari dari jendela. Kebiasaan ini bukan sekadar mencari kenyamanan tidur, melainkan bagian dari insting alami mereka. Mari kita bahas lebih dalam mengenai manfaat berjemur bagi kucing serta panduan aman melakukannya sehari-hari.
 
@@ -51,10 +51,10 @@ Paparan sinar matahari membantu mengatur jam biologis (ritme sirkadian) kucing. 
 
 Meskipun bermanfaat, membiarkan kucing berjemur sembarangan tanpa pengawasan bisa berbahaya. Berikut adalah langkah-langkah aman yang bisa Anda terapkan di rumah:
 
-### 1. Pilih Waktu Terbaik di Pagi Hari
+### 1. Jam Berapa Sebaiknya Kucing Berjemur?
 Waktu terbaik untuk menjemur kucing adalah antara pukul 07.00 hingga 09.00 pagi. Pada jam-jam ini, sinar matahari belum terlalu terik dan indeks UV masih berada dalam batas aman untuk kulit sensitif anabul. Hindari menjemur kucing di atas pukul 10.00 karena cuaca sudah mulai panas dan berisiko merusak kulit.
 
-### 2. Batasi Durasi Berjemur
+### 2. Berapa Lama Kucing Boleh Berjemur?
 Kucing tidak membutuhkan waktu berjemur yang terlalu lama. Durasi sekitar 10 hingga 15 menit sudah sangat cukup untuk memberikan manfaat kesehatan yang optimal. Jika kucing berjemur sendiri di dekat jendela kaca, pastikan mereka memiliki pilihan untuk berpindah ke area yang teduh jika sudah merasa terlalu gerah.
 
 ### 3. Sediakan Air Minum yang Cukup

@@ -34,7 +34,7 @@ Memilih litter box dan pasir kucing yang tepat adalah langkah krusial dalam mema
 
 ## Mengapa Pemilihan Litter Box dan Pasir Penting untuk Kucing?
 
-Pemilihan litter box dan jenis pasir bukan sekadar masalah preferensi, melainkan berdampak langsung pada kesejahteraan fisik dan mental kucing. Kucing adalah makhluk yang bersih, dan mereka sangat sensitif terhadap kebersihan tempat buang airnya. Litter box yang kotor, berbau, atau tidak nyaman bisa memicu stres, masalah perilaku, bahkan masalah kesehatan seperti infeksi saluran kemih karena menahan buang air.
+Pemilihan litter box dan jenis pasir bukan sekadar masalah preferensi, melainkan berdampak langsung pada kesejahteraan fisik dan mental kucing. Kucing adalah makhluk yang bersih, dan mereka sangat sensitif terhadap kebersihan tempat buang airnya. Litter box yang kotor, berbau, atau tidak nyaman bisa memicu stres, masalah perilaku, bahkan masalah kesehatan seperti [infeksi saluran kemih (ISK)](/kesehatan-hewan/waspada-isk-kucing-kenali-gejala-dan-pencegahannya/) karena menahan buang air.
 
 Selain itu, jenis pasir yang digunakan juga memengaruhi kaki sensitif anabul, kemampuan mereka untuk mengubur kotoran, dan tingkat debu yang mungkin terhirup. Pemilihan yang tepat akan membuat anabul merasa aman dan nyaman saat buang air, sekaligus mempermudah Anda dalam menjaga kebersihan rumah.
 
