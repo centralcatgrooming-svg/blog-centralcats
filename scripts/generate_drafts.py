@@ -90,7 +90,7 @@ WEEKDAY_SECTION = {
 # Dipakai untuk MEWAJIBKAN hewan jadi jangkar query gambar (hindari nyamber foto manusia).
 ANIMAL_EN = {
     "kucing": "cat", "anjing": "dog", "kelinci": "rabbit", "hamster": "hamster",
-    "burung": "bird", "ikan": "fish", "ayam": "chicken", "bebek": "duck",
+    "burung": "bird", "ikan": "fish", "ikan-hias": "aquarium fish", "ayam": "chicken", "bebek": "duck",
     "kambing": "goat", "sapi": "cattle", "domba": "sheep", "kuda": "horse",
     "kura-kura": "turtle", "marmut": "guinea pig", "ular": "snake", "lebah": "bee",
     "landak": "hedgehog", "sugar-glider": "sugar glider", "iguana": "iguana",
@@ -256,6 +256,23 @@ def gemini_article(section, avoid):
         else:
             extra += ("Variasikan hewan yang dibahas — TIDAK harus kucing. Boleh hewan "
                       f"peliharaan lain atau ternak halal ({pool}).\n")
+
+    # Diversifikasi hewan untuk kategori PERAWATAN (Kesehatan & Panduan): kucing
+    # tetap tema utama, tetapi bila sudah terlalu dominan (>65%) WAJIB angkat hewan
+    # peliharaan LAIN — agar blog menjangkau kata kunci non-kucing yang saingannya
+    # lebih sepi (ternak halal TIDAK dipakai di sini, hanya untuk Bisnis Hewan).
+    if section in ("kesehatan-hewan", "panduan-tips"):
+        counts = section_hewan_counts(section)
+        total = sum(counts.values())
+        cat = counts.get("kucing", 0)
+        pool = ", ".join(VARIETY_PETS)
+        if total >= 3 and cat >= total * 0.65:
+            extra += ("PENTING — kategori ini SUDAH didominasi artikel tentang kucing. "
+                      "Kali ini JANGAN pilih kucing. WAJIB angkat HEWAN PELIHARAAN lain "
+                      f"(mis.: {pool}). Set field \"hewan\" ke hewan itu (bukan kucing). "
+                      "Bila artikel bukan tentang kucing, JANGAN memakai subkategori khusus "
+                      "kucing seperti \"Kesehatan Kucing\".\n")
+        # Bila kucing belum dominan, biarkan default (kucing sebagai tema utama blog).
     if section == "berita-tren":
         extra += ("Jika berita/tren ini juga menyangkut PELUANG USAHA/BISNIS, tambahkan tag "
                   "\"bisnis\" pada field tags agar mudah ditemukan lintas-topik.\n")
