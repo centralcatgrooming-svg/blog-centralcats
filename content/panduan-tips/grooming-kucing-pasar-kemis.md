@@ -6,7 +6,7 @@ tags = ["kucing", "grooming", "grooming kucing", "pasar kemis", "tangerang"]
 hewan = ["kucing"]
 summary = "Cari grooming kucing di Pasar Kemis? Simak panduan lengkap manfaat, proses, dan tips memilih salon kucing terpercaya bersama Central Cat's."
 author = "Team Central Cat's"
-# images = ["/images/grooming-kucing-pasar-kemis.webp"]  # TODO: tambahkan foto asli grooming Central Cat's
+images = ["/images/grooming-kucing-pasar-kemis.webp"]
 
 [[faq]]
 q = "Berapa sering kucing perlu grooming di salon?"
