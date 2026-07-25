@@ -75,3 +75,13 @@ jobs:
           BASE_URL: "https://blog.centralcats.id/"
           NEW_FILES: ${{ steps.detect.outputs.files }}
         run: python3 scripts/notify_new_post.py
+
+      # Beri tahu mesin pencari (Bing/Yandex dll) via IndexNow agar artikel baru
+      # cepat ditemukan. Non-blocking: gagal di sini tak menggagalkan job.
+      # Catatan: Google TIDAK mendukung IndexNow (andalkan sitemap utk Google).
+      - name: Ping IndexNow (Bing/Yandex)
+        if: steps.detect.outputs.has == 'true'
+        continue-on-error: true
+        env:
+          NEW_FILES: ${{ steps.detect.outputs.files }}
+        run: python3 scripts/indexnow_ping.py
