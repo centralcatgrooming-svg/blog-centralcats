@@ -53,7 +53,10 @@
         <a class="cc-cta__btn" href="https://app.centralcats.id/booking">Booking Sekarang</a>
       </div>
     </aside>
-    {{ $rel := first 3 (where (where .Site.RegularPages "Section" .Section) "Permalink" "!=" .Permalink) }}
+    {{/* Artikel Terkait: cocokkan berdasar tags/hewan/kategori (config [related] di hugo.toml). */}}
+    {{/* Fallback ke artikel terbaru se-section bila hasil relasi < 3. */}}
+    {{ $rel := first 4 (site.RegularPages.Related .) }}
+    {{ if lt (len $rel) 3 }}{{ $rel = first 4 (where (where .Site.RegularPages "Section" .Section) "Permalink" "!=" .Permalink) }}{{ end }}
     {{ with $rel }}
     <section class="cc-related">
       <h2>Artikel Terkait</h2>

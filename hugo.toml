@@ -6,7 +6,7 @@ timeZone = "Asia/Jakarta"
 enableRobotsTXT = false
 
 [params]
-  description = "Berita, tips kesehatan, dan panduan merawat hewan peliharaan dari Central Cat's."
+  description = "Berita hewan peliharaan, tips kesehatan, dan panduan merawat anabul dari Central Cat's."
   brandColor = "#1e3a8a"
   mainSite = "https://www.centralcats.id"
 
@@ -15,6 +15,25 @@ enableRobotsTXT = false
   category = "categories"
   tag = "tags"
   hewan = "hewan"
+
+# Artikel Terkait (Related Content) — cocokkan artikel berdasar tags, hewan, & kategori
+# agar internal link benar-benar relevan (bukan sekadar artikel terbaru se-section).
+[related]
+  includeNewer = true
+  threshold = 80
+  toLower = true
+  [[related.indices]]
+    name = "tags"
+    weight = 100
+  [[related.indices]]
+    name = "hewan"
+    weight = 80
+  [[related.indices]]
+    name = "categories"
+    weight = 60
+  [[related.indices]]
+    name = "date"
+    weight = 10
 
 # Format output kustom untuk indeks pencarian (menghasilkan search-index.json di root situs)
 [outputFormats.SearchIndex]
