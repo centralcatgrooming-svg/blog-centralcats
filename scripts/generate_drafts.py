@@ -83,14 +83,20 @@ WEEKDAY_SECTION = {
     3: "kesehatan-hewan",   # Kamis
     4: "panduan-tips",      # Jumat
     5: "berita-tren",       # Sabtu
-    6: None,                # Minggu (libur)
+    6: "berita-tren",       # Minggu -> khusus "Ras & Sejarah" (lihat HISTORY_WEEKDAYS)
 }
 
 # Hari yang WAJIB mengangkat KUCING. Medsos (IG + Halaman FB) hanya memuat
-# artikel kucing, sedangkan aturan diversifikasi di bawah justru mendorong ke
-# hewan lain — tanpa hari khusus ini, medsos nyaris tidak pernah terisi.
+# artikel kucing & anjing, sedangkan aturan diversifikasi di bawah justru
+# mendorong ke hewan lain — tanpa hari khusus ini, medsos nyaris tidak terisi.
 # Senin=0 ... Minggu=6.
 CAT_WEEKDAYS = {0, 2, 5}    # Senin (Kesehatan), Rabu (Bisnis), Sabtu (Berita & Tren)
+
+# Minggu = slot evergreen "Ras & Sejarah": asal-usul ras kucing/anjing dan kisah
+# hewan terkenal (mis. Hachiko). Bukan hari kucing murni — anjing juga boleh,
+# dan keduanya sama-sama masuk cakupan medsos.
+HISTORY_WEEKDAYS = {6}
+HISTORY_SUBCAT = "Ras & Sejarah"
 
 # Nama hewan (slug Indonesia) -> kata kunci Inggris untuk pencarian foto Pexels.
 # Dipakai untuk MEWAJIBKAN hewan jadi jangkar query gambar (hindari nyamber foto manusia).
@@ -123,6 +129,7 @@ ATURAN WAJIB:
 7. Tubuh artikel dalam Markdown, sekitar 600-1000 kata: paragraf pembuka, beberapa subjudul, poin praktis, dan kesimpulan singkat. JANGAN menulis judul utama sebagai H1 (#) di dalam body — judul sudah dipakai terpisah.
 8. JAWAB LANGSUNG (penting untuk mesin pencari & asisten AI): paragraf PEMBUKA harus langsung menjawab inti pertanyaan/topik secara ringkas (definisi/jawaban inti dalam 2-3 kalimat pertama), baru diperdalam. Ini membantu artikel dikutip AI seperti ChatGPT, Gemini, dan Google AI Overviews.
 9. Bila wajar, rumuskan judul & beberapa subjudul sebagai PERTANYAAN yang benar-benar diketik orang. Gunakan kalimat ringkas & mudah dipindai.
+9b. AJAK PEMBACA BERINTERAKSI: tutup artikel dengan 1-2 kalimat hangat berisi PERTANYAAN TERBUKA atau ajakan yang memancing pembaca berbagi pengalaman — mis. "Kalau anabul kamu, cara mana yang paling cocok?" atau "Punya pengalaman serupa? Bagikan cerita kamu." Ajak mereka bercerita lewat Instagram @centralcat_official atau WhatsApp Central Cat's (sebut sebagai TEKS biasa, JANGAN dibuat tautan). CATATAN: blog ini TIDAK punya kolom komentar — JANGAN menulis "tulis di kolom komentar" atau menyuruh pembaca berkomentar di bawah artikel. Untuk artikel kesehatan, taruh ajakan ini SEBELUM kalimat penutup saran konsultasi dokter hewan (aturan 4), jangan menggantikannya.
 10. ATURAN HALAL (khusus kategori Bisnis Hewan): topik boleh mencakup hewan peliharaan dan ternak HALAL (mis. ayam, bebek, kambing, sapi, domba, kelinci, ikan, lebah madu). DILARANG KERAS mengangkat konten yang berpusat pada hewan haram dalam Islam (mis. babi/celeng) maupun budidaya/produk turunannya.
 11. CAKUPAN HEWAN: kucing adalah TEMA UTAMA blog (mayoritas artikel), tetapi artikel BOLEH membahas hewan peliharaan lain (anjing, kelinci, hamster, burung, ikan, dll) bila relevan & bermanfaat — tidak harus selalu kucing. Sesuaikan isi dengan hewan yang dibahas.
 12. TAUTAN KE LAYANAN (internal natural, BUKAN keyword stuffing): bila relevan dengan topik, sisipkan 1 (maksimal 2) tautan Markdown ke layanan Central Cat's di dalam body, HANYA dari daftar URL berikut — JANGAN mengarang URL lain, JANGAN menaut ke blog ini sendiri:
@@ -185,6 +192,16 @@ def is_cat_day():
     if force in ("0", "false", "no"):
         return False
     return datetime.datetime.now(WIB).weekday() in CAT_WEEKDAYS
+
+
+def is_history_day():
+    """Hari slot evergreen "Ras & Sejarah" (Minggu). Dipaksa lewat FORCE_HISTORY=1."""
+    force = (os.environ.get("FORCE_HISTORY", "") or "auto").strip().lower()
+    if force in ("1", "true", "yes"):
+        return True
+    if force in ("0", "false", "no"):
+        return False
+    return datetime.datetime.now(WIB).weekday() in HISTORY_WEEKDAYS
 
 
 def slugify(text):
@@ -262,9 +279,17 @@ def gemini_article(section, avoid):
         extra += ("Topik boleh bisnis hewan peliharaan ATAU ternak HALAL "
                   "(ayam, kambing, sapi, domba, kelinci, ikan, dll). DILARANG babi/hewan haram.\n")
 
+    # MINGGU: slot evergreen "Ras & Sejarah" — subkategori dikunci, bukan dipilih
+    # Gemini, agar slot ini benar-benar terisi tiap minggu.
+    history_day = is_history_day() and HISTORY_SUBCAT in SUBCATS[section]
+    if history_day:
+        subcats = [HISTORY_SUBCAT]
+        extra += (f"HARI KHUSUS EVERGREEN — WAJIB pakai subkategori "
+                  f"\"{HISTORY_SUBCAT}\". Jangan pilih subkategori lain.\n")
+
     # HARI KUCING: pasokan wajib untuk auto-post medsos. Semua aturan
     # diversifikasi hewan di bawah dimatikan agar tidak saling bertentangan.
-    cat_day = is_cat_day()
+    cat_day = is_cat_day() and not history_day
     if cat_day:
         extra += ("HARI KHUSUS KUCING — artikel ini WAJIB tentang KUCING. "
                   "Set field \"hewan\" ke [\"kucing\"]. Pilih sudut yang segar dan "
@@ -277,7 +302,7 @@ def gemini_article(section, avoid):
 
     # Dorong VARIASI HEWAN untuk kategori yang mudah jatuh ke "kucing terus".
     # Berita & Tren + Bisnis Hewan boleh mengangkat hewan peliharaan lain atau ternak halal.
-    if not cat_day and section in ("berita-tren", "bisnis-hewan"):
+    if not cat_day and not history_day and section in ("berita-tren", "bisnis-hewan"):
         counts = section_hewan_counts(section)
         total = sum(counts.values())
         cat = counts.get("kucing", 0)

@@ -1,15 +1,16 @@
 name: Auto Draft Artikel (AI)
 
 on:
-  # Jadwal otomatis: Senin–Sabtu pagi WIB. GitHub kadang MENUNDA/MELEWATI cron
+  # Jadwal otomatis: SETIAP HARI pagi WIB. GitHub kadang MENUNDA/MELEWATI cron
   # saat beban tinggi, jadi disediakan 3 waktu berdekatan sebagai cadangan.
   # Guard anti-dobel (job di bawah) menjaga tetap maksimal 1 artikel/hari.
   # Menit ganjil agar tak bentrok beban puncak GitHub di menit :00.
-  # Script memilih kategori sesuai hari (Minggu libur -> tidak jalan).
+  # Script memilih kategori sesuai hari; Minggu = slot evergreen "Ras & Sejarah".
+  # (01:xx UTC = 08:xx WIB pada tanggal yang sama, jadi hari cron = hari WIB.)
   schedule:
-    - cron: "17 1 * * 1-6"   # 08:17 WIB
-    - cron: "37 1 * * 1-6"   # 08:37 WIB (cadangan)
-    - cron: "57 1 * * 1-6"   # 08:57 WIB (cadangan)
+    - cron: "17 1 * * *"   # 08:17 WIB
+    - cron: "37 1 * * *"   # 08:37 WIB (cadangan)
+    - cron: "57 1 * * *"   # 08:57 WIB (cadangan)
   # Bisa juga dijalankan manual dari tab Actions.
   workflow_dispatch:
     inputs:

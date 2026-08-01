@@ -68,6 +68,19 @@ HEAD_RE = re.compile(r'(?m)^(#{2,3})\s+(.+?)\s*$')
 
 # Hashtag tetap milik brand. Sisanya diturunkan dari `tags`/`hewan` artikel.
 BRAND_TAGS = ["centralcats", "groomingkucing", "petshoptangerang", "pasarkemis", "rajeg"]
+
+# Ajakan berkomentar — ditaruh di caption medsos (blog tidak punya kolom komentar).
+# Dipilih deterministik dari slug supaya tiap artikel dapat variasi tetapi
+# posting ulang artikel yang sama menghasilkan caption yang sama.
+ENGAGE = [
+    "{H} kamu pernah mengalami ini juga? Cerita dong di kolom komentar \U0001f447",
+    "Kalau versi kamu, cara mana yang paling ampuh? Tulis di komentar ya \U0001f447",
+    "Masih ada yang mau ditanyakan soal ini? Tulis di kolom komentar, "
+    "nanti kami bantu jawab \U0001f447",
+    "Menurut kamu poin mana yang paling penting? Bagikan pengalamanmu "
+    "di kolom komentar \U0001f447",
+    "Sudah pernah coba yang mana? Ceritakan di kolom komentar \U0001f447",
+]
 MAX_HASHTAGS = 20
 MAX_CAPTION = 2200  # batas keras Instagram
 
@@ -180,7 +193,16 @@ def outline(body, limit=5):
     return items[:limit]
 
 
-def build_caption(title, fm, body, url=None):
+def engage(fm, seed):
+    """Kalimat ajakan berkomentar, dipilih deterministik dari seed (slug)."""
+    animals = [a.lower() for a in list_field("hewan", fm)] or ["kucing"]
+    hewan = "Anjing" if animals[0] == "anjing" else (
+        "Kucing" if animals[0] == "kucing" else "Anabul")
+    idx = sum(ord(c) for c in seed) % len(ENGAGE)
+    return ENGAGE[idx].format(H=hewan)
+
+
+def build_caption(title, fm, body, url=None, seed=""):
     """Caption medsos.
 
     `summary` di front matter sengaja dibatasi ~155 karakter untuk meta
@@ -200,7 +222,9 @@ def build_caption(title, fm, body, url=None):
 
     cta = (f"Baca artikel lengkapnya:\n{url}" if url
            else "Baca artikel lengkapnya di blog kami — tautan ada di bio \U0001f517")
-    tail = [cta + "\nCentral Cat's — grooming, petshop & cat hotel di Pasar Kemis & Rajeg."]
+    # Ajakan komentar ikut di ekor agar TIDAK pernah kena pemotongan caption.
+    tail = [engage(fm, seed or title),
+            cta + "\nCentral Cat's — grooming, petshop & cat hotel di Pasar Kemis & Rajeg."]
     tags = hashtags(fm)
     if tags:
         tail.append(tags)
@@ -465,7 +489,8 @@ def main():
 
         url = article_url(f)
 
-        media_id = publish(image_url, build_caption(title, fm, body))
+        slug = p.stem
+        media_id = publish(image_url, build_caption(title, fm, body, seed=slug))
         if media_id:
             posted += 1
             print(f"[IG] {title} -> media id {media_id} ({url})")
@@ -474,7 +499,8 @@ def main():
         # Catatan: setelan crosspost IG->FB TIDAK berlaku untuk postingan yang
         # diterbitkan lewat Graph API, jadi Halaman harus diposting terpisah.
         if FB_PAGE_ID and fb_token:
-            post_id = post_facebook(image_url, build_caption(title, fm, body, url), fb_token)
+            post_id = post_facebook(
+                image_url, build_caption(title, fm, body, url, seed=slug), fb_token)
             if post_id:
                 posted_fb += 1
                 print(f"[FB] {title} -> post id {post_id} ({url})")
