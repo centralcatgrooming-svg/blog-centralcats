@@ -289,7 +289,14 @@ def gemini_article(section, avoid):
                   "Nusantara): dari mana ras itu berasal, bagaimana berkembang, ciri "
                   "khas fisik & sifatnya, serta perannya dalam budaya. Bila memilih "
                   "subkategori ini, artikel WAJIB tentang kucing — set \"hewan\" ke "
-                  "[\"kucing\"]. Tetap faktual; jangan mengarang klaim sejarah.\n")
+                  "[\"kucing\"]. Tetap faktual; jangan mengarang klaim sejarah.\n"
+                  "Untuk standar ras & sejarahnya, berpedomanlah pada organisasi ras "
+                  "kucing yang diakui — terutama CFA (Cat Fanciers' Association, "
+                  "cfa.org), boleh juga TICA atau FIFe. Sebut nama organisasinya di "
+                  "dalam artikel sebagai rujukan (mis. \"menurut CFA\") bila memang "
+                  "relevan. INGAT aturan 1 & 3: tulis ulang dengan kata-katamu sendiri, "
+                  "JANGAN menyalin teks mereka, dan JANGAN mengarang tahun/angka bila "
+                  "tidak yakin — cukup sampaikan secara umum.\n")
     user = (
         f"Tulis SATU artikel blog original untuk kategori utama \"{SECTIONS[section]}\".\n"
         f"Pilih SATU subkategori dari: {subcats}.\n"
