@@ -49,8 +49,10 @@ except Exception:  # pragma: no cover - hanya bila pillow tak terpasang
 IG_USER_ID = (os.environ.get("IG_USER_ID") or "").strip()
 IG_TOKEN = (os.environ.get("IG_ACCESS_TOKEN") or "").strip()
 FB_PAGE_ID = (os.environ.get("FB_PAGE_ID") or "").strip()  # kosong = lewati Halaman FB
-# Medsos KHUSUS artikel kucing (blog tetap semua hewan — kriterianya sengaja beda).
-ONLY_CAT = (os.environ.get("SOCIAL_ONLY_CAT") or "1").strip().lower() not in ("0", "false", "no")
+# Hewan yang boleh masuk medsos (blog tetap SEMUA hewan — kriterianya sengaja beda).
+# Kosongkan (SOCIAL_ANIMALS="") untuk mematikan filter & posting semua artikel.
+SOCIAL_ANIMALS = [a.strip().lower() for a in
+                  (os.environ.get("SOCIAL_ANIMALS", "kucing,anjing")).split(",") if a.strip()]
 GRAPH_VERSION = (os.environ.get("IG_GRAPH_VERSION") or "v21.0").strip()
 BASE_URL = ((os.environ.get("BASE_URL") or "https://blog.centralcats.id/").strip().rstrip("/")) + "/"
 FILES = [f.strip() for f in (os.environ.get("NEW_FILES") or "").splitlines() if f.strip()]
@@ -432,13 +434,13 @@ def main():
 
         title = field("title", fm) or "Artikel baru"
 
-        # Medsos KHUSUS artikel kucing — kriteria ini SENGAJA beda dari blog,
-        # yang tetap memuat semua hewan (lihat CLAUDE.md Bagian 8 & 13).
+        # Medsos hanya memuat hewan tertentu (kucing & anjing) — kriteria ini
+        # SENGAJA beda dari blog, yang memuat semua hewan (CLAUDE.md Bagian 8 & 13).
         # `hewan` kosong dianggap kucing (default blog, lihat Bagian 3).
         animals = [a.lower() for a in list_field("hewan", fm)] or ["kucing"]
-        if ONLY_CAT and "kucing" not in animals:
-            notice(f"'{title}' bukan artikel kucing (hewan: {', '.join(animals)}) "
-                   "— tidak diposting ke medsos.")
+        if SOCIAL_ANIMALS and not any(a in SOCIAL_ANIMALS for a in animals):
+            notice(f"'{title}' di luar cakupan medsos (hewan: {', '.join(animals)}; "
+                   f"yang diposting: {', '.join(SOCIAL_ANIMALS)}) — dilewati.")
             continue
 
         img_path = first_image(fm)

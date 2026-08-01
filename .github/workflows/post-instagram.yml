@@ -2,8 +2,8 @@ name: Auto-posting Medsos (Instagram + Halaman FB)
 
 # Saat ada artikel BARU ditambahkan ke main (mis. PR auto-draft di-merge),
 # posting 1 foto + caption ke Instagram DAN Halaman Facebook Central Cat's.
-# KHUSUS artikel kucing (SOCIAL_ONLY_CAT) — kriteria medsos sengaja BEDA dari
-# blog, yang tetap memuat semua hewan.
+# KHUSUS artikel kucing & anjing (SOCIAL_ANIMALS) — kriteria medsos sengaja
+# BEDA dari blog, yang tetap memuat semua hewan.
 # Pola deteksi artikel baru SAMA dengan notify-new-post.yml (status A = ditambahkan),
 # supaya artikel lama yang disunting tidak diposting ulang.
 #
@@ -90,7 +90,7 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           FB_PAGE_ID: "112817513877801"   # Halaman centralcat_official (ID publik)
-          SOCIAL_ONLY_CAT: "1"            # medsos khusus artikel kucing; blog tetap semua hewan
+          SOCIAL_ANIMALS: "kucing,anjing" # medsos khusus 2 hewan ini; blog tetap semua hewan
           BASE_URL: "https://blog.centralcats.id/"
           NEW_FILES: ${{ steps.detect.outputs.files }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

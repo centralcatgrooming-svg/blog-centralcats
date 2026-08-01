@@ -70,7 +70,7 @@ SUBCATS = {
     "kesehatan-hewan": ["Kesehatan Kucing", "Nutrisi & Makanan",
                         "Penyakit & Pencegahan", "Grooming & Perawatan"],
     "panduan-tips": ["Panduan Pemula", "Perawatan Harian"],
-    "berita-tren": ["Tren & Lifestyle", "Event & Komunitas", "Ras & Sejarah Kucing"],
+    "berita-tren": ["Tren & Lifestyle", "Event & Komunitas", "Ras & Sejarah"],
     "bisnis-hewan": ["Peluang Usaha & Waralaba", "Tips Petshop & Grooming",
                      "Ternak & Budidaya (Halal)", "Industri & Pasar"],
 }
@@ -85,6 +85,12 @@ WEEKDAY_SECTION = {
     5: "berita-tren",       # Sabtu
     6: None,                # Minggu (libur)
 }
+
+# Hari yang WAJIB mengangkat KUCING. Medsos (IG + Halaman FB) hanya memuat
+# artikel kucing, sedangkan aturan diversifikasi di bawah justru mendorong ke
+# hewan lain — tanpa hari khusus ini, medsos nyaris tidak pernah terisi.
+# Senin=0 ... Minggu=6.
+CAT_WEEKDAYS = {0, 2, 5}    # Senin (Kesehatan), Rabu (Bisnis), Sabtu (Berita & Tren)
 
 # Nama hewan (slug Indonesia) -> kata kunci Inggris untuk pencarian foto Pexels.
 # Dipakai untuk MEWAJIBKAN hewan jadi jangkar query gambar (hindari nyamber foto manusia).
@@ -111,6 +117,7 @@ ATURAN WAJIB:
 2. Bahasa Indonesia yang hangat, ramah, jelas, dan mudah dipahami pemilik kucing awam. Boleh memakai istilah "anabul".
 3. AKURAT. JANGAN mengarang statistik, angka, persentase, hasil studi, atau kutipan sumber. Jika tidak yakin pada sebuah fakta, sampaikan secara umum tanpa angka palsu.
 4. Untuk topik KESEHATAN: bersifat edukasi umum saja. JANGAN memberi dosis obat spesifik, diagnosis pasti, atau resep medis. WAJIB menyarankan konsultasi ke dokter hewan untuk kondisi yang butuh penanganan, dan akhiri artikel kesehatan dengan kalimat saran konsultasi dokter hewan.
+4b. SEBUT NARASUMBER/OTORITAS (memperkuat E-E-A-T): bila relevan, sebutkan NAMA lembaga atau profesi yang menjadi rujukan di dalam kalimat — mis. "dokter hewan", "asosiasi ras kucing CFA", "American Kennel Club (AKC)", "WSAVA (asosiasi dokter hewan hewan kecil sedunia)", "AAFP", "FCI", "Kementerian Pertanian", atau "pengalaman tim groomer Central Cat's". Sebut nama lembaganya saja sebagai pedoman — JANGAN mengarang kutipan langsung, nomor halaman, judul studi, tahun terbit, atau statistik dari lembaga itu. Bila tidak yakin sebuah lembaga benar-benar menyatakan hal tersebut, cukup sampaikan sebagai pengetahuan umum tanpa menyebut lembaga.
 5. JANGAN membuat klaim berlebihan atau menyesatkan tentang produk maupun hasil.
 6. SEO: judul jelas & menarik (idealnya <= 60 karakter), ringkasan memikat <= 150 karakter, gunakan subjudul (## dan ###) yang terstruktur, dan kata kunci yang muncul natural — TANPA keyword stuffing.
 7. Tubuh artikel dalam Markdown, sekitar 600-1000 kata: paragraf pembuka, beberapa subjudul, poin praktis, dan kesimpulan singkat. JANGAN menulis judul utama sebagai H1 (#) di dalam body — judul sudah dipakai terpisah.
@@ -165,6 +172,19 @@ def pick_section():
         print(f"(SECTION '{SECTION_OVERRIDE}' tidak dikenal, pakai jadwal hari)", file=sys.stderr)
     today = datetime.datetime.now(WIB).weekday()
     return WEEKDAY_SECTION.get(today)
+
+
+def is_cat_day():
+    """Hari WAJIB kucing (Senin, Rabu, Sabtu) — menjamin pasokan artikel kucing
+    untuk auto-post medsos, yang HANYA memuat artikel kucing (lihat Bagian 13).
+    Hari lain tetap dipakai untuk diversifikasi hewan demi SEO non-kucing.
+    Bisa dipaksa lewat env FORCE_CAT=1 / dimatikan dengan FORCE_CAT=0."""
+    force = (os.environ.get("FORCE_CAT", "") or "auto").strip().lower()
+    if force in ("1", "true", "yes"):
+        return True
+    if force in ("0", "false", "no"):
+        return False
+    return datetime.datetime.now(WIB).weekday() in CAT_WEEKDAYS
 
 
 def slugify(text):
@@ -242,19 +262,32 @@ def gemini_article(section, avoid):
         extra += ("Topik boleh bisnis hewan peliharaan ATAU ternak HALAL "
                   "(ayam, kambing, sapi, domba, kelinci, ikan, dll). DILARANG babi/hewan haram.\n")
 
+    # HARI KUCING: pasokan wajib untuk auto-post medsos. Semua aturan
+    # diversifikasi hewan di bawah dimatikan agar tidak saling bertentangan.
+    cat_day = is_cat_day()
+    if cat_day:
+        extra += ("HARI KHUSUS KUCING — artikel ini WAJIB tentang KUCING. "
+                  "Set field \"hewan\" ke [\"kucing\"]. Pilih sudut yang segar dan "
+                  "belum dibahas; jangan mengulang topik kucing yang sudah ada.\n")
+        if section == "bisnis-hewan":
+            extra += ("Karena kategorinya Bisnis Hewan, angkat sisi USAHA yang "
+                      "berhubungan dengan kucing (mis. petshop, jasa grooming, "
+                      "cat hotel/penitipan, pakan & aksesori kucing, breeding "
+                      "beretika) — bukan ternak.\n")
+
     # Dorong VARIASI HEWAN untuk kategori yang mudah jatuh ke "kucing terus".
     # Berita & Tren + Bisnis Hewan boleh mengangkat hewan peliharaan lain atau ternak halal.
-    if section in ("berita-tren", "bisnis-hewan"):
+    if not cat_day and section in ("berita-tren", "bisnis-hewan"):
         counts = section_hewan_counts(section)
         total = sum(counts.values())
         cat = counts.get("kucing", 0)
         pool = ", ".join(VARIETY_PETS + VARIETY_LIVESTOCK)
-        # Subkategori "Ras & Sejarah Kucing" (khusus berita-tren) SENGAJA dikecualikan
+        # Subkategori "Ras & Sejarah" (khusus berita-tren) SENGAJA dikecualikan
         # dari aturan anti-dominasi kucing: itu jalur evergreen kucing yang memasok
         # konten untuk auto-post medsos (medsos hanya memuat artikel kucing).
         kecuali = ("" if section != "berita-tren" else
-                   " KECUALI bila kamu memilih subkategori \"Ras & Sejarah Kucing\","
-                   " yang memang khusus kucing dan tetap boleh dipilih.")
+                   " KECUALI bila kamu memilih subkategori \"Ras & Sejarah\","
+                   " yang memang khusus kucing/anjing dan tetap boleh dipilih.")
         if total >= 3 and cat >= total * 0.5:
             extra += ("PENTING — kategori ini SUDAH kebanyakan artikel tentang kucing. "
                       "Kali ini JANGAN pilih kucing. WAJIB angkat hewan peliharaan lain "
@@ -268,7 +301,7 @@ def gemini_article(section, avoid):
     # tetap tema utama, tetapi bila sudah terlalu dominan (>65%) WAJIB angkat hewan
     # peliharaan LAIN — agar blog menjangkau kata kunci non-kucing yang saingannya
     # lebih sepi (ternak halal TIDAK dipakai di sini, hanya untuk Bisnis Hewan).
-    if section in ("kesehatan-hewan", "panduan-tips"):
+    if not cat_day and section in ("kesehatan-hewan", "panduan-tips"):
         counts = section_hewan_counts(section)
         total = sum(counts.values())
         cat = counts.get("kucing", 0)
@@ -283,20 +316,27 @@ def gemini_article(section, avoid):
     if section == "berita-tren":
         extra += ("Jika berita/tren ini juga menyangkut PELUANG USAHA/BISNIS, tambahkan tag "
                   "\"bisnis\" pada field tags agar mudah ditemukan lintas-topik.\n")
-        extra += ("Subkategori \"Ras & Sejarah Kucing\" dipakai untuk artikel SEJARAH & "
-                  "ASAL-USUL RAS KUCING DUNIA (mis. Persia, Maine Coon, Anggora Turki, "
-                  "Siam, Sphynx, Bengal, Norwegian Forest, kucing kampung/domestik "
-                  "Nusantara): dari mana ras itu berasal, bagaimana berkembang, ciri "
-                  "khas fisik & sifatnya, serta perannya dalam budaya. Bila memilih "
-                  "subkategori ini, artikel WAJIB tentang kucing — set \"hewan\" ke "
-                  "[\"kucing\"]. Tetap faktual; jangan mengarang klaim sejarah.\n"
-                  "Untuk standar ras & sejarahnya, berpedomanlah pada organisasi ras "
-                  "kucing yang diakui — terutama CFA (Cat Fanciers' Association, "
-                  "cfa.org), boleh juga TICA atau FIFe. Sebut nama organisasinya di "
-                  "dalam artikel sebagai rujukan (mis. \"menurut CFA\") bila memang "
-                  "relevan. INGAT aturan 1 & 3: tulis ulang dengan kata-katamu sendiri, "
-                  "JANGAN menyalin teks mereka, dan JANGAN mengarang tahun/angka bila "
-                  "tidak yakin — cukup sampaikan secara umum.\n")
+        extra += (
+            "Subkategori \"Ras & Sejarah\" dipakai untuk artikel SEJARAH & ASAL-USUL "
+            "RAS KUCING/ANJING DUNIA, atau KISAH HEWAN TERKENAL. Contoh sudut:\n"
+            "- Ras kucing: Persia, Maine Coon, Anggora Turki, Siam, Sphynx, Bengal, "
+            "Norwegian Forest, kucing kampung/domestik Nusantara.\n"
+            "- Ras anjing: Golden Retriever, Akita, Shiba Inu, German Shepherd, "
+            "Poodle, Kintamani (ras asli Indonesia).\n"
+            "- Kisah hewan terkenal: mis. Hachiko (Akita yang menunggu majikannya di "
+            "Stasiun Shibuya), Balto, atau kucing/anjing bersejarah lain.\n"
+            "Bahas asal-usulnya, bagaimana berkembang, ciri khas fisik & sifatnya, "
+            "serta perannya dalam budaya. Artikel subkategori ini WAJIB tentang KUCING "
+            "atau ANJING — set \"hewan\" ke [\"kucing\"] atau [\"anjing\"] sesuai isi. "
+            "Tetap faktual; jangan mengarang klaim sejarah.\n"
+            "Berpedomanlah pada organisasi ras yang diakui dan sebut namanya di dalam "
+            "artikel sebagai rujukan (mis. \"menurut CFA\"): untuk KUCING — CFA (Cat "
+            "Fanciers' Association, cfa.org), TICA, atau FIFe; untuk ANJING — AKC "
+            "(American Kennel Club, akc.org) atau FCI (Federation Cynologique "
+            "Internationale). Untuk sisi sejarah/budaya boleh merujuk museum atau "
+            "lembaga resmi setempat. INGAT aturan 1 & 3: tulis ulang dengan "
+            "kata-katamu sendiri, JANGAN menyalin teks mereka, dan JANGAN mengarang "
+            "tahun/angka bila tidak yakin — cukup sampaikan secara umum.\n")
     user = (
         f"Tulis SATU artikel blog original untuk kategori utama \"{SECTIONS[section]}\".\n"
         f"Pilih SATU subkategori dari: {subcats}.\n"
