@@ -1,0 +1,93 @@
+name: Auto-posting Instagram (Artikel Baru)
+
+# Saat ada artikel BARU ditambahkan ke main (mis. PR auto-draft di-merge),
+# posting 1 foto + caption ke Instagram Central Cat's.
+# Pola deteksi artikel baru SAMA dengan notify-new-post.yml (status A = ditambahkan),
+# supaya artikel lama yang disunting tidak diposting ulang.
+#
+# Workflow ini SENGAJA terpisah dari notify-new-post.yml karena butuh
+# `contents: write` (mengunggah gambar JPEG sebagai release asset) —
+# workflow notifikasi tetap read-only.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/**"
+  # Posting ulang MANUAL (uji): kosongkan `path` -> artikel terbaru,
+  # atau isi path artikel tertentu (mis. content/panduan-tips/xxx.md).
+  workflow_dispatch:
+    inputs:
+      path:
+        description: "Path artikel utk diposting (kosong = artikel terbaru)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write  # perlu untuk membuat/menambah asset di release `ig-images`
+
+jobs:
+  instagram:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # perlu histori untuk diff before..after
+
+      - name: Deteksi artikel baru (file ditambahkan)
+        id: detect
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            IN='${{ github.event.inputs.path }}'
+            if [ -n "$IN" ]; then
+              FILES="$IN"
+            else
+              FILES="$(git log --diff-filter=A --name-only --pretty=format: -- content \
+                       | grep -E '\.md$' | grep -v '_index.md' | head -1)"
+            fi
+          else
+            BEFORE='${{ github.event.before }}'
+            AFTER='${{ github.event.after }}'
+            if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+              BEFORE="$(git rev-parse "${AFTER}^" 2>/dev/null || true)"
+            fi
+            if [ -z "$BEFORE" ]; then
+              FILES="$(git show --name-only --diff-filter=A --format= "$AFTER" -- content || true)"
+            else
+              FILES="$(git diff --name-only --diff-filter=A "$BEFORE" "$AFTER" -- content || true)"
+            fi
+          fi
+          echo "File baru di content/:"
+          echo "$FILES"
+          if [ -n "$(printf '%s' "$FILES" | tr -d '[:space:]')" ]; then
+            echo "has=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has=false" >> "$GITHUB_OUTPUT"
+          fi
+          {
+            echo 'files<<__EOF__'
+            echo "$FILES"
+            echo '__EOF__'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Setup Python
+        if: steps.detect.outputs.has == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Pillow
+        if: steps.detect.outputs.has == 'true'
+        run: pip install --quiet pillow
+
+      # Non-blocking: gagal posting IG tidak boleh menggagalkan apa pun.
+      - name: Posting ke Instagram
+        if: steps.detect.outputs.has == 'true'
+        continue-on-error: true
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          BASE_URL: "https://blog.centralcats.id/"
+          NEW_FILES: ${{ steps.detect.outputs.files }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/post_instagram.py
