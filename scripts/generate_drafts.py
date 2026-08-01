@@ -143,7 +143,15 @@ Balas HANYA satu objek JSON valid dengan struktur:
 - "slug": huruf kecil, kata dipisah tanda hubung, tanpa spasi/tanda baca.
 - "subcategory": pilih SATU dari daftar yang diberikan.
 - "tags": 2-4 tag relevan (huruf kecil).
-- "image_query": 2-4 kata BAHASA INGGRIS berupa OBJEK/ADEGAN KONKRET yang mudah ditemukan di situs foto/ilustrasi (mis. "cat drinking water", "fluffy cat grooming", "dog playing park", "rabbit eating", "chicken farm"). HINDARI istilah abstrak/medis yang tidak punya gambar (JANGAN mis. "urinary tract infection", "nutrition deficiency"). Query HARUS menampilkan HEWAN/SUBJEK UTAMA artikel ini secara konkret (kalau artikelnya tentang kucing pakai kucing, kalau tentang anjing pakai anjing, dst).
+- "image_query": 2-4 kata BAHASA INGGRIS untuk mencari FOTO yang BENAR-BENAR SESUAI ISI ARTIKEL — bukan foto hewan generik. WAJIB menyebut BAGIAN TUBUH, OBJEK, atau ADEGAN yang jadi fokus artikel, bukan cuma nama hewannya. Contoh:
+    * artikel membersihkan telinga kucing -> "cat ear close up" (BUKAN "cute cat")
+    * artikel menyikat gigi kucing -> "cat teeth brushing"
+    * artikel kucing di carrier -> "cat inside carrier"
+    * artikel memotong kuku -> "cat paw claws"
+    * artikel bulu kusut -> "cat fur brushing"
+    * artikel kandang kelinci -> "rabbit in cage"
+  Selalu sertakan nama hewannya di depan. HINDARI istilah abstrak/medis yang tidak punya stok foto (JANGAN mis. "urinary tract infection", "gastrointestinal stasis", "nutrition deficiency") — terjemahkan jadi adegan yang KELIHATAN (mis. untuk artikel penyakit pencernaan kelinci: "rabbit eating hay").
+- "image_query_fallback": 2-3 kata BAHASA INGGRIS, versi LEBIH UMUM dari image_query untuk dipakai bila query spesifik tidak menemukan foto. Tetap relevan & tetap menyebut hewannya (mis. image_query "cat ear close up" -> fallback "cat face close up"; "cat inside carrier" -> "cat travel"). JANGAN sama persis dengan image_query.
 - "hewan": 1-2 nama HEWAN UTAMA yang dibahas artikel, huruf kecil & tunggal (mis. ["kucing"], ["anjing"], ["kelinci"], ["ayam"]). Bila artikel umum/tidak spesifik ke satu hewan, pakai ["kucing"] (tema utama blog). JANGAN memasukkan hewan haram (mis. babi/celeng).
 - "body": Markdown lengkap artikel (JANGAN masukkan FAQ ke body).
 - "faq": 3-5 pasang tanya-jawab; jawaban ringkas 1-3 kalimat, akurat, satu baris. Topik kesehatan: sertakan anjuran dokter hewan bila relevan. JANGAN mengarang angka."""
@@ -157,6 +165,7 @@ RESPONSE_SCHEMA = {
         "tags": {"type": "ARRAY", "items": {"type": "STRING"}},
         "summary": {"type": "STRING"},
         "image_query": {"type": "STRING"},
+        "image_query_fallback": {"type": "STRING"},
         "hewan": {"type": "ARRAY", "items": {"type": "STRING"}},
         "body": {"type": "STRING"},
         "faq": {
@@ -168,7 +177,8 @@ RESPONSE_SCHEMA = {
             },
         },
     },
-    "required": ["title", "slug", "subcategory", "tags", "summary", "image_query", "body", "faq"],
+    "required": ["title", "slug", "subcategory", "tags", "summary", "image_query",
+                 "image_query_fallback", "body", "faq"],
 }
 
 
@@ -455,14 +465,35 @@ def fetch_illustration_pixabay(query, slug):
         return None, None
 
 
-def fetch_image(query, slug):
+def fetch_image(queries, slug):
     """Semua kategori: UTAMAKAN FOTO ASLI (Pexels). Ilustrasi Pixabay hanya
     dipakai sebagai cadangan terakhir bila Pexels tidak punya hasil, supaya
-    setiap artikel tetap punya gambar yang relevan & profesional."""
-    path, credit = fetch_photo_pexels(query, slug)
-    if not path:
-        path, credit = fetch_illustration_pixabay(query, slug)
-    return path, credit
+    setiap artikel tetap punya gambar yang relevan & profesional.
+
+    `queries` = daftar kata kunci dari yang PALING SPESIFIK ke paling umum
+    (mis. "cat ear cleaning" -> "cat ear close up" -> "cat"). Query spesifik
+    dicoba dulu agar foto benar-benar sesuai isi artikel; kalau stok fotonya
+    tidak ada, baru melebar — supaya artikel tetap dapat FOTO, bukan langsung
+    jatuh ke ilustrasi kartun."""
+    seen = []
+    for q in queries:
+        q = (q or "").strip()
+        if not q or q.lower() in seen:
+            continue
+        seen.append(q.lower())
+        path, credit = fetch_photo_pexels(q, slug)
+        if path:
+            print(f"  Foto ketemu dgn query: \"{q}\"", file=sys.stderr)
+            return path, credit
+    # Semua query gagal di Pexels -> ilustrasi (cadangan terakhir).
+    for q in queries:
+        if not (q or "").strip():
+            continue
+        path, credit = fetch_illustration_pixabay(q.strip(), slug)
+        if path:
+            print(f"  (jatuh ke ilustrasi Pixabay, query: \"{q}\")", file=sys.stderr)
+            return path, credit
+    return None, None
 
 
 def fix_escapes(s):
@@ -512,14 +543,29 @@ def write_article(section, data):
 
     # Gambar: WAJIB jangkar HEWAN utama (Inggris) di query agar foto Pexels relevan
     # & tidak nyamber subjek manusia. Bila Gemini sudah menyebut hewannya, query dipakai apa adanya.
-    raw_query = (data.get("image_query") or "").strip()
     animal_en = ANIMAL_EN.get(hewan_list[0], hewan_list[0])
-    if raw_query and re.search(r"\b" + re.escape(animal_en) + r"\b", raw_query.lower()):
-        query = raw_query
-    else:
-        query = (animal_en + " " + raw_query).strip()
-    print(f"  Query gambar: \"{query}\" (hewan: {hewan_list[0]})", file=sys.stderr)
-    img_path, credit = fetch_image(query, slug)
+
+    def _anchor(q):
+        q = (q or "").strip()
+        if not q:
+            return ""
+        if re.search(r"\b" + re.escape(animal_en) + r"\b", q.lower()):
+            return q
+        return (animal_en + " " + q).strip()
+
+    # Bertingkat dari PALING SPESIFIK ke paling umum: query fokus (mis. "cat ear
+    # close up") -> fallback lebih luas -> nama hewan saja. Tujuannya foto benar-
+    # benar sesuai isi artikel, tapi artikel tetap dapat FOTO kalau stok query
+    # spesifik kosong (daripada langsung jatuh ke ilustrasi kartun).
+    queries = [
+        _anchor(data.get("image_query")),
+        _anchor(data.get("image_query_fallback")),
+        animal_en,
+    ]
+    queries = [q for q in queries if q]
+    print(f"  Query gambar (spesifik -> umum): {queries} (hewan: {hewan_list[0]})",
+          file=sys.stderr)
+    img_path, credit = fetch_image(queries, slug)
     if credit:
         print(f"  {credit}", file=sys.stderr)
 
