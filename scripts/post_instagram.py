@@ -58,6 +58,8 @@ RELEASE_TAG = "ig-images"
 
 GRAPH = f"https://graph.facebook.com/{GRAPH_VERSION}"
 FM_RE = re.compile(r'^\+\+\+\s*\n(.*?)\n\+\+\+\s*$', re.S | re.M)
+MD_LINK_RE = re.compile(r'\[([^\]]+)\]\([^)]*\)')
+HEAD_RE = re.compile(r'(?m)^(#{2,3})\s+(.+?)\s*$')
 
 # Hashtag tetap milik brand. Sisanya diturunkan dari `tags`/`hewan` artikel.
 BRAND_TAGS = ["centralcats", "groomingkucing", "petshoptangerang", "pasarkemis", "rajeg"]
@@ -96,9 +98,12 @@ def http_json(url, data=None, headers=None, method=None, timeout=60):
 
 
 # --------------------------------------------------------------- front matter
-def front_matter(text):
+def split_doc(text):
+    """Pisahkan dokumen jadi (front matter, isi artikel)."""
     m = FM_RE.search(text)
-    return m.group(1) if m else ""
+    if not m:
+        return "", text
+    return m.group(1), text[m.end():]
 
 
 def field(name, fm):
@@ -136,22 +141,68 @@ def hashtags(fm):
     return " ".join("#" + t for t in out[:MAX_HASHTAGS])
 
 
-def build_caption(title, summary, fm):
-    """Caption IG. Ingat: link di caption TIDAK bisa diklik -> arahkan ke bio."""
-    parts = [title]
-    if summary:
-        parts.append(summary)
-    parts.append(
-        "Baca artikel lengkapnya di blog kami — tautan ada di bio \U0001f517\n"
-        "Central Cat's — grooming, petshop & cat hotel di Pasar Kemis & Rajeg."
-    )
+def plain(s):
+    """Buang markup markdown ringan agar enak dibaca di caption IG."""
+    s = MD_LINK_RE.sub(r"\1", s)          # [teks](url) -> teks
+    s = re.sub(r"[*_`]+", "", s)
+    return " ".join(s.split())
+
+
+def lede(body, min_len=200):
+    """Paragraf pembuka artikel (gaya answer-first). Ambil paragraf kedua bila
+    yang pertama terlalu pendek, supaya caption tidak terasa nanggung."""
+    paras = []
+    for block in re.split(r"\n\s*\n", body):
+        b = block.strip()
+        # Lewati heading, gambar, shortcode, kutipan, pemisah, dan kredit foto.
+        if (not b or b[0] in "#>!-|" or b.startswith("{{")
+                or b.lower().startswith("*foto")):
+            continue
+        paras.append(plain(b))
+        if sum(len(p) for p in paras) >= min_len or len(paras) >= 2:
+            break
+    return "\n\n".join(paras)
+
+
+def outline(body, limit=5):
+    """Daftar isi ringkas dari heading artikel. Utamakan H3 bila artikel punya
+    langkah bernomor (lebih konkret), selain itu pakai H2."""
+    h2, h3 = [], []
+    for hashes, text in HEAD_RE.findall(body):
+        t = re.sub(r"^\d+[.)]\s*", "", plain(text))
+        (h2 if len(hashes) == 2 else h3).append(t)
+    items = h3 if len(h3) >= 3 else h2
+    return items[:limit]
+
+
+def build_caption(title, fm, body):
+    """Caption IG. Ingat: link di caption TIDAK bisa diklik -> arahkan ke bio.
+
+    `summary` di front matter sengaja dibatasi ~155 karakter untuk meta
+    description SEO, jadi terlalu pendek untuk IG (batas 2200). Caption ini
+    memakai paragraf pembuka artikel + daftar isi, dengan summary sbg cadangan.
+    """
+    head = [title]
+    lead = lede(body) or field("summary", fm)
+    if lead:
+        head.append(lead)
+    items = outline(body)
+    if items:
+        head.append("Yang dibahas:\n" + "\n".join("• " + i for i in items))
+
+    tail = ["Baca artikel lengkapnya di blog kami — tautan ada di bio \U0001f517\n"
+            "Central Cat's — grooming, petshop & cat hotel di Pasar Kemis & Rajeg."]
     tags = hashtags(fm)
     if tags:
-        parts.append(tags)
-    caption = "\n\n".join(parts)
-    if len(caption) > MAX_CAPTION:
-        caption = caption[:MAX_CAPTION - 1].rstrip() + "…"
-    return caption
+        tail.append(tags)
+    tail = "\n\n".join(tail)
+
+    # Potong bagian isi, JANGAN ekornya — CTA & hashtag harus selalu ikut.
+    body_text = "\n\n".join(head)
+    budget = MAX_CAPTION - len(tail) - 2
+    if len(body_text) > budget:
+        body_text = body_text[:budget - 1].rstrip() + "…"
+    return body_text + "\n\n" + tail
 
 
 # --------------------------------------------------------------------- gambar
@@ -337,7 +388,7 @@ def main():
             print(f"  lewati (file tak ada di checkout): {f}")
             continue
 
-        fm = front_matter(p.read_text(encoding="utf-8"))
+        fm, body = split_doc(p.read_text(encoding="utf-8"))
         if re.search(r'(?m)^\s*draft\s*=\s*true', fm):
             print(f"  lewati (draft=true): {f}")
             continue
@@ -363,7 +414,7 @@ def main():
         if not image_url or not is_public(image_url):
             continue
 
-        media_id = publish(image_url, build_caption(title, field("summary", fm), fm))
+        media_id = publish(image_url, build_caption(title, fm, body))
         if media_id:
             posted += 1
             print(f"[POSTING] {title} -> media id {media_id} ({article_url(f)})")
