@@ -48,6 +48,9 @@ except Exception:  # pragma: no cover - hanya bila pillow tak terpasang
 
 IG_USER_ID = (os.environ.get("IG_USER_ID") or "").strip()
 IG_TOKEN = (os.environ.get("IG_ACCESS_TOKEN") or "").strip()
+FB_PAGE_ID = (os.environ.get("FB_PAGE_ID") or "").strip()  # kosong = lewati Halaman FB
+# Medsos KHUSUS artikel kucing (blog tetap semua hewan — kriterianya sengaja beda).
+ONLY_CAT = (os.environ.get("SOCIAL_ONLY_CAT") or "1").strip().lower() not in ("0", "false", "no")
 GRAPH_VERSION = (os.environ.get("IG_GRAPH_VERSION") or "v21.0").strip()
 BASE_URL = ((os.environ.get("BASE_URL") or "https://blog.centralcats.id/").strip().rstrip("/")) + "/"
 FILES = [f.strip() for f in (os.environ.get("NEW_FILES") or "").splitlines() if f.strip()]
@@ -175,12 +178,15 @@ def outline(body, limit=5):
     return items[:limit]
 
 
-def build_caption(title, fm, body):
-    """Caption IG. Ingat: link di caption TIDAK bisa diklik -> arahkan ke bio.
+def build_caption(title, fm, body, url=None):
+    """Caption medsos.
 
     `summary` di front matter sengaja dibatasi ~155 karakter untuk meta
-    description SEO, jadi terlalu pendek untuk IG (batas 2200). Caption ini
-    memakai paragraf pembuka artikel + daftar isi, dengan summary sbg cadangan.
+    description SEO, jadi terlalu pendek untuk medsos. Caption ini memakai
+    paragraf pembuka artikel + daftar isi, dengan summary sbg cadangan.
+
+    `url` diisi HANYA untuk Facebook — di sana tautan bisa diklik. Di Instagram
+    tautan dalam caption TIDAK bisa diklik, jadi diarahkan ke bio.
     """
     head = [title]
     lead = lede(body) or field("summary", fm)
@@ -190,8 +196,9 @@ def build_caption(title, fm, body):
     if items:
         head.append("Yang dibahas:\n" + "\n".join("• " + i for i in items))
 
-    tail = ["Baca artikel lengkapnya di blog kami — tautan ada di bio \U0001f517\n"
-            "Central Cat's — grooming, petshop & cat hotel di Pasar Kemis & Rajeg."]
+    cta = (f"Baca artikel lengkapnya:\n{url}" if url
+           else "Baca artikel lengkapnya di blog kami — tautan ada di bio \U0001f517")
+    tail = [cta + "\nCentral Cat's — grooming, petshop & cat hotel di Pasar Kemis & Rajeg."]
     tags = hashtags(fm)
     if tags:
         tail.append(tags)
@@ -357,6 +364,31 @@ def publish(image_url, caption):
     return res["id"]
 
 
+def page_token():
+    """Pages API butuh token HALAMAN, bukan token system user. Tukar dulu."""
+    s, res = http_json(f"{GRAPH}/{FB_PAGE_ID}?fields=access_token"
+                       f"&access_token={urllib.parse.quote(IG_TOKEN)}")
+    if isinstance(res, dict) and res.get("access_token"):
+        return res["access_token"]
+    warn(f"gagal mengambil token Halaman FB (HTTP {s}): {res}. "
+         "Pastikan token punya izin 'pages_manage_posts' & 'pages_show_list'.")
+    return None
+
+
+def post_facebook(image_url, message, tok):
+    """Posting foto + teks ke Halaman FB. Beda dari IG: tautan BISA diklik."""
+    status, res = http_json(f"{GRAPH}/{FB_PAGE_ID}/photos", data={
+        "url": image_url,
+        "caption": message,
+        "published": "true",
+        "access_token": tok,
+    })
+    if status >= 300 or not isinstance(res, dict) or not res.get("id"):
+        warn(f"gagal posting ke Halaman FB (HTTP {status}): {res}")
+        return None
+    return res.get("post_id") or res["id"]
+
+
 # ---------------------------------------------------------------------- main
 def main():
     if not IG_USER_ID or not IG_TOKEN:
@@ -376,7 +408,12 @@ def main():
     if not release:
         return
 
-    posted = 0
+    # Token Halaman diambil sekali di depan; bila gagal, IG tetap jalan.
+    fb_token = page_token() if FB_PAGE_ID else None
+    if FB_PAGE_ID and not fb_token:
+        notice("posting Halaman Facebook dilewati — Instagram tetap diproses.")
+
+    posted = posted_fb = 0
     for f in FILES:
         parts = pathlib.PurePosixPath(f.replace("\\", "/")).parts
         if (len(parts) < 3 or parts[0] != "content"
@@ -394,10 +431,20 @@ def main():
             continue
 
         title = field("title", fm) or "Artikel baru"
+
+        # Medsos KHUSUS artikel kucing — kriteria ini SENGAJA beda dari blog,
+        # yang tetap memuat semua hewan (lihat CLAUDE.md Bagian 8 & 13).
+        # `hewan` kosong dianggap kucing (default blog, lihat Bagian 3).
+        animals = [a.lower() for a in list_field("hewan", fm)] or ["kucing"]
+        if ONLY_CAT and "kucing" not in animals:
+            notice(f"'{title}' bukan artikel kucing (hewan: {', '.join(animals)}) "
+                   "— tidak diposting ke medsos.")
+            continue
+
         img_path = first_image(fm)
         if not img_path:
             notice(f"'{title}' tidak punya gambar unggulan — dilewati "
-                   "(Instagram wajib pakai gambar).")
+                   "(Instagram & Facebook wajib pakai gambar).")
             continue
 
         raw = load_image_bytes(img_path)
@@ -414,12 +461,23 @@ def main():
         if not image_url or not is_public(image_url):
             continue
 
+        url = article_url(f)
+
         media_id = publish(image_url, build_caption(title, fm, body))
         if media_id:
             posted += 1
-            print(f"[POSTING] {title} -> media id {media_id} ({article_url(f)})")
+            print(f"[IG] {title} -> media id {media_id} ({url})")
 
-    notice(f"selesai. {posted} postingan Instagram terkirim.")
+        # Halaman FB: tautan BISA diklik di sini, jadi permalink ikut dimuat.
+        # Catatan: setelan crosspost IG->FB TIDAK berlaku untuk postingan yang
+        # diterbitkan lewat Graph API, jadi Halaman harus diposting terpisah.
+        if FB_PAGE_ID and fb_token:
+            post_id = post_facebook(image_url, build_caption(title, fm, body, url), fb_token)
+            if post_id:
+                posted_fb += 1
+                print(f"[FB] {title} -> post id {post_id} ({url})")
+
+    notice(f"selesai. {posted} postingan Instagram, {posted_fb} postingan Halaman Facebook.")
 
 
 if __name__ == "__main__":

@@ -70,7 +70,7 @@ SUBCATS = {
     "kesehatan-hewan": ["Kesehatan Kucing", "Nutrisi & Makanan",
                         "Penyakit & Pencegahan", "Grooming & Perawatan"],
     "panduan-tips": ["Panduan Pemula", "Perawatan Harian"],
-    "berita-tren": ["Tren & Lifestyle", "Event & Komunitas"],
+    "berita-tren": ["Tren & Lifestyle", "Event & Komunitas", "Ras & Sejarah Kucing"],
     "bisnis-hewan": ["Peluang Usaha & Waralaba", "Tips Petshop & Grooming",
                      "Ternak & Budidaya (Halal)", "Industri & Pasar"],
 }
@@ -249,10 +249,17 @@ def gemini_article(section, avoid):
         total = sum(counts.values())
         cat = counts.get("kucing", 0)
         pool = ", ".join(VARIETY_PETS + VARIETY_LIVESTOCK)
+        # Subkategori "Ras & Sejarah Kucing" (khusus berita-tren) SENGAJA dikecualikan
+        # dari aturan anti-dominasi kucing: itu jalur evergreen kucing yang memasok
+        # konten untuk auto-post medsos (medsos hanya memuat artikel kucing).
+        kecuali = ("" if section != "berita-tren" else
+                   " KECUALI bila kamu memilih subkategori \"Ras & Sejarah Kucing\","
+                   " yang memang khusus kucing dan tetap boleh dipilih.")
         if total >= 3 and cat >= total * 0.5:
             extra += ("PENTING — kategori ini SUDAH kebanyakan artikel tentang kucing. "
                       "Kali ini JANGAN pilih kucing. WAJIB angkat hewan peliharaan lain "
-                      f"atau ternak halal, mis.: {pool}. Set field \"hewan\" ke hewan itu (bukan kucing).\n")
+                      f"atau ternak halal, mis.: {pool}. Set field \"hewan\" ke hewan itu "
+                      f"(bukan kucing).{kecuali}\n")
         else:
             extra += ("Variasikan hewan yang dibahas — TIDAK harus kucing. Boleh hewan "
                       f"peliharaan lain atau ternak halal ({pool}).\n")
@@ -276,6 +283,13 @@ def gemini_article(section, avoid):
     if section == "berita-tren":
         extra += ("Jika berita/tren ini juga menyangkut PELUANG USAHA/BISNIS, tambahkan tag "
                   "\"bisnis\" pada field tags agar mudah ditemukan lintas-topik.\n")
+        extra += ("Subkategori \"Ras & Sejarah Kucing\" dipakai untuk artikel SEJARAH & "
+                  "ASAL-USUL RAS KUCING DUNIA (mis. Persia, Maine Coon, Anggora Turki, "
+                  "Siam, Sphynx, Bengal, Norwegian Forest, kucing kampung/domestik "
+                  "Nusantara): dari mana ras itu berasal, bagaimana berkembang, ciri "
+                  "khas fisik & sifatnya, serta perannya dalam budaya. Bila memilih "
+                  "subkategori ini, artikel WAJIB tentang kucing — set \"hewan\" ke "
+                  "[\"kucing\"]. Tetap faktual; jangan mengarang klaim sejarah.\n")
     user = (
         f"Tulis SATU artikel blog original untuk kategori utama \"{SECTIONS[section]}\".\n"
         f"Pilih SATU subkategori dari: {subcats}.\n"
