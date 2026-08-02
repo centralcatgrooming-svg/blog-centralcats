@@ -43,7 +43,7 @@ Maine Coon memiliki penampilan fisik yang sangat khas dan mudah dibedakan dari r
 * **Telinga Berumbai (Lynx Tips):** Di ujung telinga mereka terdapat rumbai bulu tipis seperti kucing liar Lynx, yang berfungsi membantu melindungi telinga dari suhu dingin.
 * **Ekor yang Mengembang:** Ekor mereka sangat panjang dan berbulu lebat seperti kemoceng, yang sering mereka lilitkan ke tubuh untuk menghangatkan diri.
 
-Karena bulunya yang sangat tebal dan mudah kusut jika tidak dirawat, Maine Coon membutuhkan perhatian ekstra dalam hal kebersihan. Agar bulu lebatnya selalu sehat dan bebas gimbal, Anda bisa mempercayakan perawatannya pada [layanan grooming Central Cat's](https://www.centralcats.id/layanan) yang ditangani oleh tim profesional.
+Karena bulunya yang sangat tebal dan mudah kusut jika tidak dirawat, Maine Coon membutuhkan perhatian ekstra dalam hal kebersihan. Menyisir secara rutin bukan sekadar merapikan penampilan, tetapi juga menekan risiko [hairball](/kesehatan-hewan/waspada-hairball-kucing-kenali-bahaya-dan-cara-mencegahnya/) dan membantu [mengatasi bulu rontok berlebihan](/panduan-tips/mengatasi-bulu-rontok-berlebihan-kucing-tips-praktis/) yang wajar terjadi pada ras berbulu panjang. Agar bulu lebatnya selalu sehat dan bebas gimbal, Anda bisa mempercayakan perawatannya pada [layanan grooming Central Cat's](https://www.centralcats.id/layanan) yang ditangani oleh tim profesional.
 
 ## Sifat dan Karakter: Mengapa Disebut "Gentle Giant"?
 
@@ -53,7 +53,7 @@ Mereka adalah kucing yang sangat sosial, cerdas, dan aktif bermain. Berbeda deng
 
 ## Perawatan Khusus untuk Maine Coon
 
-Memelihara Maine Coon membutuhkan komitmen ekstra. Selain menyisir bulunya secara rutin, mereka juga membutuhkan makanan berkualitas tinggi yang mendukung pertumbuhan tulang dan sendi mereka yang besar. Karena ukuran tubuhnya yang jumbo, mereka juga memerlukan wadah pasir (litter box) dan ruang gerak yang lebih luas dibanding kucing biasa.
+Memelihara Maine Coon membutuhkan komitmen ekstra. Selain menyisir bulunya secara rutin, mereka juga membutuhkan makanan berkualitas tinggi yang mendukung pertumbuhan tulang dan sendi mereka yang besar. Perlu diingat, bertubuh besar tidak sama dengan boleh kelebihan berat badan — [menjaga berat badan ideal](/kesehatan-hewan/jaga-berat-badan-ideal-kucing-cegah-obesitas-anabul/) justru penting agar sendi mereka tidak menanggung beban berlebih. Karena ukuran tubuhnya yang jumbo, mereka juga memerlukan wadah pasir (litter box) dan ruang gerak yang lebih luas dibanding kucing biasa.
 
 Secara genetik, ras ini memiliki kecenderungan terhadap beberapa masalah kesehatan bawaan seperti gangguan jantung (HCM) atau masalah persendian karena beban tubuhnya. Oleh karena itu, pemeriksaan kesehatan rutin sangat dianjurkan.
 
