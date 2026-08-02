@@ -3,8 +3,23 @@ name: Tambah Gambar Artikel Lama (non-destruktif)
 # Jalankan MANUAL dari tab Actions. Mengambil 1 foto relevan (Pexels, fallback
 # Pixabay) untuk setiap artikel yang BELUM punya field `images`, lalu menyisipkan
 # baris images = [...] TANPA mengubah teks/slug/URL artikel. Output = Pull Request.
+# Bisa juga dipakai untuk MENGGANTI foto SATU artikel yang fotonya keliru:
+# isi `slug` (+ `subjek` bila artikel ras, agar foto diverifikasi Gemini vision).
 on:
   workflow_dispatch:
+    inputs:
+      slug:
+        description: "Ganti foto 1 artikel (slug tanpa .md). Kosong = mode normal"
+        required: false
+        default: ""
+      query:
+        description: "Kata kunci foto (Inggris). Kosong = otomatis dari hewan"
+        required: false
+        default: ""
+      subjek:
+        description: "Subjek wajib utk verifikasi ras, mis. kucing ras Maine Coon"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -27,10 +42,14 @@ jobs:
 
       - name: Tambah gambar ke artikel tanpa gambar
         env:
-          # GEMINI hanya agar import generate_drafts.py lolos (tidak dipakai di sini).
+          # GEMINI dipakai saat `subjek` diisi (verifikasi foto ras), selain itu
+          # hanya agar import generate_drafts.py lolos pengecekan key.
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          FORCE_SLUG: ${{ github.event.inputs.slug }}
+          FORCE_QUERY: ${{ github.event.inputs.query }}
+          FORCE_SUBJECT: ${{ github.event.inputs.subjek }}
         run: python scripts/add_images.py
 
       - name: Buka Pull Request untuk review

@@ -28,6 +28,7 @@ import re
 import io
 import sys
 import json
+import base64
 import datetime
 import pathlib
 
@@ -49,6 +50,9 @@ MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
 NUM = int(os.environ.get("NUM_ARTICLES", "1") or "1")
 SECTION_OVERRIDE = (os.environ.get("SECTION", "") or "").strip()
 MAX_RETRY = 3  # berapa kali coba ulang bila Gemini mengembalikan topik yang sudah ada
+# Berapa kandidat foto Pexels diambil saat verifikasi ras aktif. Hasil teratas
+# sering salah ras, jadi perlu cadangan untuk dicoba satu per satu.
+VERIFY_CANDIDATES = 8
 
 if not GEMINI_KEY:
     sys.exit("GEMINI_API_KEY belum diset (cek GitHub Secrets).")
@@ -152,6 +156,7 @@ Balas HANYA satu objek JSON valid dengan struktur:
     * artikel kandang kelinci -> "rabbit in cage"
   Selalu sertakan nama hewannya di depan. HINDARI istilah abstrak/medis yang tidak punya stok foto (JANGAN mis. "urinary tract infection", "gastrointestinal stasis", "nutrition deficiency") — terjemahkan jadi adegan yang KELIHATAN (mis. untuk artikel penyakit pencernaan kelinci: "rabbit eating hay").
 - "image_query_fallback": 2-3 kata BAHASA INGGRIS, versi LEBIH UMUM dari image_query untuk dipakai bila query spesifik tidak menemukan foto. Tetap relevan & tetap menyebut hewannya (mis. image_query "cat ear close up" -> fallback "cat face close up"; "cat inside carrier" -> "cat travel"). JANGAN sama persis dengan image_query.
+- "image_subject": HANYA untuk subkategori "Ras & Sejarah". Isi nama subjek yang WAJIB terlihat di foto, BAHASA INDONESIA, sebut rasnya lengkap (mis. "kucing ras Maine Coon", "anjing ras Akita"). Foto kandidat akan diperiksa ulang terhadap kalimat ini, jadi tulis apa adanya tanpa kata tambahan. Untuk subkategori lain, kosongkan.
 - "hewan": 1-2 nama HEWAN UTAMA yang dibahas artikel, huruf kecil & tunggal (mis. ["kucing"], ["anjing"], ["kelinci"], ["ayam"]). Bila artikel umum/tidak spesifik ke satu hewan, pakai ["kucing"] (tema utama blog). JANGAN memasukkan hewan haram (mis. babi/celeng).
 - "body": Markdown lengkap artikel (JANGAN masukkan FAQ ke body).
 - "faq": 3-5 pasang tanya-jawab; jawaban ringkas 1-3 kalimat, akurat, satu baris. Topik kesehatan: sertakan anjuran dokter hewan bila relevan. JANGAN mengarang angka."""
@@ -166,6 +171,7 @@ RESPONSE_SCHEMA = {
         "summary": {"type": "STRING"},
         "image_query": {"type": "STRING"},
         "image_query_fallback": {"type": "STRING"},
+        "image_subject": {"type": "STRING"},
         "hewan": {"type": "ARRAY", "items": {"type": "STRING"}},
         "body": {"type": "STRING"},
         "faq": {
@@ -419,24 +425,74 @@ def _save_webp(img_bytes, slug):
     return f"/images/{out.name}"
 
 
-def fetch_photo_pexels(query, slug):
+def verify_photo(img_bytes, subject):
+    """Tanya Gemini (vision): apakah foto ini BENAR-BENAR menampilkan `subject`?
+
+    Ada karena pencarian kata kunci Pexels TIDAK memahami ras: query
+    "cat maine coon" bisa mengembalikan kucing berbulu panjang mana saja
+    (Siberian, Norwegian Forest, domestik) karena penandaan foto stok dibuat
+    pengunggah, bukan juri ras. Untuk artikel slot "Ras & Sejarah" itu bukan
+    sekadar foto kurang nyambung — artikelnya jadi SALAH secara faktual.
+
+    Sengaja FAIL-CLOSED: ragu, ciri ras tak terlihat, atau API error = TOLAK.
+    Artikel tanpa foto jauh lebih baik daripada artikel ras berfoto ras lain.
+    """
+    prompt = (
+        f"Apakah foto ini menampilkan {subject}?\n"
+        "Jawab HANYA satu kata: YA atau TIDAK.\n"
+        "Jawab TIDAK bila kamu ragu, bila hewan di foto tampak dari ras lain, "
+        "bila ciri khas ras tidak terlihat jelas, atau bila tidak ada hewan "
+        "yang dimaksud di foto."
+    )
+    try:
+        r = requests.post(
+            GEMINI_URL,
+            headers={"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"},
+            json={
+                "contents": [{"role": "user", "parts": [
+                    {"inline_data": {"mime_type": "image/jpeg",
+                                     "data": base64.b64encode(img_bytes).decode("ascii")}},
+                    {"text": prompt},
+                ]}],
+                "generationConfig": {"temperature": 0, "maxOutputTokens": 512},
+            },
+            timeout=90,
+        )
+        r.raise_for_status()
+        parts = r.json()["candidates"][0]["content"].get("parts") or []
+        answer = " ".join(p.get("text", "") for p in parts).strip().upper()
+    except Exception as e:
+        print(f"    (verifikasi foto gagal, foto ditolak: {e})", file=sys.stderr)
+        return False
+    ok = answer.startswith("YA")
+    if not ok:
+        print(f"    (foto ditolak verifikasi: jawaban \"{answer[:40]}\")", file=sys.stderr)
+    return ok
+
+
+def fetch_photo_pexels(query, slug, subject=None, candidates=1):
+    """Ambil foto dari Pexels. Bila `subject` diisi, tiap kandidat diverifikasi
+    lewat `verify_photo()` dan yang tidak lolos dilewati — makanya `candidates`
+    (per_page) dinaikkan saat verifikasi aktif, agar ada cadangan untuk dicoba."""
     if not PEXELS_KEY or not query:
         return None, None
     try:
         r = requests.get(
             "https://api.pexels.com/v1/search",
             headers={"Authorization": PEXELS_KEY},
-            params={"query": query, "per_page": 1, "orientation": "landscape"},
+            params={"query": query, "per_page": max(1, candidates),
+                    "orientation": "landscape"},
             timeout=60,
         )
         r.raise_for_status()
         photos = r.json().get("photos", [])
-        if not photos:
-            return None, None
-        p = photos[0]
-        src = p["src"].get("large2x") or p["src"].get("large") or p["src"]["original"]
-        img = requests.get(src, timeout=60).content
-        return _save_webp(img, slug), f"Foto: {p.get('photographer', 'Pexels')} / Pexels"
+        for p in photos:
+            src = p["src"].get("large2x") or p["src"].get("large") or p["src"]["original"]
+            img = requests.get(src, timeout=60).content
+            if subject and not verify_photo(img, subject):
+                continue
+            return _save_webp(img, slug), f"Foto: {p.get('photographer', 'Pexels')} / Pexels"
+        return None, None
     except Exception as e:
         print(f"  (foto Pexels dilewati: {e})", file=sys.stderr)
         return None, None
@@ -465,7 +521,7 @@ def fetch_illustration_pixabay(query, slug):
         return None, None
 
 
-def fetch_image(queries, slug):
+def fetch_image(queries, slug, subject=None, strict=False):
     """Semua kategori: UTAMAKAN FOTO ASLI (Pexels). Ilustrasi Pixabay hanya
     dipakai sebagai cadangan terakhir bila Pexels tidak punya hasil, supaya
     setiap artikel tetap punya gambar yang relevan & profesional.
@@ -474,17 +530,28 @@ def fetch_image(queries, slug):
     (mis. "cat ear cleaning" -> "cat ear close up" -> "cat"). Query spesifik
     dicoba dulu agar foto benar-benar sesuai isi artikel; kalau stok fotonya
     tidak ada, baru melebar — supaya artikel tetap dapat FOTO, bukan langsung
-    jatuh ke ilustrasi kartun."""
+    jatuh ke ilustrasi kartun.
+
+    `subject` = subjek yang WAJIB terlihat (mis. "kucing ras Maine Coon");
+    bila diisi, tiap kandidat foto diverifikasi Gemini vision.
+    `strict`  = artikel ras: lebih baik TANPA gambar daripada salah ras, jadi
+    ilustrasi Pixabay pun tidak dipakai sebagai pelarian."""
     seen = []
     for q in queries:
         q = (q or "").strip()
         if not q or q.lower() in seen:
             continue
         seen.append(q.lower())
-        path, credit = fetch_photo_pexels(q, slug)
+        path, credit = fetch_photo_pexels(
+            q, slug, subject=subject, candidates=VERIFY_CANDIDATES if subject else 1)
         if path:
             print(f"  Foto ketemu dgn query: \"{q}\"", file=sys.stderr)
             return path, credit
+    if strict:
+        # Ilustrasi kartun juga tidak bisa menjamin rasnya benar — lebih baik kosong.
+        print("  (artikel ras: tak ada foto yang lolos verifikasi -> TANPA gambar)",
+              file=sys.stderr)
+        return None, None
     # Semua query gagal di Pexels -> ilustrasi (cadangan terakhir).
     for q in queries:
         if not (q or "").strip():
@@ -562,10 +629,23 @@ def write_article(section, data):
         _anchor(data.get("image_query_fallback")),
         animal_en,
     ]
+
+    # Artikel RAS (slot "Ras & Sejarah"): fotonya WAJIB ras yang dibahas.
+    # Fallback terakhir `animal_en` ("cat") DIBUANG — kalau tidak, artikel
+    # "Sejarah Maine Coon" bisa tampil dengan kucing sembarangan, dan itu
+    # kesalahan faktual, bukan sekadar foto kurang nyambung.
+    is_breed = sub == HISTORY_SUBCAT
+    subject = ""
+    if is_breed:
+        queries = queries[:2]
+        subject = (data.get("image_subject") or "").strip() or data.get("title", "")
+
     queries = [q for q in queries if q]
     print(f"  Query gambar (spesifik -> umum): {queries} (hewan: {hewan_list[0]})",
           file=sys.stderr)
-    img_path, credit = fetch_image(queries, slug)
+    if subject:
+        print(f"  Verifikasi ras aktif — subjek wajib: \"{subject}\"", file=sys.stderr)
+    img_path, credit = fetch_image(queries, slug, subject=subject or None, strict=is_breed)
     if credit:
         print(f"  {credit}", file=sys.stderr)
 
