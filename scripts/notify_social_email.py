@@ -48,10 +48,13 @@ if not items:
     print("Ringkasan pratinjau kosong — email dilewati.")
     sys.exit(0)
 
-# Tombol mengarah ke halaman workflow, tempat "Run workflow" dengan posting: true.
-# Saat panel Media Sosial di POS jadi, ganti tautan ini ke POS.
-aksi = (f"https://github.com/{REPO}/actions/workflows/post-instagram.yml"
-        if REPO else RUN_URL)
+# Tombol utama ke POS Pusat Konten — sama seperti email draf blog, supaya satu
+# pintu dan kebiasaannya konsisten.
+POS_URL = "https://app.centralcats.id/technology-system"
+# Cadangan sementara: selama panel Media Sosial di POS belum ada, penayangan hanya
+# bisa dilakukan lewat "Run workflow" di GitHub. Hapus baris ini begitu panelnya jadi.
+aksi_cadangan = (f"https://github.com/{REPO}/actions/workflows/post-instagram.yml"
+                 if REPO else RUN_URL)
 
 
 def potong(s, n=180):
@@ -99,13 +102,13 @@ html_body = f"""<div style="font-family:Segoe UI,Arial,sans-serif;background:#f5
       </p>
       {kartu}
       <div style="text-align:center;margin-top:18px">
-        <a href="{html.escape(aksi)}" style="display:inline-block;background:#E8793A;color:#ffffff;font-size:14px;font-weight:700;padding:13px 30px;border-radius:50px;text-decoration:none">Tinjau &amp; tayangkan &rarr;</a>
+        <a href="{POS_URL}" style="display:inline-block;background:#E8793A;color:#ffffff;font-size:14px;font-weight:700;padding:13px 30px;border-radius:50px;text-decoration:none">Tinjau di Pusat Konten &rarr;</a>
       </div>
       <p style="margin:16px 0 0;font-size:11px;color:#999;line-height:1.6">
-        Tombol mengarah ke <b>GitHub Actions</b>, bukan POS — panel Media Sosial di
-        Pusat Konten belum tersedia, jadi untuk sekarang penayangan dilakukan di sana:
-        <b>Run workflow</b> &rarr; isi <b>path</b> artikel &rarr; <b>posting: true</b>.<br>
-        Caption Instagram <b>tidak bisa diedit setelah tayang</b> — periksa dulu.
+        Caption Instagram <b>tidak bisa diedit setelah tayang</b> — periksa dulu.<br>
+        <i>Sementara panel Media Sosial di POS belum tersedia, penayangan bisa dilakukan
+        lewat <a href="{html.escape(aksi_cadangan)}" style="color:#999">GitHub Actions</a>
+        (Run workflow &rarr; path &rarr; posting: true).</i>
       </p>
     </div>
     <div style="background:#faf6f1;padding:14px 24px;text-align:center">
