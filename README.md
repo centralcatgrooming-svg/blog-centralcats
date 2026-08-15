@@ -89,6 +89,10 @@ maupun `node_modules/`. Menambah devDependency tidak membebani pengunjung.
 | `post-instagram.yml` | push `main` menyentuh `content/**` | auto-post ke Instagram **dan** Halaman Facebook |
 | `backup.yml` | tiap tanggal 1, 09:00 WIB | arsip ZIP seluruh repo sebagai artifact |
 
+**Draf ditinjau & disetujui di POS "Pusat Konten":**
+**https://app.centralcats.id/technology-system** — bukan di halaman PR GitHub. Halaman itu
+juga tempat memicu **Buat Artikel** (AI) dan **Tulis Manual**.
+
 Deteksi "artikel baru" memakai `git diff --diff-filter=A` — hanya file yang **ditambahkan**,
 bukan editan. Semua otomasi non-blocking: gagal ping/post tidak menggagalkan deploy.
 

@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Buat arsip ZIP
         run: |
@@ -26,7 +26,7 @@ jobs:
           zip -rq "backup-blog-$DATE.zip" . -x '.git/*'
 
       - name: Unggah arsip (bisa diunduh dari halaman run ini)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backup-blog-${{ env.DATE }}
           path: backup-blog-*.zip
