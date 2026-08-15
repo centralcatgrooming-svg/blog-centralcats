@@ -10,3 +10,6 @@ __pycache__/
 
 # Panduan internal Claude Code — jangan publikasikan ke repo publik
 /CLAUDE.md
+
+# Ringkasan sementara pratinjau medsos (dibuat di runner, jangan di-commit)
+preview-summary.json

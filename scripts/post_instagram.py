@@ -78,6 +78,9 @@ try:
 except ValueError:
     CAROUSEL_MAX = 4
 
+# Daftar pratinjau yang terbentuk, dibaca notify_social_email.py di langkah berikutnya.
+SUMMARY_FILE = (os.environ.get("PREVIEW_SUMMARY") or "preview-summary.json").strip()
+
 GRAPH = f"https://graph.facebook.com/{GRAPH_VERSION}"
 FM_RE = re.compile(r'^\+\+\+\s*\n(.*?)\n\+\+\+\s*$', re.S | re.M)
 MD_LINK_RE = re.compile(r'\[([^\]]+)\]\([^)]*\)')
@@ -626,6 +629,7 @@ def main():
             notice("posting Halaman Facebook dilewati — Instagram tetap diproses.")
 
     posted = posted_fb = previewed = 0
+    ringkasan = []  # pratinjau yang terbentuk -> dipakai notify_social_email.py
     for f in FILES:
         parts = pathlib.PurePosixPath(f.replace("\\", "/")).parts
         if (len(parts) < 3 or parts[0] != "content"
@@ -700,7 +704,7 @@ def main():
         caption_fb = build_caption(title, fm, body, url, seed=slug)
 
         if DRY_RUN:
-            if write_preview(release, slug, {
+            entri = {
                 "slug": slug,
                 "path": f,
                 "title": title,
@@ -714,8 +718,10 @@ def main():
                 "hewan": animals,
                 "caption_instagram": caption_ig,
                 "caption_facebook": caption_fb,
-            }):
+            }
+            if write_preview(release, slug, entri):
                 previewed += 1
+                ringkasan.append(entri)
             continue
 
         media_id = publish(image_urls, caption_ig)
@@ -739,6 +745,13 @@ def main():
             delete_asset(release, f"preview-{slug}.json")
 
     if DRY_RUN:
+        # Ditulis ke file supaya langkah email di workflow tahu apa yang harus
+        # diberitahukan. Tanpa ini pratinjau terbentuk diam-diam: panel Media
+        # Sosial di POS belum ada, jadi email adalah satu-satunya saluran yang
+        # benar-benar sampai ke admin.
+        if ringkasan:
+            pathlib.Path(SUMMARY_FILE).write_text(
+                json.dumps(ringkasan, ensure_ascii=False), encoding="utf-8")
         notice(f"pratinjau selesai. {previewed} artikel siap ditinjau di POS. "
                "Belum ada yang diposting.")
     else:

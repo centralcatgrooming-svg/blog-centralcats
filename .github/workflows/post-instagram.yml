@@ -125,3 +125,16 @@ jobs:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python3 scripts/post_instagram.py
+
+      # Beri tahu admin bahwa ada pratinjau menunggu. Tanpa ini pratinjau terbentuk
+      # diam-diam: panel Media Sosial di POS belum ada, jadi email satu-satunya
+      # saluran yang benar-benar sampai. Skrip berhenti sendiri kalau tidak ada
+      # pratinjau baru (mis. saat mode posting, atau artikel di luar SOCIAL_ANIMALS).
+      - name: Email pratinjau medsos (Resend)
+        if: steps.detect.outputs.has == 'true'
+        continue-on-error: true
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 scripts/notify_social_email.py
