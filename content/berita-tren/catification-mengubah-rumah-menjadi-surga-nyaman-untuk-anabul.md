@@ -8,6 +8,9 @@ tags = ["catification", "kucing indoor", "lingkungan kucing", "enrichment"]
 hewan = ["kucing"]
 summary = "Yuk, intip tren 'Catification'! Pelajari cara mengubah rumah menjadi lingkungan yang lebih kaya dan menyenangkan bagi anabul kesayangan Anda, meningkatkan kesejahteraan fisik dan mentalnya."
 images = ["/images/catification-mengubah-rumah-menjadi-surga-nyaman-untuk-anabul.webp"]
+image_query = "cat wall shelf"
+image_query_fallback = "cat scratching post"
+image_subject = ""
 
 [[faq]]
 q = "Apa manfaat utama Catification bagi kucing indoor?"
