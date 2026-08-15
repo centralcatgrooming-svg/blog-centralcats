@@ -76,7 +76,7 @@ jobs:
           commit-message: "Kata kunci gambar dari jalur prompt ChatGPT"
           branch: image-query-prompt/run-${{ github.run_id }}
           delete-branch: true
-          labels: ai-draft
+          labels: chore
           title: "🔑 Kata kunci gambar (jalur ChatGPT) — siap direview"
           body: |
             Menambahkan `image_query`, `image_query_fallback`, dan `image_subject`

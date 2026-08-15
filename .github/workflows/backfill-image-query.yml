@@ -55,7 +55,7 @@ jobs:
           commit-message: "Lengkapi kata kunci gambar artikel lama (non-destruktif)"
           branch: backfill-image-query/run-${{ github.run_id }}
           delete-branch: true
-          labels: ai-draft
+          labels: chore
           title: "🔑 Kata kunci gambar artikel lama — siap direview"
           body: |
             Menambahkan `image_query`, `image_query_fallback`, dan `image_subject`

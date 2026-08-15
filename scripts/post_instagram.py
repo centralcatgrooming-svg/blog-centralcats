@@ -363,6 +363,23 @@ def upload_asset(release, name, blob, content_type="image/jpeg"):
     return None
 
 
+def delete_asset(release, name):
+    """Hapus asset release bernama `name` bila ada.
+
+    Dipakai untuk membuang `preview-<slug>.json` setelah artikelnya BENAR-BENAR
+    tayang. POS membaca daftar asset `preview-*.json` sebagai antrean "menunggu
+    tayang"; tanpa pembersihan ini, antrean itu tak pernah kosong dan artikel
+    yang sudah diposting akan terus tampil seolah masih menunggu.
+    """
+    for a in release.get("assets", []):
+        if a.get("name") == name:
+            gh_api(f"https://api.github.com/repos/{GH_REPO}/releases/assets/{a['id']}",
+                   method="DELETE")
+            print(f"  pratinjau dibersihkan: {name}")
+            return True
+    return False
+
+
 def is_public(url):
     """Pastikan URL bisa diambil TANPA autentikasi (Instagram mengunduhnya sendiri)."""
     try:
@@ -715,6 +732,11 @@ def main():
             if post_id:
                 posted_fb += 1
                 print(f"[FB] {title} -> post id {post_id} ({url})")
+
+        # Sudah tayang -> keluarkan dari antrean POS. Hanya kalau IG berhasil:
+        # kalau gagal, pratinjaunya harus tetap ada supaya bisa dicoba lagi.
+        if media_id:
+            delete_asset(release, f"preview-{slug}.json")
 
     if DRY_RUN:
         notice(f"pratinjau selesai. {previewed} artikel siap ditinjau di POS. "
