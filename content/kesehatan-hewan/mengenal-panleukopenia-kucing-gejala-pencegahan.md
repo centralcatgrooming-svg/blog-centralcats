@@ -5,7 +5,7 @@ draft = false
 author = "Team Central Cat's"
 categories = ["Penyakit & Pencegahan"]
 tags = ["kesehatan kucing", "virus panleukopenia", "penyakit kucing", "tips anabul"]
-hewan = ["k"]
+hewan = ["kucing"]
 summary = "Pelajari bahaya virus panleukopenia pada kucing, gejala klinis yang perlu diwaspadai, cara penularan, dan langkah pencegahan terbaik untuk anabul."
 images = ["/images/mengenal-panleukopenia-kucing-gejala-pencegahan.webp"]
 
