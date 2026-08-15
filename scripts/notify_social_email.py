@@ -102,7 +102,9 @@ html_body = f"""<div style="font-family:Segoe UI,Arial,sans-serif;background:#f5
         <a href="{html.escape(aksi)}" style="display:inline-block;background:#E8793A;color:#ffffff;font-size:14px;font-weight:700;padding:13px 30px;border-radius:50px;text-decoration:none">Tinjau &amp; tayangkan &rarr;</a>
       </div>
       <p style="margin:16px 0 0;font-size:11px;color:#999;line-height:1.6">
-        Jalankan workflow dengan <b>posting: true</b> untuk menayangkan.
+        Tombol mengarah ke <b>GitHub Actions</b>, bukan POS — panel Media Sosial di
+        Pusat Konten belum tersedia, jadi untuk sekarang penayangan dilakukan di sana:
+        <b>Run workflow</b> &rarr; isi <b>path</b> artikel &rarr; <b>posting: true</b>.<br>
         Caption Instagram <b>tidak bisa diedit setelah tayang</b> — periksa dulu.
       </p>
     </div>
