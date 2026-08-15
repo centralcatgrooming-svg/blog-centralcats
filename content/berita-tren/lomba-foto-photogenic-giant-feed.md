@@ -8,6 +8,9 @@ tags = ["lomba foto", "giant feed", "kelinci", "komunitas"]
 hewan = ["kelinci"]
 summary = "Yuk ikuti Lomba Photogenic Giant Feed dan menangkan total hadiah jutaan rupiah dengan membagikan foto keseruanmu bersama kelinci kesayangan!"
 images = ["/images/lomba-foto-photogenic-giant-feed/01.webp"]
+image_query = "rabbit portrait close up"
+image_query_fallback = "cute rabbit"
+image_subject = ""
 
 [[faq]]
 q = "Kapan batas akhir pendaftaran Lomba Photogenic Giant Feed?"

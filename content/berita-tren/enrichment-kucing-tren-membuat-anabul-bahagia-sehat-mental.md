@@ -8,6 +8,9 @@ tags = ["kesejahteraan kucing", "main kucing", "kucing bahagia", "aktivitas kuci
 hewan = ["kucing"]
 summary = "Ingin anabul selalu bahagia dan sehat mental? Mengenal enrichment adalah jawabannya! Pelajari tren terbaru untuk menstimulasi fisik dan mental kucing kesayangan Anda."
 images = ["/images/enrichment-kucing-tren-membuat-anabul-bahagia-sehat-mental.webp"]
+image_query = "cat playing puzzle toy"
+image_query_fallback = "cat indoor play"
+image_subject = ""
 
 [[faq]]
 q = "Apa itu enrichment untuk kucing?"

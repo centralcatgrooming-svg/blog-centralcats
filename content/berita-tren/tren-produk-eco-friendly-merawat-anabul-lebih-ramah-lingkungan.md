@@ -8,6 +8,9 @@ tags = ["eco-friendly", "produk kucing", "perawatan kucing", "lingkungan"]
 hewan = ["kucing"]
 summary = "Ingin merawat anabul sambil menjaga bumi? Tren produk eco-friendly untuk kucing semakin populer! Temukan bagaimana pilihan produk yang berkelanjutan bisa membuat anabul bahagia dan lingkungan tetap lestari."
 images = ["/images/tren-produk-eco-friendly-merawat-anabul-lebih-ramah-lingkungan.webp"]
+image_query = "cat wooden litter box"
+image_query_fallback = "cat litter box"
+image_subject = ""
 
 [[faq]]
 q = "Apa saja contoh produk eco-friendly untuk kucing?"

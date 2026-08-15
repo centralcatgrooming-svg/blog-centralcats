@@ -8,6 +8,9 @@ tags = ["ras kucing", "kucing siam", "sejarah hewan"]
 hewan = ["kucing"]
 summary = "Kenali sejarah kucing Siam, ras anggun asal Thailand yang terkenal cerdas, vokal, dan setia. Pelajari asal-usul dan keunikan fisiknya di sini!"
 images = ["/images/sejarah-kucing-siam-asal-usul-karakter.webp"]
+image_query = "siamese cat blue eyes"
+image_query_fallback = "colorpoint cat"
+image_subject = "Sejarah Kucing Siam: Asal-Usul dan Karakter Unik Anabul"
 
 [[faq]]
 q = "Dari mana asal kucing Siam?"

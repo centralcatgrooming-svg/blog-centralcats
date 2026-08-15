@@ -8,6 +8,9 @@ tags = ["bisnis petshop", "grooming kucing", "tips bisnis"]
 hewan = ["kucing"]
 summary = "Bingung menentukan harga jasa grooming kucing? Pelajari cara menghitung tarif yang tepat, kompetitif, dan menguntungkan untuk bisnis Anda di sini."
 images = ["/images/cara-menentukan-tarif-grooming-kucing.webp"]
+image_query = "cat grooming salon table"
+image_query_fallback = "cat being groomed"
+image_subject = ""
 
 [[faq]]
 q = "Apakah wajar jika tarif grooming kucing galak lebih mahal?"

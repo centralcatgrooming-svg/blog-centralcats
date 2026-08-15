@@ -8,6 +8,9 @@ tags = ["tren kucing", "cat backpack", "aksesoris kucing"]
 hewan = ["kucing"]
 summary = "Tren tas astronot kucing semakin populer untuk membawa anabul jalan-jalan. Namun, apakah tas ini benar-benar aman dan nyaman untuk kucing kesayangan Anda?"
 images = ["/images/tren-tas-astronot-kucing-apakah-aman.webp"]
+image_query = "cat inside backpack carrier"
+image_query_fallback = "cat carrier bag"
+image_subject = ""
 
 [[faq]]
 q = "Apakah tas astronot kucing aman digunakan saat cuaca panas?"

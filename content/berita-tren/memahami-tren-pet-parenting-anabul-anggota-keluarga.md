@@ -8,6 +8,9 @@ tags = ["pet parenting", "tren hewan peliharaan", "kesehatan kucing", "gaya hidu
 hewan = ["kucing"]
 summary = "Fenomena 'pet parenting' mengubah cara kita memandang anabul, dari sekadar hewan peliharaan menjadi anggota keluarga yang setara. Mari selami tren ini dan dampaknya pada perawatan anabul kesayangan Anda."
 images = ["/images/memahami-tren-pet-parenting-anabul-anggota-keluarga.webp"]
+image_query = "cat cuddling with owner"
+image_query_fallback = "cat at home"
+image_subject = ""
 
 [[faq]]
 q = "Apa yang dimaksud dengan pet parenting?"

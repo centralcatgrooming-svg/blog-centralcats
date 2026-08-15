@@ -8,6 +8,9 @@ tags = ["pet tech", "gadget kucing", "anabul modern", "gaya hidup hewan"]
 hewan = ["kucing"]
 summary = "Ingin tahu bagaimana teknologi bisa membuat hidup anabul makin nyaman dan seru? Yuk, intip berbagai gadget canggih yang kini jadi tren untuk para pemilik kucing modern!"
 images = ["/images/teknologi-untuk-anabul-gadget-canggih-tren-masa-kini.webp"]
+image_query = "cat automatic feeder gadget"
+image_query_fallback = "cat smart device"
+image_subject = ""
 
 [[faq]]
 q = "Apakah semua kucing cocok dengan gadget teknologi?"

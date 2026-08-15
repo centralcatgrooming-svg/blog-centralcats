@@ -8,6 +8,9 @@ tags = ["cat show", "ica banjarmasin", "komunitas kucing", "event kucing"]
 hewan = ["kucing"]
 summary = "Kabar gembira untuk Cat Lovers Kalimantan Selatan! Propaganda Cat Show 2026 oleh ICA Banjarmasin segera hadir di Q Mall Banjarbaru pada Agustus 2026."
 images = ["/images/propaganda-cat-show-2026-ica-banjarmasin/01.webp"]
+image_query = "cat show competition judging"
+image_query_fallback = "purebred cat"
+image_subject = ""
 
 [[faq]]
 q = "Kapan dan di mana Propaganda Cat Show 2026 diadakan?"

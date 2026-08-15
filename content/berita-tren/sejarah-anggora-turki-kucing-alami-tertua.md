@@ -8,6 +8,9 @@ tags = ["kucing anggora", "sejarah kucing", "ras kucing", "bisnis"]
 hewan = ["kucing"]
 summary = "Kenali sejarah Anggora Turki, ras kucing alami tertua asal Ankara yang anggun, berbulu sutra, dan sempat menjadi harta karun nasional."
 images = ["/images/sejarah-anggora-turki-kucing-alami-tertua.webp"]
+image_query = "turkish angora white cat"
+image_query_fallback = "white longhair cat"
+image_subject = "Sejarah Anggora Turki: Kucing Alami Tertua yang Menawan"
 
 [[faq]]
 q = "Apakah semua kucing berbulu panjang di Indonesia adalah Anggora Turki?"

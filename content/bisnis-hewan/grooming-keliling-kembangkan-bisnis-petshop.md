@@ -8,6 +8,9 @@ tags = ["bisnis hewan", "grooming kucing", "peluang usaha", "petshop"]
 hewan = ["kucing", "anjing"]
 summary = "Ingin memperluas jangkauan bisnis petshop Anda? Layanan grooming keliling bisa jadi solusi inovatif! Pahami potensi, persiapan, dan cara sukses menjalankannya."
 images = ["/images/grooming-keliling-kembangkan-bisnis-petshop.webp"]
+image_query = "cat grooming mobile van"
+image_query_fallback = "cat grooming service"
+image_subject = ""
 
 [[faq]]
 q = "Apa keuntungan utama grooming keliling bagi pemilik hewan?"

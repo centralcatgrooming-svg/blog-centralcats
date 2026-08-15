@@ -8,6 +8,9 @@ tags = ["kucing", "maine coon", "sejarah kucing", "ras kucing"]
 hewan = ["kucing"]
 summary = "Penasaran dari mana asal-usul kucing Maine Coon yang berbadan raksasa? Yuk, simak sejarah menarik, ciri khas, dan sifat ramah ras legendaris ini!"
 images = ["/images/sejarah-kucing-maine-coon.webp"]
+image_query = "maine coon cat"
+image_query_fallback = "large longhair cat"
+image_subject = "Mengenal Sejarah Maine Coon: Kucing Raksasa yang Lembut"
 
 [[faq]]
 q = "Berapa lama kucing Maine Coon bisa tumbuh hingga mencapai ukuran maksimalnya?"

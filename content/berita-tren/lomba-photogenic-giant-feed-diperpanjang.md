@@ -8,6 +8,9 @@ tags = ["lomba foto", "giant feed", "kelinci", "komunitas kelinci"]
 hewan = ["kelinci"]
 summary = "Kabar gembira! Lomba Photogenic Giant Feed diperpanjang hingga 31 Juli 2026. Yuk, foto bareng kelinci kesayanganmu dan menangkan hadiah jutaan rupiah!"
 images = ["/images/lomba-photogenic-giant-feed-diperpanjang/01.webp"]
+image_query = "rabbit eating from bowl"
+image_query_fallback = "rabbit eating"
+image_subject = ""
 
 [[faq]]
 q = "Sampai kapan pendaftaran Lomba Photogenic Giant Feed diperpanjang?"

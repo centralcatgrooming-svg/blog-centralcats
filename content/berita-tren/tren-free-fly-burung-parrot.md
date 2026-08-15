@@ -8,6 +8,9 @@ tags = ["burung", "hobi", "komunitas", "bisnis"]
 hewan = ["burung"]
 summary = "Tren free fly atau menerbangkan burung parrot di area terbuka kini makin populer di Indonesia, menawarkan hobi seru sekaligus peluang bisnis baru."
 images = ["/images/tren-free-fly-burung-parrot.webp"]
+image_query = "parrot bird flying outdoors"
+image_query_fallback = "parrot bird perched"
+image_subject = ""
 
 [[faq]]
 q = "Apakah semua jenis burung bisa dilatih free fly?"
