@@ -117,6 +117,10 @@ req = urllib.request.Request(
 )
 req.add_header("Authorization", "Bearer " + API_KEY)
 req.add_header("Content-Type", "application/json")
+# WAJIB. Tanpa User-Agent kustom, urllib mengirim "Python-urllib/3.x" dan
+# Cloudflare di depan Resend menolaknya dengan HTTP 403 "error code: 1010"
+# (blokir berdasarkan signature klien). Sama persis dengan notify_draft_email.py.
+req.add_header("User-Agent", "central-cats-blog-automation/1.0")
 try:
     with urllib.request.urlopen(req, timeout=30) as r:
         print(f"Email pratinjau medsos terkirim ({jml} artikel), HTTP {r.status}")
