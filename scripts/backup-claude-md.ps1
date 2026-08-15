@@ -1,14 +1,14 @@
-# backup-claude-md.ps1 — Salin CLAUDE.md blog ke Google Drive.
+# backup-claude-md.ps1 - Salin CLAUDE.md blog ke Google Drive.
 #
 # KENAPA ADA: repo blog ini PUBLIC, jadi CLAUDE.md sengaja masuk .gitignore
 # (isinya App ID Meta, IG user ID, catatan bisnis). Konsekuensinya dokumen acuan
-# terpenting repo ini TIDAK punya riwayat versi dan TIDAK ikut backup git —
+# terpenting repo ini TIDAK punya riwayat versi dan TIDAK ikut backup git -
 # hilang bersama mesin ini kalau tak disalin ke tempat lain.
 #
 # Ini pengulangan pola yang sudah pernah menggigit di repo POS: skrip backup
 # dulu di-.gitignore karena memuat password, lalu HILANG TOTAL saat pindah mesin
 # sementara README-nya tetap mengklaim backup berjalan. Karena itu SKRIP INI
-# ter-track git — yang dirahasiakan cukup ISI CLAUDE.md, bukan cara menyalinnya.
+# ter-track git - yang dirahasiakan cukup ISI CLAUDE.md, bukan cara menyalinnya.
 #
 # Tujuan = folder Google Drive desktop yang tersinkron, sama dengan backup DB POS
 # (scripts/backup-supabase.ps1 di repo central-cats-pos).
@@ -43,7 +43,7 @@ $stamp = Get-Date -Format 'yyyyMMdd-HHmm'
 $out = Join-Path $dest "blog-CLAUDE-$stamp.md"
 Copy-Item $src $out -Force
 
-# Verifikasi ukuran — Drive desktop kadang menulis stub 0 byte saat sync sibuk.
+# Verifikasi ukuran - Drive desktop kadang menulis stub 0 byte saat sync sibuk.
 $a = (Get-Item $src).Length
 $b = (Get-Item $out).Length
 if ($a -ne $b) { throw "Salinan tidak utuh: sumber $a byte, salinan $b byte" }
