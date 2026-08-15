@@ -563,6 +563,67 @@ def fetch_image(queries, slug, subject=None, strict=False):
     return None, None
 
 
+def fetch_photos_bytes(queries, subject=None, count=4, per_query=12):
+    """Ambil hingga `count` foto BERBEDA dari Pexels sebagai bytes mentah.
+
+    Dipakai carousel medsos (scripts/post_instagram.py). Beda dari `fetch_image()`
+    yang mengembalikan SATU path `.webp` di `static/images/`: di sini foto tidak
+    disimpan ke repo sama sekali — bytes-nya langsung dikonversi JPEG lalu
+    dititipkan sebagai asset release `ig-images`. Alasannya foto carousel hanya
+    dipakai medsos, tidak pernah tampil di blog, jadi tak ada gunanya menambah
+    3-4 biner per artikel ke histori git (lihat CLAUDE.md Bagian 8a).
+
+    `queries` bertingkat dari PALING SPESIFIK ke paling umum, sama seperti
+    `fetch_image()`. `subject` mengaktifkan verifikasi Gemini vision untuk SETIAP
+    kandidat — ini yang menjamin foto carousel benar-benar berkaitan dengan isi
+    artikel, bukan sekadar hewan yang sama. Foto yang tidak lolos dibuang, dan
+    lebih baik pulang dengan sedikit foto daripada memaksa penuh dengan foto
+    yang tidak nyambung.
+    """
+    out, seen_ids, seen_q = [], set(), set()
+    if not PEXELS_KEY:
+        return out
+    for q in queries:
+        q = (q or "").strip()
+        if not q or q.lower() in seen_q:
+            continue
+        seen_q.add(q.lower())
+        if len(out) >= count:
+            break
+        try:
+            r = requests.get(
+                "https://api.pexels.com/v1/search",
+                headers={"Authorization": PEXELS_KEY},
+                params={"query": q, "per_page": per_query, "orientation": "landscape"},
+                timeout=60,
+            )
+            r.raise_for_status()
+            photos = r.json().get("photos", [])
+        except Exception as e:
+            print(f"  (Pexels dilewati utk \"{q}\": {e})", file=sys.stderr)
+            continue
+        for p in photos:
+            if len(out) >= count:
+                break
+            pid = p.get("id")
+            if pid in seen_ids:
+                continue
+            src = p["src"].get("large2x") or p["src"].get("large") or p["src"]["original"]
+            try:
+                img = requests.get(src, timeout=60).content
+            except Exception:
+                continue
+            if subject and not verify_photo(img, subject):
+                continue
+            seen_ids.add(pid)
+            out.append({
+                "bytes": img,
+                "credit": f"Foto: {p.get('photographer', 'Pexels')} / Pexels",
+                "query": q,
+            })
+    return out
+
+
 def fix_escapes(s):
     """Gemini kadang men-DOUBLE-escape newline/tab di dalam string JSON
     (mis. menulis "\\n\\n"), sehingga setelah json.loads tersisa literal
@@ -654,6 +715,9 @@ def write_article(section, data):
     body = fix_escapes(data.get("body") or "").strip()
     images_toml = f'"{img_path}"' if img_path else ""
 
+    def _q_esc(s):
+        return " ".join(str(s or "").split()).replace('"', "'").strip()
+
     def _clean(s):
         # buang escape literal (mis. "\n") jadi spasi agar FAQ 1-baris tetap rapi
         s = str(s).replace("\\r\\n", " ").replace("\\n", " ").replace("\\r", " ").replace("\\t", " ")
@@ -676,6 +740,13 @@ def write_article(section, data):
         f"hewan = [{hewan_toml}]\n"
         f'summary = "{summary}"\n'
         f"images = [{images_toml}]\n"
+        # Query gambar DISIMPAN supaya carousel medsos (post_instagram.py) bisa
+        # mencari foto tambahan dengan kata kunci spesifik yang SAMA — bukan
+        # menebak ulang dari judul. Tanpa ini, foto ke-2 dst gampang melenceng
+        # jadi hewan generik. Tidak dipakai template Hugo mana pun.
+        f'image_query = "{_q_esc(queries[0] if queries else "")}"\n'
+        f'image_query_fallback = "{_q_esc(queries[1] if len(queries) > 1 else "")}"\n'
+        f'image_subject = "{_q_esc(subject)}"\n'
         f"{faq_toml}"
         "+++\n\n"
     )

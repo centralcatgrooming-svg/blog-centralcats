@@ -33,6 +33,7 @@ Env:
 import io
 import os
 import re
+import sys
 import json
 import time
 import pathlib
@@ -68,6 +69,14 @@ RELEASE_TAG = "ig-images"
 # TIDAK bisa diedit lewat API setelah tayang (lihat CLAUDE.md Bagian 13), jadi
 # koreksi setelah posting berarti hapus + posting ulang manual.
 DRY_RUN = (os.environ.get("DRY_RUN") or "").strip().lower() in ("1", "true", "yes")
+
+# Jumlah gambar per postingan (1 = perilaku lama, tanpa carousel). Batas keras IG
+# adalah 10; default 4 dipilih supaya carousel tetap padat tanpa memaksa foto stok
+# yang makin melenceng — kandidat relevan biasanya menipis setelah 3-4 foto.
+try:
+    CAROUSEL_MAX = max(1, min(10, int(os.environ.get("CAROUSEL_MAX") or 4)))
+except ValueError:
+    CAROUSEL_MAX = 4
 
 GRAPH = f"https://graph.facebook.com/{GRAPH_VERSION}"
 FM_RE = re.compile(r'^\+\+\+\s*\n(.*?)\n\+\+\+\s*$', re.S | re.M)
@@ -367,30 +376,79 @@ def is_public(url):
 
 
 # ------------------------------------------------------------------- publish
-def publish(image_url, caption):
-    """2 langkah Content Publishing: buat container -> publish."""
-    status, res = http_json(f"{GRAPH}/{IG_USER_ID}/media", data={
-        "image_url": image_url,
-        "caption": caption,
-        "access_token": IG_TOKEN,
-    })
-    if status >= 300 or not isinstance(res, dict) or "id" not in res:
-        warn(f"gagal membuat media container (HTTP {status}): {res}")
-        return None
-    creation_id = res["id"]
-
-    # Tunggu container siap (IG mengunduh gambar dulu). Biasanya cepat.
+def wait_container(creation_id):
+    """Tunggu container siap (IG mengunduh gambarnya dulu). Biasanya cepat."""
     for _ in range(10):
         s, st = http_json(
             f"{GRAPH}/{creation_id}?fields=status_code,status"
             f"&access_token={urllib.parse.quote(IG_TOKEN)}")
         code = st.get("status_code") if isinstance(st, dict) else None
         if code == "FINISHED":
-            break
+            return True
         if code == "ERROR":
             warn(f"container ERROR: {st}")
-            return None
+            return False
         time.sleep(3)
+    return True  # lanjutkan saja; media_publish akan menolak bila memang belum siap
+
+
+def publish(image_urls, caption):
+    """Content Publishing 2 langkah: buat container -> publish.
+
+    Satu gambar  -> container biasa.
+    Banyak gambar -> CAROUSEL: tiap gambar jadi container `is_carousel_item`,
+    lalu digabung ke container `media_type=CAROUSEL`. Batas IG 2-10 item, jadi
+    daftar dipotong di 10; kalau tersisa 1 gambar, otomatis kembali ke pos biasa.
+    """
+    if isinstance(image_urls, str):
+        image_urls = [image_urls]
+    image_urls = [u for u in image_urls if u][:10]
+    if not image_urls:
+        return None
+
+    if len(image_urls) == 1:
+        status, res = http_json(f"{GRAPH}/{IG_USER_ID}/media", data={
+            "image_url": image_urls[0],
+            "caption": caption,
+            "access_token": IG_TOKEN,
+        })
+        if status >= 300 or not isinstance(res, dict) or "id" not in res:
+            warn(f"gagal membuat media container (HTTP {status}): {res}")
+            return None
+        creation_id = res["id"]
+        if not wait_container(creation_id):
+            return None
+    else:
+        children = []
+        for u in image_urls:
+            status, res = http_json(f"{GRAPH}/{IG_USER_ID}/media", data={
+                "image_url": u,
+                "is_carousel_item": "true",
+                "access_token": IG_TOKEN,
+            })
+            if status >= 300 or not isinstance(res, dict) or "id" not in res:
+                warn(f"gagal membuat item carousel (HTTP {status}): {res}")
+                continue
+            if wait_container(res["id"]):
+                children.append(res["id"])
+        # Carousel butuh MINIMAL 2 item. Kalau cuma 1 yang lolos, jangan gagal
+        # total — turunkan jadi postingan foto tunggal.
+        if len(children) < 2:
+            warn(f"hanya {len(children)} item carousel yang siap — "
+                 "turun ke postingan foto tunggal.")
+            return publish(image_urls[:1], caption)
+        status, res = http_json(f"{GRAPH}/{IG_USER_ID}/media", data={
+            "media_type": "CAROUSEL",
+            "children": ",".join(children),
+            "caption": caption,
+            "access_token": IG_TOKEN,
+        })
+        if status >= 300 or not isinstance(res, dict) or "id" not in res:
+            warn(f"gagal membuat container carousel (HTTP {status}): {res}")
+            return None
+        creation_id = res["id"]
+        if not wait_container(creation_id):
+            return None
 
     status, res = http_json(f"{GRAPH}/{IG_USER_ID}/media_publish", data={
         "creation_id": creation_id,
@@ -413,21 +471,103 @@ def page_token():
     return None
 
 
-def post_facebook(image_url, message, tok):
-    """Posting foto + teks ke Halaman FB. Beda dari IG: tautan BISA diklik."""
-    status, res = http_json(f"{GRAPH}/{FB_PAGE_ID}/photos", data={
-        "url": image_url,
-        "caption": message,
-        "published": "true",
-        "access_token": tok,
-    })
+def post_facebook(image_urls, message, tok):
+    """Posting foto + teks ke Halaman FB. Beda dari IG: tautan BISA diklik.
+
+    Satu foto  -> `POST /{page}/photos` langsung terbit (perilaku lama).
+    Banyak foto -> tiap foto diunggah dulu dengan `published=false` (jadi TIDAK
+    muncul sendiri-sendiri di linimasa), lalu id-nya dirangkai ke satu postingan
+    lewat `POST /{page}/feed` + `attached_media`. Ini alur Pages API yang memang
+    berbeda dari carousel IG — tidak ada endpoint yang sama untuk keduanya.
+    """
+    if isinstance(image_urls, str):
+        image_urls = [image_urls]
+    image_urls = [u for u in image_urls if u]
+    if not image_urls:
+        return None
+
+    if len(image_urls) == 1:
+        status, res = http_json(f"{GRAPH}/{FB_PAGE_ID}/photos", data={
+            "url": image_urls[0],
+            "caption": message,
+            "published": "true",
+            "access_token": tok,
+        })
+        if status >= 300 or not isinstance(res, dict) or not res.get("id"):
+            warn(f"gagal posting ke Halaman FB (HTTP {status}): {res}")
+            return None
+        return res.get("post_id") or res["id"]
+
+    media_ids = []
+    for u in image_urls:
+        status, res = http_json(f"{GRAPH}/{FB_PAGE_ID}/photos", data={
+            "url": u,
+            "published": "false",   # jangan terbit sendiri; hanya bahan lampiran
+            "access_token": tok,
+        })
+        if status >= 300 or not isinstance(res, dict) or not res.get("id"):
+            warn(f"gagal mengunggah foto FB (HTTP {status}): {res}")
+            continue
+        media_ids.append(res["id"])
+
+    if not media_ids:
+        return None
+
+    data = {"message": message, "access_token": tok}
+    for i, mid in enumerate(media_ids):
+        data[f"attached_media[{i}]"] = json.dumps({"media_fbid": mid})
+    status, res = http_json(f"{GRAPH}/{FB_PAGE_ID}/feed", data=data)
     if status >= 300 or not isinstance(res, dict) or not res.get("id"):
-        warn(f"gagal posting ke Halaman FB (HTTP {status}): {res}")
+        warn(f"gagal posting multi-foto ke Halaman FB (HTTP {status}): {res}")
         return None
     return res.get("post_id") or res["id"]
 
 
 # ---------------------------------------------------------------------- main
+def extra_photos(fm, animals, want):
+    """Cari `want` foto TAMBAHAN untuk carousel, di luar gambar unggulan artikel.
+
+    Relevansi dijaga dua lapis:
+    1. Kata kunci — memakai `image_query` / `image_query_fallback` yang DISIMPAN
+       generate_drafts.py di front matter (spesifik ke isi artikel, mis.
+       "cat ear close up"), bukan menebak ulang dari judul. Artikel lama yang
+       belum punya field itu jatuh ke nama hewan saja.
+    2. Gemini vision — tiap kandidat dicek `verify_photo()`; yang subjeknya tak
+       terlihat dibuang. Fail-closed: ragu = tolak.
+
+    Lapis 1 menjaga foto nyambung ke TOPIK, lapis 2 menjamin HEWANNYA benar.
+    Kalau hasilnya kurang dari yang diminta, itu disengaja — lebih baik carousel
+    pendek daripada diisi foto yang tidak berkaitan.
+    """
+    if want <= 0:
+        return []
+    try:
+        sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+        import generate_drafts as g
+    except SystemExit as e:   # generate_drafts sys.exit bila GEMINI_API_KEY kosong
+        notice(f"carousel dilewati — {e}")
+        return []
+    except Exception as e:
+        notice(f"carousel dilewati — tidak bisa memuat generate_drafts: {e}")
+        return []
+
+    animal_en = g.ANIMAL_EN.get(animals[0], animals[0])
+    queries = [q for q in (field("image_query", fm),
+                           field("image_query_fallback", fm),
+                           animal_en) if q]
+    # Subjek verifikasi: pakai `image_subject` (artikel ras) bila ada, selain itu
+    # nama hewannya. Ini menjamin HEWAN yang benar terlihat di foto; kaitan ke
+    # topik artikel datang dari kata kunci di atas.
+    subject = field("image_subject", fm) or animals[0]
+    print(f"  carousel: cari {want} foto tambahan, query={queries}, "
+          f"verifikasi subjek \"{subject}\"")
+    try:
+        return g.fetch_photos_bytes(queries, subject=subject, count=want)
+    except Exception as e:
+        warn(f"gagal mengambil foto carousel: {e}")
+        return []
+
+
 def write_preview(release, slug, payload):
     """Titipkan pratinjau sebagai `preview-<slug>.json` di release `ig-images`.
 
@@ -511,10 +651,28 @@ def main():
             warn(f"gagal konversi gambar '{img_path}' ke JPEG: {e}")
             continue
 
-        asset_name = pathlib.PurePosixPath(img_path).stem + ".jpg"
-        image_url = upload_asset(release, asset_name, jpeg)
+        stem = pathlib.PurePosixPath(img_path).stem
+        image_url = upload_asset(release, stem + ".jpg", jpeg)
         if not image_url or not is_public(image_url):
             continue
+
+        # Carousel: gambar unggulan jadi slide pertama, sisanya foto tambahan
+        # yang relevan. Kredit fotografer dikumpulkan untuk ditulis di caption.
+        image_urls = [image_url]
+        credits = []
+        for i, ph in enumerate(extra_photos(fm, animals, CAROUSEL_MAX - 1), start=2):
+            try:
+                j = to_square_jpeg(ph["bytes"])
+            except Exception as e:
+                warn(f"gagal konversi foto carousel #{i}: {e}")
+                continue
+            u = upload_asset(release, f"{stem}-{i}.jpg", j)
+            if u and is_public(u):
+                image_urls.append(u)
+                if ph.get("credit"):
+                    credits.append(ph["credit"])
+        if len(image_urls) > 1:
+            print(f"  carousel siap: {len(image_urls)} gambar")
 
         url = article_url(f)
 
@@ -530,7 +688,12 @@ def main():
                 "path": f,
                 "title": title,
                 "article_url": url,
-                "image_url": image_url,   # JPEG 1080x1080 hasil crop, persis yg akan tayang
+                # JPEG 1080x1080 hasil crop, persis yang akan tayang. `image_url`
+                # dipertahankan (= slide pertama) supaya konsumen lama tak pecah.
+                "image_url": image_url,
+                "image_urls": image_urls,
+                "carousel": len(image_urls) > 1,
+                "photo_credits": credits,
                 "hewan": animals,
                 "caption_instagram": caption_ig,
                 "caption_facebook": caption_fb,
@@ -538,16 +701,17 @@ def main():
                 previewed += 1
             continue
 
-        media_id = publish(image_url, caption_ig)
+        media_id = publish(image_urls, caption_ig)
         if media_id:
             posted += 1
-            print(f"[IG] {title} -> media id {media_id} ({url})")
+            print(f"[IG] {title} -> media id {media_id} "
+                  f"({len(image_urls)} gambar) ({url})")
 
         # Halaman FB: tautan BISA diklik di sini, jadi permalink ikut dimuat.
         # Catatan: setelan crosspost IG->FB TIDAK berlaku untuk postingan yang
         # diterbitkan lewat Graph API, jadi Halaman harus diposting terpisah.
         if FB_PAGE_ID and fb_token:
-            post_id = post_facebook(image_url, caption_fb, fb_token)
+            post_id = post_facebook(image_urls, caption_fb, fb_token)
             if post_id:
                 posted_fb += 1
                 print(f"[FB] {title} -> post id {post_id} ({url})")

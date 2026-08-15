@@ -99,6 +99,11 @@ sebagai `preview-<slug>.json` di release `ig-images`; tidak ada yang tayang samp
 API setelah tayang. Panel Media Sosial di POS masih "Segera Hadir" — sementara ini
 tayangkan manual dari tab Actions setelah membaca pratinjaunya.
 
+**Postingan medsos berupa carousel** (`CAROUSEL_MAX`, default 4 gambar). Foto tambahan dicari
+di Pexels memakai `image_query` yang disimpan di front matter, lalu **tiap kandidat diverifikasi
+Gemini vision** supaya benar-benar berkaitan; yang tidak lolos dibuang. Foto carousel tidak
+di-commit ke repo — hanya jadi asset release.
+
 Deteksi "artikel baru" memakai `git diff --diff-filter=A` — hanya file yang **ditambahkan**,
 bukan editan. Semua otomasi non-blocking: gagal ping/post tidak menggagalkan deploy.
 

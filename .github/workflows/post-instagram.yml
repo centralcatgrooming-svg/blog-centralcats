@@ -94,9 +94,11 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Pillow
+      # `requests` dipakai generate_drafts.py yang di-import untuk mencari foto
+      # tambahan carousel (Pexels + verifikasi Gemini vision).
+      - name: Install Pillow + requests
         if: steps.detect.outputs.has == 'true'
-        run: pip install --quiet pillow
+        run: pip install --quiet pillow requests
 
       # Non-blocking: gagal posting IG tidak boleh menggagalkan apa pun.
       #
@@ -116,4 +118,10 @@ jobs:
           NEW_FILES: ${{ steps.detect.outputs.files }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.posting == 'true') && '0' || '1' }}
+          # Carousel: cari foto tambahan yang relevan (Pexels) & verifikasi tiap
+          # kandidat lewat Gemini vision. GEMINI_API_KEY juga WAJIB ada karena
+          # generate_drafts.py mengeceknya saat di-import (pola sama spt add-images.yml).
+          CAROUSEL_MAX: "4"
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python3 scripts/post_instagram.py
