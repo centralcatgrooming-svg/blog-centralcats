@@ -8,6 +8,9 @@ tags = ["tungau telinga", "kucing sakit", "perawatan telinga", "parasit kucing"]
 hewan = ["kucing"]
 summary = "Tungau telinga adalah masalah umum pada kucing yang bisa menyebabkan gatal parah dan infeksi. Kenali gejala-gejalanya seperti sering menggaruk telinga atau kotoran telinga berwarna gelap, serta pentingnya penanganan yang tepat untuk menjaga kesehatan anabul."
 images = ["/images/waspada-tungau-telinga-kucing-gejala-pencegahan.webp"]
+image_query = "cat ear close up"
+image_query_fallback = "cat scratching ear"
+image_subject = ""
 
 [[faq]]
 q = "Apa penyebab utama tungau telinga pada kucing?"

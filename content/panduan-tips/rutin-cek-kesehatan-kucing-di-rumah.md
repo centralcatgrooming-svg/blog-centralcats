@@ -8,6 +8,9 @@ tags = ["kucing", "kesehatan kucing", "perawatan kucing", "deteksi dini"]
 hewan = ["kucing"]
 summary = "Pemilik anabul wajib tahu cara rutin memeriksa kesehatan kucing di rumah. Kenali tanda-tanda kucing sehat dan waspadai gejala awal masalah agar anabul kesayangan tetap prima dan terhindar dari penyakit serius."
 images = ["/images/rutin-cek-kesehatan-kucing-di-rumah.webp"]
+image_query = "cat health check at home"
+image_query_fallback = "cat being examined"
+image_subject = ""
 
 [[faq]]
 q = "Berapa sering harus mengecek kesehatan kucing di rumah?"

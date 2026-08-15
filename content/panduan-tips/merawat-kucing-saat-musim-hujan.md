@@ -8,6 +8,9 @@ tags = ["perawatan kucing", "tips musim hujan", "kesehatan kucing"]
 hewan = ["kucing"]
 summary = "Pelajari cara praktis merawat kucing saat musim hujan agar anabul kesayangan tetap hangat, aktif, sehat, dan terhindar dari jamur kulit akibat kelembapan tinggi."
 images = ["/images/merawat-kucing-saat-musim-hujan.webp"]
+image_query = "cat indoors rainy window"
+image_query_fallback = "cat by window rain"
+image_subject = ""
 
 [[faq]]
 q = "Apakah boleh memandikan kucing saat musim hujan?"

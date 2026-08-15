@@ -8,6 +8,9 @@ tags = ["kelinci", "perawatan hewan", "kelinci hias"]
 hewan = ["kelinci"]
 summary = "Temukan panduan praktis merawat kelinci hias di rumah mulai dari pakan ideal, kebersihan kandang, hingga menjaga kesehatan mentalnya agar aktif."
 images = ["/images/tips-merawat-kelinci-hias-di-rumah.webp"]
+image_query = "pet rabbit indoor home"
+image_query_fallback = "rabbit close up"
+image_subject = ""
 
 [[faq]]
 q = "Apa makanan utama untuk kelinci hias?"

@@ -8,6 +8,9 @@ tags = ["perawatan kucing", "kesehatan kucing", "tips anabul", "grooming kucing"
 hewan = ["kucing"]
 summary = "Khawatir membersihkan telinga kucing sendiri? Simak panduan aman membersihkan telinga anabul di rumah agar terhindar dari kotoran dan infeksi."
 images = ["/images/tips-aman-membersihkan-telinga-kucing-di-rumah.webp"]
+image_query = "cat ear cleaning cotton"
+image_query_fallback = "cat ear close up"
+image_subject = ""
 
 [[faq]]
 q = "Seberapa sering telinga kucing harus dibersihkan?"

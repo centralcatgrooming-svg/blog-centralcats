@@ -8,6 +8,9 @@ tags = ["kucing", "perawatan kucing", "grooming", "kuku kucing"]
 hewan = ["kucing"]
 summary = "Memotong kuku kucing secara rutin adalah bagian penting dari perawatan anabul untuk menjaga kesehatannya dan mencegah kerusakan perabot. Pelajari panduan lengkapnya agar anabul nyaman dan aman."
 images = ["/images/cara-aman-memotong-kuku-kucing-di-rumah.webp"]
+image_query = "cat paw claws close up"
+image_query_fallback = "cat paw"
+image_subject = ""
 
 [[faq]]
 q = "Seberapa sering sebaiknya saya memotong kuku kucing?"

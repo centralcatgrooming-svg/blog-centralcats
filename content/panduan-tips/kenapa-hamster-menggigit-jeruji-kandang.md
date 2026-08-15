@@ -8,6 +8,9 @@ tags = ["hamster", "perawatan hamster", "tips hewan"]
 hewan = ["hamster"]
 summary = "Temukan penyebab utama hamster suka menggigit jeruji kandang dan cara aman mengatasinya agar hamster kesayangan Anda tetap sehat dan bebas stres."
 images = ["/images/kenapa-hamster-menggigit-jeruji-kandang.webp"]
+image_query = "hamster biting cage bars"
+image_query_fallback = "hamster in wire cage"
+image_subject = ""
 
 [[faq]]
 q = "Apakah normal jika hamster sering menggigit jeruji kandang?"

@@ -8,6 +8,9 @@ tags = ["marmut", "perawatan hewan", "guinea pig"]
 hewan = ["marmut"]
 summary = "Panduan praktis merawat bulu marmut (guinea pig) agar selalu bersih, lembut, bebas kusut, dan tidak bau untuk kesehatan hewan peliharaan Anda."
 images = ["/images/cara-merawat-bulu-marmut-bersih-bebas-kusut-bau.webp"]
+image_query = "guinea pig being brushed"
+image_query_fallback = "guinea pig close up"
+image_subject = ""
 
 [[faq]]
 q = "Seberapa sering bulu marmut berbulu panjang harus disisir?"

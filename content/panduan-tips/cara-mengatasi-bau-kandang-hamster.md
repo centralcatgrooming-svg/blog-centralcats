@@ -8,6 +8,9 @@ tags = ["perawatan hamster", "kandang hamster", "tips hewan"]
 hewan = ["hamster"]
 summary = "Temukan cara mengatasi bau kandang hamster yang menyengat melalui langkah pembersihan praktis, pemilihan alas kandang yang tepat, dan tips aman."
 images = ["/images/cara-mengatasi-bau-kandang-hamster.webp"]
+image_query = "hamster cage with bedding"
+image_query_fallback = "hamster cage"
+image_subject = ""
 
 [[faq]]
 q = "Seberapa sering kandang hamster harus dibersihkan secara total?"

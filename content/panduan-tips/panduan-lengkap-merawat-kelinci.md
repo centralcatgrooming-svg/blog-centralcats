@@ -8,6 +8,9 @@ tags = ["kelinci", "merawat kelinci", "panduan kelinci", "kelinci hias"]
 hewan = ["kelinci"]
 summary = "Panduan lengkap merawat kelinci untuk pemula: dari memilih kelinci sehat, pakan, kandang, kebersihan, hingga menjaga kesehatan agar anabul panjang umur."
 images = ["/images/tips-merawat-kelinci-hias-di-rumah.webp"]
+image_query = "rabbit in home hutch"
+image_query_fallback = "rabbit eating hay"
+image_subject = ""
 
 [[faq]]
 q = "Berapa lama umur kelinci peliharaan?"

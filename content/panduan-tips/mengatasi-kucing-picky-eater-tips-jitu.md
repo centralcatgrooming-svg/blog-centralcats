@@ -8,6 +8,9 @@ tags = ["perawatan kucing", "makanan kucing", "kesehatan kucing"]
 hewan = ["kucing"]
 summary = "Mengatasi kucing yang susah makan atau picky eater membutuhkan kesabaran. Temukan tips jitu dan cara aman membuat anabul kembali nafsu makan di sini."
 images = ["/images/mengatasi-kucing-picky-eater-tips-jitu.webp"]
+image_query = "cat refusing food bowl"
+image_query_fallback = "cat eating from bowl"
+image_subject = ""
 
 [[faq]]
 q = "Berapa lama kucing boleh mogok makan sebelum dianggap berbahaya?"

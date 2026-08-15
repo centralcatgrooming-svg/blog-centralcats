@@ -8,6 +8,9 @@ tags = ["dehidrasi", "kucing", "kesehatan kucing", "perawatan harian"]
 hewan = ["kucing"]
 summary = "Kucing bisa dehidrasi tanpa kita sadari. Kenali tanda-tanda dehidrasi pada anabulmu dan pelajari cara menjaga hidrasinya agar tetap sehat dan aktif setiap hari."
 images = ["/images/waspada-dehidrasi-kucing-kenali-tanda-dan-cara-mencegahnya.webp"]
+image_query = "cat drinking from fountain"
+image_query_fallback = "cat drinking water"
+image_subject = ""
 
 [[faq]]
 q = "Berapa banyak air yang harus diminum kucing setiap hari?"

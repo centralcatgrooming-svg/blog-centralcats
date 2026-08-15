@@ -8,6 +8,9 @@ tags = ["kesehatan kucing", "penyakit ginjal", "perawatan kucing"]
 hewan = ["kucing"]
 summary = "Penyakit ginjal kronis (CKD) adalah salah satu ancaman kesehatan terbesar bagi kucing. Kenali gejala awal dan cara pencegahannya di sini."
 images = ["/images/waspada-ginjal-kronis-kucing.webp"]
+image_query = "senior cat drinking water"
+image_query_fallback = "old cat resting"
+image_subject = ""
 
 [[faq]]
 q = "Apakah penyakit ginjal kronis pada kucing bisa sembuh total?"

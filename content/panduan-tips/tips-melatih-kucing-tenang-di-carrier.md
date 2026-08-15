@@ -8,6 +8,9 @@ tags = ["tips kucing", "perjalanan kucing", "perawatan kucing"]
 hewan = ["kucing"]
 summary = "Pelajari cara melatih kucing agar tenang dan tidak stres saat masuk ke dalam carrier dengan metode desensitisasi bertahap."
 images = ["/images/tips-melatih-kucing-tenang-di-carrier.webp"]
+image_query = "cat inside carrier calm"
+image_query_fallback = "cat carrier"
+image_subject = ""
 
 [[faq]]
 q = "Berapa lama waktu yang dibutuhkan sampai kucing terbiasa dengan carrier?"

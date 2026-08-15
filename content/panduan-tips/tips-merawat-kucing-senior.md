@@ -8,6 +8,9 @@ tags = ["kucing senior", "perawatan kucing", "kesehatan kucing"]
 hewan = ["kucing"]
 summary = "Ketahui cara terbaik merawat kucing senior (usia 7 tahun ke atas) agar tetap aktif, nyaman, dan sehat di rumah melalui penyesuaian lingkungan dan nutrisi."
 images = ["/images/tips-merawat-kucing-senior.webp"]
+image_query = "senior cat resting on bed"
+image_query_fallback = "old cat"
+image_subject = ""
 
 [[faq]]
 q = "Mulai usia berapa kucing disebut senior?"

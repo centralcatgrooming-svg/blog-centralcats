@@ -8,6 +8,9 @@ tags = ["hairball", "kesehatan kucing", "pencernaan kucing", "grooming"]
 hewan = ["kucing"]
 summary = "Hairball, gumpalan bulu di perut anabul, sering dianggap sepele. Padahal bisa sebabkan masalah serius! Ketahui tanda bahaya dan cara mencegahnya agar anabul sehat."
 images = ["/images/waspada-hairball-kucing-kenali-bahaya-dan-cara-mencegahnya.webp"]
+image_query = "cat grooming licking fur"
+image_query_fallback = "cat licking paw"
+image_subject = ""
 
 [[faq]]
 q = "Apa itu hairball pada kucing?"

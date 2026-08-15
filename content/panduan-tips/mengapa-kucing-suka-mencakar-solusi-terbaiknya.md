@@ -8,6 +8,9 @@ tags = ["perilaku kucing", "cakar kucing", "cat scratcher", "perawatan kucing"]
 hewan = ["kucing"]
 summary = "Anabul suka mencakar bukan karena iseng, tapi naluri penting! Pahami alasan di baliknya dan temukan cara tepat menyediakan media cakar agar anabul bahagia & perabot aman."
 images = ["/images/mengapa-kucing-suka-mencakar-solusi-terbaiknya.webp"]
+image_query = "cat using scratching post"
+image_query_fallback = "cat scratching furniture"
+image_subject = ""
 
 [[faq]]
 q = "Kenapa kucing saya mencakar sofa padahal sudah ada tiang cakar?"
