@@ -7,6 +7,9 @@ hewan = ["kucing"]
 summary = "Cari grooming kucing di Pasar Kemis? Simak panduan lengkap manfaat, proses, dan tips memilih salon kucing terpercaya bersama Central Cat's."
 author = "Team Central Cat's"
 images = ["/images/grooming-kucing-pasar-kemis.webp"]
+image_query = "cat grooming salon bath"
+image_query_fallback = "cat being groomed"
+image_subject = ""
 
 [[faq]]
 q = "Berapa sering kucing perlu grooming di salon?"

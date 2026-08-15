@@ -8,6 +8,9 @@ tags = ["kucing", "perawatan kucing", "jerawat kucing"]
 hewan = ["kucing"]
 summary = "Temukan cara aman mengatasi jerawat kucing (feline acne) di rumah, penyebab bintik hitam di dagu anabul, dan kapan harus ke dokter hewan."
 images = ["/images/cara-mengatasi-jerawat-kucing.webp"]
+image_query = "cat chin close up"
+image_query_fallback = "cat face close up"
+image_subject = ""
 
 [[faq]]
 q = "Apakah jerawat kucing bisa menular ke manusia atau hewan lain?"

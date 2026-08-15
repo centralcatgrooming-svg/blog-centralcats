@@ -8,6 +8,9 @@ tags = ["kura-kura", "reptil", "perawatan hewan"]
 hewan = ["kura-kura"]
 summary = "Panduan praktis merawat tempurung kura-kura air agar terhindar dari jamur, lumut, dan penyakit shell rot demi kesehatan reptil kesayangan Anda."
 images = ["/images/tips-merawat-tempurung-kura-kura-air.webp"]
+image_query = "turtle shell close up"
+image_query_fallback = "turtle in water"
+image_subject = ""
 
 [[faq]]
 q = "Apakah boleh menggunakan sabun antiseptik untuk membersihkan tempurung kura-kura?"

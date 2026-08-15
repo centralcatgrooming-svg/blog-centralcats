@@ -7,6 +7,9 @@ tags = ["cacing kucing", "kesehatan kucing", "pencegahan penyakit", "obat cacing
 hewan = ["kucing"]
 summary = "Cacingan adalah masalah kesehatan umum pada kucing yang bisa berbahaya. Yuk, kenali jenis cacing, gejalanya, cara penularan, dan langkah pencegahan efektif agar anabul sehat selalu!"
 images = ["/images/waspada-cacing-pada-kucing-kenali-bahaya-cegah-anabulmu-sakit.webp"]
+image_query = "cat belly close up"
+image_query_fallback = "cat at vet clinic"
+image_subject = ""
 +++
 
 Sebagai pemilik anabul, kita tentu ingin si kucing selalu sehat dan ceria, bukan? Namun, ada satu masalah kesehatan yang seringkali luput dari perhatian, padahal dampaknya bisa sangat serius bagi anabul kesayangan kita: cacingan.

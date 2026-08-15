@@ -8,6 +8,9 @@ tags = ["hamster", "perawatan hamster", "sand bath", "tips hewan"]
 hewan = ["hamster"]
 summary = "Ingin hamster kesayangan tetap bersih dan bebas bau? Jangan dimandikan dengan air! Temukan cara aman memandikan hamster dengan metode mandi pasir."
 images = ["/images/cara-aman-memandikan-hamster-mandi-pasir.webp"]
+image_query = "hamster in sand bath"
+image_query_fallback = "hamster bathing sand"
+image_subject = ""
 
 [[faq]]
 q = "Apakah boleh memakai pasir kucing biasa untuk mandi pasir hamster?"

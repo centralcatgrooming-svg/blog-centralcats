@@ -8,6 +8,9 @@ tags = ["bulu rontok", "perawatan kucing", "grooming", "kesehatan kucing"]
 hewan = ["kucing"]
 summary = "Bulu rontok berlebihan pada anabul bisa bikin khawatir dan rumah kotor. Yuk, kenali penyebabnya dan temukan tips praktis untuk mengatasinya agar kucing tetap sehat!"
 images = ["/images/mengatasi-bulu-rontok-berlebihan-kucing-tips-praktis.webp"]
+image_query = "cat being brushed fur"
+image_query_fallback = "cat shedding fur"
+image_subject = ""
 
 [[faq]]
 q = "Seberapa sering harus menyisir bulu kucing untuk mengurangi kerontokan?"

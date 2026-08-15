@@ -8,6 +8,9 @@ tags = ["litter box", "pasir kucing", "perawatan kucing", "kebersihan"]
 hewan = ["kucing"]
 summary = "Bingung memilih litter box dan pasir kucing yang cocok untuk anabul kesayangan? Artikel ini akan memandu Anda memahami jenis-jenisnya agar kucing nyaman dan rumah tetap bersih dari bau tak sedap."
 images = ["/images/panduan-memilih-litter-box-dan-pasir-kucing-tepat.webp"]
+image_query = "cat litter box with litter"
+image_query_fallback = "cat litter box"
+image_subject = ""
 
 [[faq]]
 q = "Berapa jumlah litter box yang ideal untuk satu kucing?"

@@ -8,6 +8,9 @@ tags = ["tips kucing", "kesehatan kucing", "perawatan kucing"]
 hewan = ["kucing"]
 summary = "Ketahui manfaat luar biasa berjemur di pagi hari bagi kucing kesayangan Anda dan bagaimana cara melakukannya dengan aman agar terhindar dari risiko kepanasan."
 images = ["/images/manfaat-kucing-berjemur-pagi-hari.webp"]
+image_query = "cat sunbathing by window"
+image_query_fallback = "cat in sunlight"
+image_subject = ""
 
 [[faq]]
 q = "Apakah boleh menjemur kucing di siang hari?"

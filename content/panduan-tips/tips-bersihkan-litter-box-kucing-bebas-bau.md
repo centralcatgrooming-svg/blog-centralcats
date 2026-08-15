@@ -8,6 +8,9 @@ tags = ["perawatan kucing", "litter box", "kebersihan kucing"]
 hewan = ["kucing"]
 summary = "Cara membersihkan kotak pasir (litter box) kucing dengan benar agar rumah bebas bau tidak sedap dan anabul terhindar dari penyakit."
 images = ["/images/tips-bersihkan-litter-box-kucing-bebas-bau.webp"]
+image_query = "cleaning cat litter box scoop"
+image_query_fallback = "cat litter box"
+image_subject = ""
 
 [[faq]]
 q = "Seberapa sering saya harus mengganti seluruh pasir di dalam litter box?"

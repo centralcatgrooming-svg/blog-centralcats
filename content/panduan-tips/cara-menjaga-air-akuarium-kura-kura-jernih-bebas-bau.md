@@ -8,6 +8,9 @@ tags = ["kura-kura", "perawatan hewan", "akuarium"]
 hewan = ["kura-kura"]
 summary = "Air akuarium kura-kura Brazil cepat keruh dan bau? Temukan cara praktis menjaga kebersihan air akuarium kura-kura agar tetap jernih dan sehat."
 images = ["/images/cara-menjaga-air-akuarium-kura-kura-jernih-bebas-bau.webp"]
+image_query = "turtle in aquarium water"
+image_query_fallback = "turtle swimming"
+image_subject = ""
 
 [[faq]]
 q = "Seberapa sering air akuarium kura-kura harus diganti?"

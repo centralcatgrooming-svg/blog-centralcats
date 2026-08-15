@@ -7,6 +7,9 @@ tags = ["bahasa tubuh kucing", "perilaku kucing", "komunikasi kucing", "ikatan k
 hewan = ["kucing"]
 summary = "Kucing sering disebut misterius, tapi sebenarnya mereka berkomunikasi lho! Pelajari cara membaca bahasa tubuh anabulmu, mulai dari ekor, telinga, mata, hingga suaranya, agar ikatanmu makin erat."
 images = ["/images/mengenali-bahasa-tubuh-kucing.webp"]
+image_query = "cat tail and ears posture"
+image_query_fallback = "cat body language"
+image_subject = ""
 +++
 
 Sebagai pemilik kucing, kita sering bertanya-tanya, "Apa sih yang anabulku pikirkan?" Kucing memang tidak bisa bicara dengan kata-kata, tapi mereka sangat ekspresif! Melalui berbagai gerakan tubuh, posisi telinga, tatapan mata, hingga jenis suara yang dikeluarkan, kucingmu sebenarnya sedang berusaha berkomunikasi denganmu. Memahami bahasa tubuh kucing adalah kunci untuk membangun ikatan yang lebih dalam dan memastikan anabulmu selalu merasa nyaman dan bahagia.

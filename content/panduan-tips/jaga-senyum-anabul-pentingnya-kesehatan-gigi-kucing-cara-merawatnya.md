@@ -8,6 +8,9 @@ tags = ["kesehatan gigi", "kucing", "perawatan harian", "bau mulut"]
 hewan = ["kucing"]
 summary = "Kesehatan gigi anabul sering terabaikan, padahal dampaknya bisa serius. Kenali pentingnya merawat gigi kucing, tanda masalah, dan tips praktis untuk menjaga gigi si mpus tetap bersih dan sehat."
 images = ["/images/jaga-senyum-anabul-pentingnya-kesehatan-gigi-kucing-cara-merawatnya.webp"]
+image_query = "cat teeth brushing"
+image_query_fallback = "cat open mouth teeth"
+image_subject = ""
 
 [[faq]]
 q = "Bisakah kucing membersihkan giginya sendiri?"
