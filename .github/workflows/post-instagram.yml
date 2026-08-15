@@ -39,6 +39,20 @@ on:
         default: "false"
         type: choice
         options: ["false", "true"]
+      aksi:
+        description: "Tombol panel POS: pratinjau | tayangkan | tolak (buang dari antrean)"
+        required: false
+        default: "pratinjau"
+        type: choice
+        options: ["pratinjau", "tayangkan", "tolak"]
+      caption_ig:
+        description: "Caption Instagram hasil suntingan (kosong = pakai rakitan skrip)"
+        required: false
+        default: ""
+      caption_fb:
+        description: "Caption Facebook hasil suntingan (kosong = pakai rakitan skrip)"
+        required: false
+        default: ""
 
 permissions:
   contents: write  # perlu untuk membuat/menambah asset di release `ig-images`
@@ -117,7 +131,13 @@ jobs:
           BASE_URL: "https://blog.centralcats.id/"
           NEW_FILES: ${{ steps.detect.outputs.files }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.posting == 'true') && '0' || '1' }}
+          # `aksi: tayangkan` setara dengan `posting: true` — dua-duanya diterima
+          # supaya panel POS bisa memakai istilah tombolnya sendiri tanpa
+          # memutus pemanggil lama.
+          DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && (github.event.inputs.posting == 'true' || github.event.inputs.aksi == 'tayangkan')) && '0' || '1' }}
+          AKSI: ${{ github.event.inputs.aksi }}
+          CAPTION_IG: ${{ github.event.inputs.caption_ig }}
+          CAPTION_FB: ${{ github.event.inputs.caption_fb }}
           # Carousel: cari foto tambahan yang relevan (Pexels) & verifikasi tiap
           # kandidat lewat Gemini vision. GEMINI_API_KEY juga WAJIB ada karena
           # generate_drafts.py mengeceknya saat di-import (pola sama spt add-images.yml).

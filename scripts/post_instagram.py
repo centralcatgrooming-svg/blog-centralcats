@@ -70,6 +70,18 @@ RELEASE_TAG = "ig-images"
 # koreksi setelah posting berarti hapus + posting ulang manual.
 DRY_RUN = (os.environ.get("DRY_RUN") or "").strip().lower() in ("1", "true", "yes")
 
+# Tindakan dari panel POS: pratinjau (default) | tayangkan | tolak.
+# `tolak` membuang pratinjau dari antrean tanpa memposting apa pun.
+AKSI = (os.environ.get("AKSI") or "").strip().lower()
+if AKSI == "tolak":
+    DRY_RUN = False   # bukan mode pratinjau; ditangani terpisah di main()
+
+# Caption hasil SUNTINGAN dari panel POS. Kosong = pakai caption yang dirakit
+# skrip. Ini satu-satunya jalan tombol "Edit" bisa berfungsi: caption IG tak bisa
+# diubah lewat API setelah tayang, jadi penyuntingan HARUS terjadi sebelum publish.
+CAPTION_IG = os.environ.get("CAPTION_IG") or ""
+CAPTION_FB = os.environ.get("CAPTION_FB") or ""
+
 # Jumlah gambar per postingan (1 = perilaku lama, tanpa carousel). Batas keras IG
 # adalah 10; default 4 dipilih supaya carousel tetap padat tanpa memaksa foto stok
 # yang makin melenceng — kandidat relevan biasanya menipis setelah 3-4 foto.
@@ -628,7 +640,7 @@ def main():
         if not fb_token:
             notice("posting Halaman Facebook dilewati — Instagram tetap diproses.")
 
-    posted = posted_fb = previewed = 0
+    posted = posted_fb = previewed = ditolak = 0
     ringkasan = []  # pratinjau yang terbentuk -> dipakai notify_social_email.py
     for f in FILES:
         parts = pathlib.PurePosixPath(f.replace("\\", "/")).parts
@@ -639,6 +651,17 @@ def main():
         p = pathlib.Path(f)
         if not p.exists():
             print(f"  lewati (file tak ada di checkout): {f}")
+            continue
+
+        # TOLAK: cukup buang pratinjau dari antrean. Ditangani paling awal supaya
+        # tidak sempat mengunduh foto atau memanggil Gemini sama sekali.
+        if AKSI == "tolak":
+            if delete_asset(release, f"preview-{p.stem}.json"):
+                ditolak += 1
+                notice(f"'{p.stem}' ditolak — pratinjau dibuang, "
+                       "tidak ada yang diposting.")
+            else:
+                notice(f"'{p.stem}' tidak ada di antrean pratinjau.")
             continue
 
         fm, body = split_doc(p.read_text(encoding="utf-8"))
@@ -707,8 +730,12 @@ def main():
         slug = p.stem
         # Caption dibangun sekali di sini supaya yang DITINJAU di POS benar-benar
         # sama dengan yang nanti diposting (seed = slug, jadi deterministik).
-        caption_ig = build_caption(title, fm, body, seed=slug)
-        caption_fb = build_caption(title, fm, body, url, seed=slug)
+        # Suntingan dari POS menang atas caption rakitan skrip.
+        caption_ig = CAPTION_IG.strip() or build_caption(title, fm, body, seed=slug)
+        caption_fb = (CAPTION_FB.strip()
+                      or build_caption(title, fm, body, url, seed=slug))
+        if CAPTION_IG.strip() or CAPTION_FB.strip():
+            print("  memakai caption hasil suntingan dari POS")
 
         if DRY_RUN:
             entri = {
@@ -751,7 +778,9 @@ def main():
         if media_id:
             delete_asset(release, f"preview-{slug}.json")
 
-    if DRY_RUN:
+    if AKSI == "tolak":
+        notice(f"selesai. {ditolak} pratinjau ditolak & dibuang dari antrean.")
+    elif DRY_RUN:
         # Ditulis ke file supaya langkah email di workflow tahu apa yang harus
         # diberitahukan. Tanpa ini pratinjau terbentuk diam-diam: panel Media
         # Sosial di POS belum ada, jadi email adalah satu-satunya saluran yang

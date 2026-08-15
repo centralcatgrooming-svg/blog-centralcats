@@ -95,7 +95,32 @@ tampilkan satu lalu menganggap yang lain sama.
 
 ---
 
-## 4. Menayangkan
+## 4. Tombol yang harus ada di panel
+
+Panel Media Sosial minimal punya tiga tombol per kartu. Semuanya dipetakan ke satu
+endpoint yang sama (`workflow_dispatch` pada `post-instagram.yml`), dibedakan input
+`aksi`:
+
+| Tombol | `aksi` | Efek |
+|---|---|---|
+| **Kirim / Terima** | `tayangkan` | posting ke IG + Halaman FB, lalu pratinjau dihapus dari antrean |
+| **Tolak / Hapus** | `tolak` | pratinjau dibuang dari antrean, **tidak ada yang diposting** |
+| **Segarkan pratinjau** | `pratinjau` | hitung ulang caption & foto (default) |
+
+**Edit** bukan tombol terpisah: panel menyediakan kotak teks berisi
+`caption_instagram` / `caption_facebook` dari pratinjau, lalu mengirim hasil
+suntingannya lewat input `caption_ig` / `caption_fb` bersama `aksi: tayangkan`.
+Kosongkan keduanya untuk memakai caption rakitan skrip.
+
+⚠️ **Penyuntingan WAJIB terjadi sebelum tayang.** Caption Instagram tidak bisa
+diubah lewat API setelah terbit — satu-satunya koreksi adalah hapus lalu posting
+ulang manual dari aplikasi IG. Karena itu tombol Edit tidak punya padanan
+"edit setelah tayang", dan panel sebaiknya tidak menjanjikannya.
+
+`aksi: tolak` sengaja ditangani paling awal di skrip: ia tidak mengunduh foto dan
+tidak memanggil Gemini sama sekali, jadi menolak itu murah.
+
+## 5. Menayangkan
 
 Picu `workflow_dispatch` pada `post-instagram.yml`:
 
@@ -108,27 +133,29 @@ Content-Type: application/json
   "ref": "main",
   "inputs": {
     "path": "<path dari preview JSON>",
-    "posting": "true"
+    "aksi": "tayangkan",
+    "caption_ig": "<kosong = pakai rakitan skrip>",
+    "caption_fb": "<kosong = pakai rakitan skrip>"
   }
 }
 ```
 
-- `posting: "true"` → **benar-benar tayang** ke IG + Halaman FB.
-- `posting: "false"` (default) → hanya menghitung ulang pratinjau. Pakai ini
-  untuk tombol "Segarkan pratinjau".
+- `aksi: "tayangkan"` → **benar-benar tayang** ke IG + Halaman FB.
+  (`posting: "true"` masih diterima, sinonim.)
+- `aksi: "pratinjau"` (default) → hanya menghitung ulang pratinjau.
+- `aksi: "tolak"` → buang pratinjau dari antrean tanpa memposting.
 - Nilainya **string**, bukan boolean — input `workflow_dispatch` selalu string.
 
 Balasan `204 No Content` berarti workflow *dijadwalkan*, **bukan** berarti sudah
 tayang. Untuk status sesungguhnya, pantau run terbaru workflow itu, atau cukup
 anggap selesai ketika `preview-<slug>.json` hilang dari antrean.
 
-**Menolak/melewati** cukup dengan tidak memicu apa pun. Kalau ingin membuang dari
-antrean tanpa memposting, hapus asset-nya:
-`DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}` (butuh `contents:write`).
+**Menolak** cukup dengan `aksi: "tolak"` — skrip yang membuang asset-nya. Panel
+tidak perlu izin `contents:write` sendiri.
 
 ---
 
-## 5. Yang TIDAK akan muncul di antrean
+## 6. Yang TIDAK akan muncul di antrean
 
 Ini perilaku disengaja, bukan bug — jangan "diperbaiki" di sisi POS:
 
@@ -142,7 +169,7 @@ Ini perilaku disengaja, bukan bug — jangan "diperbaiki" di sisi POS:
 
 ---
 
-## 6. Catatan implementasi
+## 7. Catatan implementasi
 
 - Batas carousel IG **2–10 gambar**; `CAROUSEL_MAX` default 4. Kalau hanya 1
   gambar yang lolos, skrip otomatis turun ke postingan foto tunggal.
