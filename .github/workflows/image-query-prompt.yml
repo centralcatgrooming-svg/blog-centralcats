@@ -1,0 +1,91 @@
+name: Kata kunci & prompt gambar (jalur ChatGPT manual)
+
+# Jalur PROMPT — tidak memanggil API AI sama sekali, jadi tidak kena kuota Gemini
+# dan tidak butuh kredit OpenAI. Model dijalankan MANUSIA di ChatGPT (langganan
+# ChatGPT tidak memberi akses API, jadi ini caranya memanfaatkannya).
+#
+# Tiga mode:
+#   prompt         -> cetak prompt berisi artikel yang belum punya image_query.
+#                     Salin dari Job summary -> tempel ke ChatGPT.
+#   apply          -> tempel JSON balasan ChatGPT ke input `payload`.
+#                     Divalidasi lalu ditulis ke front matter -> Pull Request.
+#   prompt-gambar  -> cetak prompt untuk MEMBUAT gambar (lengkap dengan latar &
+#                     isi frame). Tidak mengubah repo — gambarnya Anda buat di
+#                     ChatGPT lalu masukkan lewat "Tulis Manual" di POS.
+#
+# Mode prompt & prompt-gambar TIDAK mengubah apa pun, jadi tidak membuat PR.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "prompt = minta kata kunci | apply = terapkan JSON | prompt-gambar = prompt buat gambar"
+        required: true
+        default: "prompt"
+        type: choice
+        options: ["prompt", "apply", "prompt-gambar"]
+      limit:
+        description: "Jumlah artikel per batch (mode prompt/prompt-gambar). 0 = semua"
+        required: false
+        default: "20"
+      slug:
+        description: "prompt-gambar: fokus 1 artikel saja (slug tanpa .md)"
+        required: false
+        default: ""
+      payload:
+        description: "mode apply: tempel array JSON balasan ChatGPT di sini"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  jalur-prompt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install --quiet requests
+
+      - name: Jalankan
+        env:
+          # TIDAK dipakai memanggil apa pun. Wajib ada hanya karena
+          # generate_drafts.py mengeceknya saat di-import (pola sama dgn add-images.yml);
+          # yang dipakai dari sana cuma ANIMAL_EN & HISTORY_SUBCAT.
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          MODE: ${{ github.event.inputs.mode }}
+          LIMIT: ${{ github.event.inputs.limit }}
+          SLUG: ${{ github.event.inputs.slug }}
+          PAYLOAD: ${{ github.event.inputs.payload }}
+        run: python scripts/image_query_prompt.py
+
+      # Hanya mode `apply` yang mengubah file; dua mode lain tak menghasilkan diff
+      # sehingga langkah ini otomatis tidak membuat PR apa pun.
+      - name: Buka Pull Request untuk review
+        if: github.event.inputs.mode == 'apply'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "Kata kunci gambar dari jalur prompt ChatGPT"
+          branch: image-query-prompt/run-${{ github.run_id }}
+          delete-branch: true
+          labels: ai-draft
+          title: "🔑 Kata kunci gambar (jalur ChatGPT) — siap direview"
+          body: |
+            Menambahkan `image_query`, `image_query_fallback`, dan `image_subject`
+            ke front matter — hasil prompt yang dijalankan manual di ChatGPT.
+
+            **Teks, slug, URL, tanggal, `images`, dan blok `[[faq]]` tidak diubah.**
+            Field ini hanya dibaca `scripts/post_instagram.py` untuk mencari foto
+            carousel yang berkaitan; tidak ada tampilan blog yang berubah.
+
+            **Cara review:** buka tab **Files changed** — tiap artikel harus hanya
+            bertambah 3 baris. Periksa kata kuncinya masuk akal untuk topiknya
+            (mis. artikel asma → `cat open mouth breathing`, bukan `cute cat`).
