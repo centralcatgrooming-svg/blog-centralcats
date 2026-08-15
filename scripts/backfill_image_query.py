@@ -28,6 +28,7 @@ import os
 import re
 import sys
 import json
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_drafts as g  # noqa: E402  (memuat konstanta + cek GEMINI_API_KEY)
@@ -37,6 +38,13 @@ try:
     LIMIT = int(os.environ.get("LIMIT") or 0)
 except ValueError:
     LIMIT = 0
+# Jeda antar-artikel & dasar backoff. Kuota Gemini gratis dihitung per menit,
+# jadi memanggil 84 kali secepat mungkin dijamin kena 429 (sudah terbukti).
+try:
+    PAUSE = float(os.environ.get("PAUSE") or 5)
+except ValueError:
+    PAUSE = 5.0
+RETRY_BASE = 20
 
 # Front matter dibatasi +++ ... +++ (grup 1 = isi, grup 2 = penutup).
 FM_RE = re.compile(r'^(\+\+\+\s*\n)(.*?\n)(\+\+\+\s*)$', re.S | re.M)
@@ -88,25 +96,47 @@ def ask_gemini(title, summary, body, animal_en):
         'KELIHATAN (mis. "rabbit eating hay", "cat at vet clinic").\n'
         f"Hewan utama artikel ini dalam bahasa Inggris: {animal_en}."
     )
-    r = g.requests.post(
-        g.GEMINI_URL,
-        headers={"x-goog-api-key": g.GEMINI_KEY, "Content-Type": "application/json"},
-        json={
-            "contents": [{"role": "user", "parts": [{"text": user}]}],
-            "generationConfig": {
-                "temperature": 0.4,
-                "maxOutputTokens": 256,
-                "responseMimeType": "application/json",
-                "responseSchema": SCHEMA,
-            },
+    payload = {
+        "contents": [{"role": "user", "parts": [{"text": user}]}],
+        "generationConfig": {
+            "temperature": 0.4,
+            # Longgar: model bisa menghabiskan token untuk "berpikir" sebelum
+            # menuliskan JSON. Dengan plafon terlalu rendah, respons terpotong
+            # sebelum ada `parts` sama sekali -> KeyError, bukan JSON rusak.
+            "maxOutputTokens": 2048,
+            "responseMimeType": "application/json",
+            "responseSchema": SCHEMA,
         },
-        timeout=90,
-    )
-    r.raise_for_status()
-    text = r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
-    text = re.sub(r"^```(?:json)?\s*", "", text)
-    text = re.sub(r"\s*```$", "", text).strip()
-    return json.loads(text)
+    }
+    # Kuota Gemini gratis dibatasi per menit. Backfill memanggil berpuluh kali
+    # beruntun, jadi 429 itu WAJAR — bukan error fatal. Mundur lalu ulangi.
+    last = None
+    for attempt in range(5):
+        r = g.requests.post(
+            g.GEMINI_URL,
+            headers={"x-goog-api-key": g.GEMINI_KEY, "Content-Type": "application/json"},
+            json=payload, timeout=90,
+        )
+        if r.status_code == 429:
+            wait = int(r.headers.get("Retry-After") or 0) or (RETRY_BASE * (2 ** attempt))
+            print(f"       (429 — tunggu {wait}s lalu coba lagi)")
+            time.sleep(wait)
+            last = "429 terus-menerus (kuota Gemini)"
+            continue
+        r.raise_for_status()
+        cand = (r.json().get("candidates") or [{}])[0]
+        parts = (cand.get("content") or {}).get("parts")
+        if not parts:
+            # Tidak ada teks sama sekali: biasanya finishReason MAX_TOKENS atau SAFETY.
+            raise RuntimeError(f"respons tanpa teks (finishReason="
+                               f"{cand.get('finishReason', '?')})")
+        text = parts[0].get("text", "").strip()
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```$", "", text).strip()
+        if not text:
+            raise RuntimeError("respons kosong")
+        return json.loads(text)
+    raise RuntimeError(last or "gagal setelah beberapa percobaan")
 
 
 def anchor(q, animal_en):
@@ -178,15 +208,25 @@ def main():
         if not files:
             sys.exit(f"artikel dengan slug '{FORCE_SLUG}' tidak ditemukan")
 
-    changed = 0
+    # LIMIT menghitung artikel yang DICOBA, bukan yang berhasil. Kalau menghitung
+    # yang berhasil, satu run yang selalu gagal (mis. kuota habis) akan menembus
+    # batas dan menggilas seluruh artikel — persis yang terjadi di run pertama.
+    changed = attempts = 0
     for p in files:
-        if LIMIT and changed >= LIMIT:
+        if LIMIT and attempts >= LIMIT:
             print(f"(batas {LIMIT} artikel tercapai — sisanya dilewati)")
             break
+        text = p.read_text(encoding="utf-8")
+        m = FM_RE.search(text)
+        if m and HAS_QUERY_RE.search(m.group(2)):
+            continue  # sudah punya: tidak dihitung sebagai percobaan
+        attempts += 1
         if process(p):
             changed += 1
+        if attempts and PAUSE:
+            time.sleep(PAUSE)  # jaga jarak agar tidak menabrak kuota per menit
 
-    print(f"\nSelesai. {changed} artikel dilengkapi kata kunci gambar.")
+    print(f"\nSelesai. {changed} dari {attempts} artikel dilengkapi kata kunci gambar.")
     if not changed:
         print("Tidak ada perubahan.")
 
