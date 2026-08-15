@@ -8,6 +8,9 @@ tags = ["kucing alergi", "alergi anabul", "kesehatan kulit kucing", "perawatan k
 hewan = ["kucing"]
 summary = "Apakah anabulmu sering gatal, bulu rontok, atau bersin-bersin? Bisa jadi ia alergi! Kenali tanda-tanda alergi pada kucing dan langkah penanganan yang bisa kamu lakukan."
 images = ["/images/waspada-alergi-pada-kucing-kenali-gejala-dan-cara-mengatasinya.webp"]
+image_query = "cat scratching itchy skin"
+image_query_fallback = "cat scratching"
+image_subject = ""
 
 [[faq]]
 q = "Apa pemicu alergi yang paling umum pada kucing?"

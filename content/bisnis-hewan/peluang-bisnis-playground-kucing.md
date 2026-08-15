@@ -8,6 +8,9 @@ tags = ["bisnis kucing", "catification", "peluang usaha"]
 hewan = ["kucing"]
 summary = "Peluang bisnis jasa pembuatan playground dan cat condo kustom kini makin menjanjikan seiring meningkatnya kesadaran pemilik akan kesejahteraan anabul."
 images = ["/images/peluang-bisnis-playground-kucing.webp"]
+image_query = "cat climbing tree shelf"
+image_query_fallback = "cat play tower"
+image_subject = ""
 
 [[faq]]
 q = "Apa bahan terbaik untuk membuat playground kucing yang aman?"

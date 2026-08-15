@@ -8,6 +8,9 @@ tags = ["kesehatan hamster", "wet tail", "penyakit hamster"]
 hewan = ["hamster"]
 summary = "Ketahui apa itu penyakit wet tail pada hamster, gejala klinis yang perlu diwaspadai, serta cara tepat mencegahnya agar hamster tetap sehat."
 images = ["/images/mengenal-wet-tail-pada-hamster-gejala-dan-pencegahan.webp"]
+image_query = "hamster in clean bedding"
+image_query_fallback = "hamster close up"
+image_subject = ""
 
 [[faq]]
 q = "Apakah penyakit wet tail pada hamster bisa menular ke manusia?"

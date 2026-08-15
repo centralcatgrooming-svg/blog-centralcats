@@ -8,6 +8,9 @@ tags = ["bisnis kelinci", "ternak kelinci", "kelinci hias", "peluang usaha"]
 hewan = ["kelinci"]
 summary = "Temukan peluang bisnis budidaya kelinci hias yang menjanjikan, mulai dari pemilihan jenis populer hingga langkah sukses perawatannya untuk pemula."
 images = ["/images/peluang-bisnis-budidaya-kelinci-hias.webp"]
+image_query = "rabbit in breeding hutch"
+image_query_fallback = "rabbit in cage"
+image_subject = ""
 
 [[faq]]
 q = "Apa jenis kelinci hias yang paling mudah dibudidayakan untuk pemula?"

@@ -8,6 +8,9 @@ tags = ["vaksin kucing", "kesehatan kucing", "pencegahan penyakit", "imunisasi"]
 hewan = ["kucing"]
 summary = "Vaksinasi adalah langkah penting untuk menjaga anabul tetap sehat dan terlindungi dari berbagai penyakit menular berbahaya. Pahami jenis, jadwal, dan manfaat imunisasi rutin bagi kucing Anda."
 images = ["/images/pentingnya-vaksinasi-kucing-untuk-anabul.webp"]
+image_query = "cat vaccination syringe vet"
+image_query_fallback = "cat at vet clinic"
+image_subject = ""
 
 [[faq]]
 q = "Apakah vaksinasi kucing aman?"

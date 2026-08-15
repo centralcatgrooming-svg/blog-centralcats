@@ -8,6 +8,9 @@ tags = ["kesehatan kucing", "scabies kucing", "perawatan kulit kucing"]
 hewan = ["kucing"]
 summary = "Kenali gejala scabies pada kucing seperti kulit berkerak dan gatal hebat, serta cara ampuh mengatasinya sebelum menular ke anabul lain."
 images = ["/images/mengenal-scabies-pada-kucing-gejala-dan-pencegahan.webp"]
+image_query = "cat scratching ear"
+image_query_fallback = "cat ear close up"
+image_subject = ""
 
 [[faq]]
 q = "Apakah scabies pada kucing bisa menular ke manusia?"

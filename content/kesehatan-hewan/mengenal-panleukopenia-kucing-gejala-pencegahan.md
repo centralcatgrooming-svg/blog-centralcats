@@ -8,6 +8,9 @@ tags = ["kesehatan kucing", "virus panleukopenia", "penyakit kucing", "tips anab
 hewan = ["kucing"]
 summary = "Pelajari bahaya virus panleukopenia pada kucing, gejala klinis yang perlu diwaspadai, cara penularan, dan langkah pencegahan terbaik untuk anabul."
 images = ["/images/mengenal-panleukopenia-kucing-gejala-pencegahan.webp"]
+image_query = "cat kitten at vet clinic"
+image_query_fallback = "cat veterinary examination"
+image_subject = ""
 
 [[faq]]
 q = "Apakah virus panleukopenia kucing bisa menular ke manusia?"

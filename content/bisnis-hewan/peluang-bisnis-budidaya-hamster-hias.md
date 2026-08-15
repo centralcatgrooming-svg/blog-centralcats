@@ -8,6 +8,9 @@ tags = ["bisnis hamster", "budidaya hamster", "peluang usaha"]
 hewan = ["hamster"]
 summary = "Tertarik memulai bisnis hewan peliharaan? Simak peluang bisnis budidaya hamster hias yang menjanjikan, mudah dilakukan, dan minim modal bagi pemula."
 images = ["/images/peluang-bisnis-budidaya-hamster-hias.webp"]
+image_query = "hamster breeding cage babies"
+image_query_fallback = "hamster in cage"
+image_subject = ""
 
 [[faq]]
 q = "Berapa lama masa kehamilan hamster?"

@@ -8,6 +8,9 @@ tags = ["kucing hamil", "perawatan kucing", "melahirkan kucing", "kesehatan repr
 hewan = ["kucing"]
 summary = "Kucing hamil butuh perhatian ekstra! Kenali tanda-tanda kehamilan, cara merawat anabul selama bunting, hingga persiapan persalinan agar ia dan calon bayinya sehat."
 images = ["/images/menyambut-kehadiran-anabul-baru-panduan-merawat-kucing-hamil.webp"]
+image_query = "pregnant cat resting"
+image_query_fallback = "cat with kittens"
+image_subject = ""
 
 [[faq]]
 q = "Berapa lama kucing hamil?"

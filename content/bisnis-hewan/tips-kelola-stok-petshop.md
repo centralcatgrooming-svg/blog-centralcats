@@ -8,6 +8,9 @@ tags = ["bisnis petshop", "tips bisnis", "stok barang"]
 hewan = ["kucing"]
 summary = "Kelola inventaris petshop dengan cerdas! Simak tips praktis mengatur stok barang agar bebas dari produk kedaluwarsa dan dead stock yang merugikan."
 images = ["/images/tips-kelola-stok-petshop.webp"]
+image_query = "pet food shelves store cat"
+image_query_fallback = "cat food bags"
+image_subject = ""
 
 [[faq]]
 q = "Apa perbedaan utama antara metode FIFO dan FEFO dalam bisnis petshop?"

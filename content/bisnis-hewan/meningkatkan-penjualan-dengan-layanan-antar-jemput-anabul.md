@@ -8,6 +8,9 @@ tags = ["layanan antar jemput", "bisnis petshop", "grooming", "pet taxi"]
 hewan = ["kucing"]
 summary = "Cari cara baru untuk memanjakan anabul sekaligus meningkatkan omzet bisnis Anda? Layanan antar jemput hewan peliharaan bisa jadi solusi. Pelajari manfaat & cara memulainya."
 images = ["/images/meningkatkan-penjualan-dengan-layanan-antar-jemput-anabul.webp"]
+image_query = "cat in carrier being transported"
+image_query_fallback = "cat carrier"
+image_subject = ""
 
 [[faq]]
 q = "Apa keuntungan utama pet taxi bagi pelanggan?"

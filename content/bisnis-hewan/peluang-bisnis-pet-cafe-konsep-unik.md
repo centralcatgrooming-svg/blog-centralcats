@@ -8,6 +8,9 @@ tags = ["bisnis hewan", "pet cafe", "peluang usaha", "anabul"]
 hewan = ["kucing"]
 summary = "Pet cafe menawarkan pengalaman unik bagi pemilik anabul untuk bersantai bersama hewan kesayangan. Pelajari peluang bisnisnya, tips memulai, dan kunci suksesnya di sini!"
 images = ["/images/peluang-bisnis-pet-cafe-konsep-unik.webp"]
+image_query = "cat cafe interior"
+image_query_fallback = "cat in cafe"
+image_subject = ""
 
 [[faq]]
 q = "Apa perbedaan pet cafe dengan pet shop?"

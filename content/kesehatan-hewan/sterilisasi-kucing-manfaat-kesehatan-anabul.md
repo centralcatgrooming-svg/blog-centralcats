@@ -8,6 +8,9 @@ tags = ["sterilisasi kucing", "kastrasi kucing", "kesehatan kucing", "perawatan 
 hewan = ["kucing"]
 summary = "Sterilisasi atau kastrasi bukan hanya tentang mengendalikan populasi kucing, tapi juga kunci untuk kesehatan jangka panjang dan perilaku positif anabul Anda. Pahami berbagai manfaatnya di sini."
 images = ["/images/sterilisasi-kucing-manfaat-kesehatan-anabul.webp"]
+image_query = "cat recovering after surgery"
+image_query_fallback = "cat at vet clinic"
+image_subject = ""
 
 [[faq]]
 q = "Apakah sterilisasi sama dengan kastrasi?"

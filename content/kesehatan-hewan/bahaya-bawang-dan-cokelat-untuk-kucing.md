@@ -8,6 +8,9 @@ tags = ["nutrisi kucing", "kesehatan kucing", "makanan berbahaya"]
 hewan = ["kucing"]
 summary = "Beberapa makanan manusia seperti bawang dan cokelat ternyata sangat beracun bagi kucing. Temukan bahaya tersembunyi dan gejalanya di sini!"
 images = ["/images/bahaya-bawang-dan-cokelat-untuk-kucing.webp"]
+image_query = "cat near kitchen table food"
+image_query_fallback = "cat in kitchen"
+image_subject = ""
 
 [[faq]]
 q = "Apakah sedikit bawang putih dalam makanan kucing tetap berbahaya?"

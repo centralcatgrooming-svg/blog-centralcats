@@ -8,6 +8,9 @@ tags = ["kesehatan burung", "egg binding", "perawatan burung"]
 hewan = ["burung"]
 summary = "Egg binding adalah kondisi darurat saat burung betina kesulitan mengeluarkan telur. Kenali gejala, penyebab, dan cara mencegahnya di sini!"
 images = ["/images/mengenal-egg-binding-pada-burung.webp"]
+image_query = "bird in nest with eggs"
+image_query_fallback = "pet bird in cage"
+image_subject = ""
 
 [[faq]]
 q = "Apakah egg binding hanya menyerang burung yang dipasangkan?"

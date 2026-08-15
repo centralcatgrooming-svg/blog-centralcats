@@ -8,6 +8,9 @@ tags = ["kesehatan kucing", "mata kucing", "perawatan anabul"]
 hewan = ["kucing"]
 summary = "Mata kucing Anda berair dan belekan? Kenali penyebab konjungtivitis pada kucing, gejala yang harus diwaspadai, serta cara tepat mengatasinya."
 images = ["/images/mata-kucing-belekan-gejala-dan-cara-mengatasi.webp"]
+image_query = "cat eye close up"
+image_query_fallback = "cat face close up"
+image_subject = ""
 
 [[faq]]
 q = "Apakah mata belekan pada kucing bisa menular ke manusia?"
