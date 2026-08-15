@@ -1,0 +1,73 @@
+name: Lengkapi kata kunci gambar artikel lama (non-destruktif)
+
+# Jalankan MANUAL dari tab Actions. Mengisi `image_query`, `image_query_fallback`,
+# dan `image_subject` pada artikel yang BELUM punya field itu, diturunkan dari
+# judul + isi artikel lewat Gemini.
+#
+# Kenapa: carousel medsos (post_instagram.py) mencari foto tambahan memakai kata
+# kunci di front matter. Artikel lama tidak punya, jadi carousel-nya jatuh ke
+# nama hewan saja ("cat") dan hasilnya kucing generik yang tak nyambung topik.
+#
+# NON-DESTRUKTIF: hanya MENAMBAH baris front matter. Teks, slug, URL, tanggal,
+# `images`, dan blok [[faq]] tidak disentuh -> tidak ada tampilan blog yang
+# berubah dan tidak ada URL yang mati. Output = Pull Request.
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Proses 1 artikel saja (slug tanpa .md). Kosong = semua yang belum punya"
+        required: false
+        default: ""
+      limit:
+        description: "Batas jumlah artikel per run (0 = tanpa batas)"
+        required: false
+        default: "0"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install --quiet requests
+
+      - name: Lengkapi kata kunci gambar
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FORCE_SLUG: ${{ github.event.inputs.slug }}
+          LIMIT: ${{ github.event.inputs.limit }}
+        run: python scripts/backfill_image_query.py
+
+      - name: Buka Pull Request untuk review
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "Lengkapi kata kunci gambar artikel lama (non-destruktif)"
+          branch: backfill-image-query/run-${{ github.run_id }}
+          delete-branch: true
+          labels: ai-draft
+          title: "🔑 Kata kunci gambar artikel lama — siap direview"
+          body: |
+            Menambahkan `image_query`, `image_query_fallback`, dan `image_subject`
+            ke front matter artikel lama supaya **carousel medsos** bisa mencari
+            foto tambahan yang benar-benar berkaitan dengan topik artikel —
+            bukan foto hewan generik.
+
+            **Teks, slug, URL, tanggal, `images`, dan blok `[[faq]]` tidak diubah.**
+            Tidak ada tampilan blog yang berubah; field ini hanya dibaca
+            `scripts/post_instagram.py`.
+
+            **Cara review:** buka tab **Files changed** — tiap artikel harus hanya
+            bertambah 3 baris di front matter. Periksa kata kuncinya masuk akal
+            untuk topik artikel (mis. artikel asma → `cat open mouth breathing`,
+            bukan `cute cat`). Cocok? **Merge**.
