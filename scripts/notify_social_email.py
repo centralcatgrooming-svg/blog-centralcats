@@ -65,7 +65,12 @@ for it in items:
     gambar = it.get("image_urls") or ([it["image_url"]] if it.get("image_url") else [])
     n = len(gambar)
     label = f"Carousel {n} gambar" if n > 1 else "1 gambar"
-    cap = html.escape(potong(it.get("caption_instagram")))
+    # Caption diawali judul artikel; di kartu ini judulnya sudah ditampilkan
+    # terpisah, jadi buang baris pertama supaya tidak terbaca dobel.
+    isi = (it.get("caption_instagram") or "").split("\n", 1)
+    isi = isi[1] if len(isi) > 1 and isi[0].strip() == (it.get("title") or "").strip() \
+        else it.get("caption_instagram")
+    cap = html.escape(potong(isi))
     thumb = html.escape(gambar[0]) if gambar else ""
     kartu += f"""
       <div style="border:1px solid #eee;border-radius:12px;overflow:hidden;margin:0 0 14px">

@@ -694,6 +694,13 @@ def main():
                     credits.append(ph["credit"])
         if len(image_urls) > 1:
             print(f"  carousel siap: {len(image_urls)} gambar")
+        elif CAROUSEL_MAX > 1:
+            # Jangan diam. Verifikasi vision sengaja fail-closed, jadi saat kuota
+            # Gemini habis SEMUA kandidat ditolak dan carousel menciut jadi satu
+            # gambar tanpa error apa pun. Tanpa peringatan ini, gejalanya cuma
+            # "kok postingannya cuma 1 foto" dan sangat sulit dilacak.
+            warn(f"'{title}': tidak ada foto tambahan yang lolos verifikasi — "
+                 "postingan jadi foto tunggal. Cek kuota Gemini / stok Pexels.")
 
         url = article_url(f)
 
