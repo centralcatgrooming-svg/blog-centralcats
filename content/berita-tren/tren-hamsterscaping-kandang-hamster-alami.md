@@ -8,6 +8,9 @@ tags = ["hamster", "tren lifestyle", "bisnis"]
 hewan = ["hamster"]
 summary = "Mengenal tren hamsterscaping, seni dekorasi kandang alami yang ramah hamster, serta peluang bisnis menjanjikan di balik estetika kandang ini."
 images = ["/images/tren-hamsterscaping-kandang-hamster-alami.webp"]
+image_query = "hamster natural bedding cage"
+image_query_fallback = "hamster in cage"
+image_subject = ""
 
 [[faq]]
 q = "Apa bahan terbaik untuk alas kandang hamsterscaping?"

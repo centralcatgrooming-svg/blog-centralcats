@@ -8,6 +8,9 @@ tags = ["tren", "kura-kura", "bisnis"]
 hewan = ["kura-kura"]
 summary = "Mengenal tren memelihara kura-kura Sulcata yang sedang naik daun, dari hobi eksotis hingga menjadi peluang bisnis sampingan yang sangat menjanjikan."
 images = ["/images/tren-kura-kura-sulcata-hobi-bisnis.webp"]
+image_query = "turtle walking on grass"
+image_query_fallback = "turtle close up"
+image_subject = ""
 
 [[faq]]
 q = "Apa makanan terbaik untuk kura-kura Sulcata?"

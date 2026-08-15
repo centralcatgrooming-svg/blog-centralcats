@@ -8,6 +8,9 @@ tags = ["bisnis", "ikan hias", "hobi", "tren"]
 hewan = ["ikan"]
 summary = "Ingin tahu kenapa ikan gabus hias ini begitu populer? Simak tren ikan Channa, cara merawatnya, hingga peluang bisnis yang sangat menjanjikan di sini!"
 images = ["/images/tren-ikan-channa-hobi-estetik-peluang-bisnis.webp"]
+image_query = "snakehead fish aquarium"
+image_query_fallback = "fish in aquarium"
+image_subject = ""
 
 [[faq]]
 q = "Apakah ikan Channa bisa dicampur dengan ikan hias lainnya di dalam satu akuarium?"

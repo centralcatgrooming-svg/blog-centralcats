@@ -6,6 +6,9 @@ tags = ["cat hotel", "tren"]
 hewan = ["kucing"]
 summary = "Layanan penitipan kucing tumbuh pesat seiring gaya hidup pemilik anabul. Apa yang sebenarnya dicari pelanggan?"
 images = ["/images/tren-cat-hotel-2026.webp"]
+image_query = "cat in boarding cattery"
+image_query_fallback = "cat in cage"
+image_subject = ""
 +++
 
 Penitipan kucing kini bukan lagi sekadar "tempat menampung" saat pemilik bepergian. Pelanggan mencari rasa aman, kebersihan, dan laporan harian kondisi anabul.

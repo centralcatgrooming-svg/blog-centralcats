@@ -8,6 +8,9 @@ tags = ["kucing", "sejarah kucing", "ras kucing", "british shorthair"]
 hewan = ["kucing"]
 summary = "Kenali sejarah menarik kucing British Shorthair, dari penjaga gudang Romawi kuno hingga menjadi salah satu ras paling populer di dunia."
 images = ["/images/sejarah-kucing-british-shorthair.webp"]
+image_query = "british shorthair cat"
+image_query_fallback = "grey shorthair cat"
+image_subject = "Sejarah Kucing British Shorthair: Si Teddy Bear yang Menawan"
 
 [[faq]]
 q = "Apakah kucing British Shorthair ramah anak-anak?"

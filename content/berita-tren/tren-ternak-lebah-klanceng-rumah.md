@@ -8,6 +8,9 @@ tags = ["bisnis", "lebah", "urban farming", "hobi"]
 hewan = ["lebah"]
 summary = "Mengenal tren ternak lebah klanceng (Trigona) tanpa sengat di pekarangan rumah. Hobi praktis, estetik, dan menghasilkan madu bernilai tinggi!"
 images = ["/images/tren-ternak-lebah-klanceng-rumah.webp"]
+image_query = "bee hive wooden box"
+image_query_fallback = "bee on flower"
+image_subject = ""
 
 [[faq]]
 q = "Apakah madu klanceng aman dikonsumsi setiap hari?"
