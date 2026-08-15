@@ -8,6 +8,9 @@ tags = ["pet sitter", "bisnis hewan", "perawatan hewan", "peluang usaha"]
 hewan = ["kucing", "anjing"]
 summary = "Ingin memulai bisnis yang menyenangkan dan penuh kasih sayang? Jasa pet sitter atau penitipan hewan di rumah pemilik adalah peluang menarik untuk Anda yang gemar anabul. Ketahui tips memulai dan sukses di bidang ini!"
 images = ["/images/mulai-bisnis-pet-sitter-rawat-anabul-nyaman-di-rumahnya.webp"]
+image_query = "cat at home with sitter"
+image_query_fallback = "cat at home"
+image_subject = ""
 
 [[faq]]
 q = "Apa bedanya pet sitter dengan pet hotel?"

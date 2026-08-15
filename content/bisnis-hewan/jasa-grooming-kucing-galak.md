@@ -8,6 +8,9 @@ tags = ["bisnis petshop", "grooming kucing", "kucing galak", "tips grooming"]
 hewan = ["kucing"]
 summary = "Jasa grooming kucing galak menawarkan peluang bisnis menjanjikan dengan tarif premium. Simak tips aman mengelola risikonya di sini!"
 images = ["/images/jasa-grooming-kucing-galak.webp"]
+image_query = "cat grooming with towel restraint"
+image_query_fallback = "cat being groomed"
+image_subject = ""
 
 [[faq]]
 q = "Mengapa tarif grooming kucing galak lebih mahal?"

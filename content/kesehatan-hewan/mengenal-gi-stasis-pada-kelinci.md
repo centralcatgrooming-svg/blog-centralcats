@@ -8,6 +8,9 @@ tags = ["kesehatan kelinci", "gi stasis", "perawatan hewan eksotis"]
 hewan = ["kelinci"]
 summary = "GI Stasis adalah kondisi darurat pada kelinci yang menyebabkan sistem pencernaan berhenti bekerja. Kenali gejala awal dan cara mencegahnya di sini."
 images = ["/images/mengenal-gi-stasis-pada-kelinci.webp"]
+image_query = "rabbit eating hay"
+image_query_fallback = "rabbit with vegetables"
+image_subject = ""
 
 [[faq]]
 q = "Apakah GI Stasis pada kelinci bisa sembuh sendiri?"

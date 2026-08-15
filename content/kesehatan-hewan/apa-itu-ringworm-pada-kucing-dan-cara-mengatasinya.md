@@ -8,6 +8,9 @@ tags = ["kesehatan kucing", "ringworm kucing", "jamur kucing"]
 hewan = ["kucing"]
 summary = "Ringworm adalah infeksi jamur kulit pada kucing yang sangat menular. Kenali gejala, cara penularan, dan langkah tepat mengatasinya di sini!"
 images = ["/images/apa-itu-ringworm-pada-kucing-dan-cara-mengatasinya.webp"]
+image_query = "cat skin patch close up"
+image_query_fallback = "cat at vet clinic"
+image_subject = ""
 
 [[faq]]
 q = "Apakah ringworm pada kucing bisa sembuh sendiri?"

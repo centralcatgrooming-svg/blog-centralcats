@@ -8,6 +8,9 @@ tags = ["ikan hias", "budidaya ikan", "peluang bisnis", "mas koki"]
 hewan = ["ikan"]
 summary = "Budidaya ikan mas koki menawarkan peluang bisnis menjanjikan dengan modal terjangkau dan pangsa pasar yang luas bagi pemula maupun profesional."
 images = ["/images/peluang-bisnis-budidaya-ikan-mas-koki.webp"]
+image_query = "fish goldfish in aquarium"
+image_query_fallback = "fish goldfish"
+image_subject = ""
 
 [[faq]]
 q = "Apa pakan terbaik untuk burayak atau larva ikan mas koki?"

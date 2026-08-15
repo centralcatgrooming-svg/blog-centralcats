@@ -8,6 +8,9 @@ tags = ["ikan hias", "budidaya ikan", "peluang bisnis", "guppy"]
 hewan = ["ikan-hias"]
 summary = "Panduan lengkap peluang bisnis budidaya ikan guppy dari rumah. Pelajari modal minimal, cara budidaya mudah, dan tips pemasaran agar cepat untung."
 images = ["/images/peluang-bisnis-budidaya-ikan-guppy.webp"]
+image_query = "aquarium fish guppy fish aquarium"
+image_query_fallback = "aquarium fish colorful fish tank"
+image_subject = ""
 
 [[faq]]
 q = "Berapa lama ikan guppy bisa dipanen untuk dijual?"

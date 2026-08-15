@@ -8,6 +8,9 @@ tags = ["kesehatan kelinci", "penyakit kelinci", "perawatan kelinci"]
 hewan = ["kelinci"]
 summary = "Kenali sore hocks atau kapalan pada kaki kelinci. Temukan gejala, penyebab, dan cara mencegahnya agar kelinci kesayangan tetap aktif bergerak."
 images = ["/images/mengatasi-sore-hocks-kelinci-gejala-pencegahan.webp"]
+image_query = "rabbit paws on hay"
+image_query_fallback = "rabbit sitting on hay"
+image_subject = ""
 
 [[faq]]
 q = "Apakah sore hocks pada kelinci bisa sembuh sendiri?"

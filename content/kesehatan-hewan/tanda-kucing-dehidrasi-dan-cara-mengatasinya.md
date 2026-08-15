@@ -8,6 +8,9 @@ tags = ["kesehatan kucing", "dehidrasi kucing", "perawatan anabul"]
 hewan = ["kucing"]
 summary = "Ketahui tanda-tanda kucing mengalami dehidrasi dan cara tepat mencegahnya agar anabul tetap sehat, aktif, dan terhindar dari penyakit berbahaya."
 images = ["/images/tanda-kucing-dehidrasi-dan-cara-mengatasinya.webp"]
+image_query = "cat drinking from water bowl"
+image_query_fallback = "cat water bowl"
+image_subject = ""
 
 [[faq]]
 q = "Bagaimana cara menguji apakah kucing saya mengalami dehidrasi secara cepat di rumah?"

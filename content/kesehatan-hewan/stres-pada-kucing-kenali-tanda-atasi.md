@@ -8,6 +8,9 @@ tags = ["kucing stres", "perilaku kucing", "kesehatan mental kucing", "kesejahte
 hewan = ["kucing"]
 summary = "Anabulmu menunjukkan perubahan perilaku? Bisa jadi ia stres! Kenali tanda-tanda stres pada kucing dan temukan cara efektif untuk membantu anabulmu merasa nyaman kembali."
 images = ["/images/stres-pada-kucing-kenali-tanda-atasi.webp"]
+image_query = "cat hiding under furniture"
+image_query_fallback = "scared cat"
+image_subject = ""
 
 [[faq]]
 q = "Apa tanda utama kucing stres?"

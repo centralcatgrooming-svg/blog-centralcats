@@ -8,6 +8,9 @@ tags = ["kesehatan kucing", "flu kucing", "calicivirus", "penyakit kucing"]
 hewan = ["kucing"]
 summary = "Feline Calicivirus (FCV) adalah virus penyebab flu kucing yang khas dengan gejala sariawan menyakitkan di mulut. Yuk, kenali gejala dan pencegahannya!"
 images = ["/images/mengenal-feline-calicivirus-kucing.webp"]
+image_query = "cat mouth and nose close up"
+image_query_fallback = "cat at vet clinic"
+image_subject = ""
 
 [[faq]]
 q = "Apakah Feline Calicivirus bisa menular ke manusia atau anjing?"

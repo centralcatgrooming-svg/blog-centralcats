@@ -8,6 +8,9 @@ tags = ["kesehatan kucing", "asma kucing", "penyakit kucing"]
 hewan = ["kucing"]
 summary = "Asma pada kucing adalah peradangan kronis saluran napas akibat alergen. Kenali gejala batuk, napas mengi, dan tips pencegahannya demi anabul."
 images = ["/images/mengenal-asma-pada-kucing-gejala-dan-penanganan.webp"]
+image_query = "cat open mouth breathing"
+image_query_fallback = "cat lying on side"
+image_subject = ""
 
 [[faq]]
 q = "Apakah asma pada kucing bisa disembuhkan secara total?"

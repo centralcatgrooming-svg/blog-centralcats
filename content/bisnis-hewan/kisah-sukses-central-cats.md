@@ -11,6 +11,9 @@ instagram = "https://www.instagram.com/centralcat_official"
 situs = "https://centralcats.id"
 summary = "Berawal dari kebangkrutan di masa pandemi, Central Cat's bangkit dari emperan rumah menjadi layanan grooming, cat hotel, dan petshop kucing tepercaya di Tangerang."
 images = ["/images/kisah-sukses-central-cats.webp"]
+image_query = "pet shop storefront cat"
+image_query_fallback = "cat in pet shop"
+image_subject = ""
 
 [[faq]]
 q = "Layanan apa saja yang tersedia di Central Cat's?"

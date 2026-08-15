@@ -8,6 +8,9 @@ tags = ["obesitas kucing", "berat badan ideal", "kesehatan kucing", "nutrisi kuc
 hewan = ["kucing"]
 summary = "Obesitas pada kucing adalah masalah serius yang bisa memicu berbagai penyakit kronis. Pahami tanda, penyebab, dan cara menjaga berat badan ideal anabul agar tetap sehat, aktif, dan memiliki kualitas hidup yang lebih baik."
 images = ["/images/jaga-berat-badan-ideal-kucing-cegah-obesitas-anabul.webp"]
+image_query = "overweight cat lying down"
+image_query_fallback = "chubby cat"
+image_subject = ""
 
 [[faq]]
 q = "Bagaimana cara tahu apakah kucing saya obesitas?"

@@ -6,6 +6,9 @@ tags = ["bisnis", "petshop"]
 hewan = ["kucing"]
 summary = "Tertarik membuka petshop? Empat fondasi ini menentukan apakah usaha Anda bertahan di tahun pertama."
 images = ["/images/memulai-usaha-petshop.webp"]
+image_query = "pet shop shelves supplies cat"
+image_query_fallback = "cat pet store"
+image_subject = ""
 +++
 
 Industri hewan peliharaan terus tumbuh, tapi membuka petshop butuh persiapan matang. Empat hal berikut layak jadi perhatian utama.

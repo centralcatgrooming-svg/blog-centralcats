@@ -8,6 +8,9 @@ tags = ["loyalitas pelanggan", "bisnis hewan", "petshop", "grooming"]
 hewan = ["kucing"]
 summary = "Pelanggan setia adalah aset berharga. Temukan strategi jitu untuk membangun loyalitas pelanggan di bisnis petshop dan grooming Anda, agar anabul dan pemiliknya selalu kembali!"
 images = ["/images/membangun-loyalitas-pelanggan-bisnis-petshop-grooming.webp"]
+image_query = "pet shop counter cat"
+image_query_fallback = "cat pet store"
+image_subject = ""
 
 [[faq]]
 q = "Apa itu loyalitas pelanggan dalam bisnis hewan peliharaan?"
