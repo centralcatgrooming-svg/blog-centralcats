@@ -61,6 +61,14 @@ GH_REPO = (os.environ.get("GITHUB_REPOSITORY") or "").strip()
 GH_TOKEN = (os.environ.get("GITHUB_TOKEN") or "").strip()
 RELEASE_TAG = "ig-images"
 
+# Mode PRATINJAU: hitung caption + gambar 1:1 persis seperti saat posting, unggah
+# hasilnya sebagai `preview-<slug>.json` di release `ig-images`, lalu BERHENTI
+# sebelum memanggil Graph API. Dipakai POS (Pusat Konten) untuk menampilkan apa
+# yang akan tayang supaya bisa ditinjau dulu. Alasan mode ini ada: caption IG
+# TIDAK bisa diedit lewat API setelah tayang (lihat CLAUDE.md Bagian 13), jadi
+# koreksi setelah posting berarti hapus + posting ulang manual.
+DRY_RUN = (os.environ.get("DRY_RUN") or "").strip().lower() in ("1", "true", "yes")
+
 GRAPH = f"https://graph.facebook.com/{GRAPH_VERSION}"
 FM_RE = re.compile(r'^\+\+\+\s*\n(.*?)\n\+\+\+\s*$', re.S | re.M)
 MD_LINK_RE = re.compile(r'\[([^\]]+)\]\([^)]*\)')
@@ -314,8 +322,12 @@ def ensure_release():
     return None
 
 
-def upload_asset(release, name, jpeg):
-    """Unggah JPEG sebagai asset release. Return URL publik atau None."""
+def upload_asset(release, name, blob, content_type="image/jpeg"):
+    """Unggah blob sebagai asset release. Return URL publik atau None.
+
+    `content_type` dibuat parameter (default JPEG, perilaku lama) supaya mode
+    pratinjau bisa menitipkan `preview-<slug>.json` di release yang sama.
+    """
     # Hapus asset lama bernama sama agar bisa di-upload ulang.
     for a in release.get("assets", []):
         if a.get("name") == name:
@@ -324,10 +336,10 @@ def upload_asset(release, name, jpeg):
 
     url = (f"https://uploads.github.com/repos/{GH_REPO}/releases/"
            f"{release['id']}/assets?name={urllib.parse.quote(name)}")
-    req = urllib.request.Request(url, data=jpeg, method="POST", headers={
+    req = urllib.request.Request(url, data=blob, method="POST", headers={
         "Authorization": "Bearer " + GH_TOKEN,
         "Accept": "application/vnd.github+json",
-        "Content-Type": "image/jpeg",
+        "Content-Type": content_type,
         "User-Agent": "blog-centralcats-ig",
     })
     try:
@@ -335,10 +347,10 @@ def upload_asset(release, name, jpeg):
             data = json.loads(r.read().decode("utf-8", "replace"))
             return data.get("browser_download_url")
     except urllib.error.HTTPError as e:
-        warn(f"gagal unggah gambar ke release (HTTP {e.code}): "
+        warn(f"gagal unggah asset ke release (HTTP {e.code}): "
              f"{e.read().decode('utf-8', 'replace')[:200]}")
     except Exception as e:
-        warn(f"gagal unggah gambar ke release: {e}")
+        warn(f"gagal unggah asset ke release: {e}")
     return None
 
 
@@ -416,8 +428,23 @@ def post_facebook(image_url, message, tok):
 
 
 # ---------------------------------------------------------------------- main
+def write_preview(release, slug, payload):
+    """Titipkan pratinjau sebagai `preview-<slug>.json` di release `ig-images`.
+
+    Repo ini PUBLIC, jadi POS cukup mengambilnya lewat URL tanpa autentikasi —
+    pola yang sama dengan gambar JPEG (dan tetap tidak menambah biner ke histori
+    git, lihat CLAUDE.md Bagian 8a).
+    """
+    blob = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+    url = upload_asset(release, f"preview-{slug}.json", blob, "application/json")
+    if url:
+        print(f"[PRATINJAU] {slug} -> {url}")
+    return url
+
+
 def main():
-    if not IG_USER_ID or not IG_TOKEN:
+    # Pratinjau tidak menyentuh Graph API, jadi token IG tak wajib ada.
+    if not DRY_RUN and (not IG_USER_ID or not IG_TOKEN):
         notice("IG_USER_ID / IG_ACCESS_TOKEN belum diset — auto-post dilewati.")
         return
     if not FILES:
@@ -435,11 +462,13 @@ def main():
         return
 
     # Token Halaman diambil sekali di depan; bila gagal, IG tetap jalan.
-    fb_token = page_token() if FB_PAGE_ID else None
-    if FB_PAGE_ID and not fb_token:
-        notice("posting Halaman Facebook dilewati — Instagram tetap diproses.")
+    fb_token = None
+    if FB_PAGE_ID and not DRY_RUN:
+        fb_token = page_token()
+        if not fb_token:
+            notice("posting Halaman Facebook dilewati — Instagram tetap diproses.")
 
-    posted = posted_fb = 0
+    posted = posted_fb = previewed = 0
     for f in FILES:
         parts = pathlib.PurePosixPath(f.replace("\\", "/")).parts
         if (len(parts) < 3 or parts[0] != "content"
@@ -490,7 +519,26 @@ def main():
         url = article_url(f)
 
         slug = p.stem
-        media_id = publish(image_url, build_caption(title, fm, body, seed=slug))
+        # Caption dibangun sekali di sini supaya yang DITINJAU di POS benar-benar
+        # sama dengan yang nanti diposting (seed = slug, jadi deterministik).
+        caption_ig = build_caption(title, fm, body, seed=slug)
+        caption_fb = build_caption(title, fm, body, url, seed=slug)
+
+        if DRY_RUN:
+            if write_preview(release, slug, {
+                "slug": slug,
+                "path": f,
+                "title": title,
+                "article_url": url,
+                "image_url": image_url,   # JPEG 1080x1080 hasil crop, persis yg akan tayang
+                "hewan": animals,
+                "caption_instagram": caption_ig,
+                "caption_facebook": caption_fb,
+            }):
+                previewed += 1
+            continue
+
+        media_id = publish(image_url, caption_ig)
         if media_id:
             posted += 1
             print(f"[IG] {title} -> media id {media_id} ({url})")
@@ -499,13 +547,17 @@ def main():
         # Catatan: setelan crosspost IG->FB TIDAK berlaku untuk postingan yang
         # diterbitkan lewat Graph API, jadi Halaman harus diposting terpisah.
         if FB_PAGE_ID and fb_token:
-            post_id = post_facebook(
-                image_url, build_caption(title, fm, body, url, seed=slug), fb_token)
+            post_id = post_facebook(image_url, caption_fb, fb_token)
             if post_id:
                 posted_fb += 1
                 print(f"[FB] {title} -> post id {post_id} ({url})")
 
-    notice(f"selesai. {posted} postingan Instagram, {posted_fb} postingan Halaman Facebook.")
+    if DRY_RUN:
+        notice(f"pratinjau selesai. {previewed} artikel siap ditinjau di POS. "
+               "Belum ada yang diposting.")
+    else:
+        notice(f"selesai. {posted} postingan Instagram, "
+               f"{posted_fb} postingan Halaman Facebook.")
 
 
 if __name__ == "__main__":

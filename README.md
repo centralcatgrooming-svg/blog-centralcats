@@ -86,12 +86,18 @@ maupun `node_modules/`. Menambah devDependency tidak membebani pengunjung.
 | `manual-draft.yml` | dipicu POS (Pusat Konten) via API | form "Tulis Manual" + gambar Supabase → PR |
 | `add-images.yml` | manual | tambah/ganti foto artikel lama tanpa mengubah teks/slug → PR |
 | `notify-new-post.yml` | push `main` menyentuh `content/**` | push notification OneSignal + ping **IndexNow** (Bing/Yandex) |
-| `post-instagram.yml` | push `main` menyentuh `content/**` | auto-post ke Instagram **dan** Halaman Facebook |
+| `post-instagram.yml` | push `main` menyentuh `content/**` | **pratinjau** caption + foto IG/FB (`preview-<slug>.json`); tayang hanya lewat `workflow_dispatch` + `posting: true` |
 | `backup.yml` | tiap tanggal 1, 09:00 WIB | arsip ZIP seluruh repo sebagai artifact |
 
 **Draf ditinjau & disetujui di POS "Pusat Konten":**
 **https://app.centralcats.id/technology-system** — bukan di halaman PR GitHub. Halaman itu
 juga tempat memicu **Buat Artikel** (AI) dan **Tulis Manual**.
+
+**Medsos juga bergerbang tinjau.** Push ke `main` hanya *menyiapkan* caption + foto IG/FB
+sebagai `preview-<slug>.json` di release `ig-images`; tidak ada yang tayang sampai ada
+`workflow_dispatch` dengan `posting: true`. Alasannya: caption IG tidak bisa diedit lewat
+API setelah tayang. Panel Media Sosial di POS masih "Segera Hadir" — sementara ini
+tayangkan manual dari tab Actions setelah membaca pratinjaunya.
 
 Deteksi "artikel baru" memakai `git diff --diff-filter=A` — hanya file yang **ditambahkan**,
 bukan editan. Semua otomasi non-blocking: gagal ping/post tidak menggagalkan deploy.

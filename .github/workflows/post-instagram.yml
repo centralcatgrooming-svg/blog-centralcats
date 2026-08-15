@@ -1,7 +1,17 @@
-name: Auto-posting Medsos (Instagram + Halaman FB)
+name: Medsos (Instagram + Halaman FB) — pratinjau & posting
 
 # Saat ada artikel BARU ditambahkan ke main (mis. PR auto-draft di-merge),
-# posting 1 foto + caption ke Instagram DAN Halaman Facebook Central Cat's.
+# siapkan PRATINJAU 1 foto + caption untuk Instagram DAN Halaman Facebook.
+# Yang menayangkan adalah POS (Pusat Konten) lewat workflow_dispatch dengan
+# input `posting: true`, SETELAH caption & foto ditinjau manusia.
+#
+# Kenapa harus ditinjau: caption IG TIDAK bisa diedit lewat API setelah tayang
+# (CLAUDE.md Bagian 13) — koreksi berarti hapus + posting ulang manual. Blog
+# sudah punya gerbang tinjau di POS; medsos dulu tidak, padahal justru medsos
+# yang paling sulit dibatalkan.
+#
+# Hasil pratinjau = asset `preview-<slug>.json` di release `ig-images`, berisi
+# caption IG & FB serta URL JPEG 1080x1080 yang persis akan tayang.
 # KHUSUS artikel kucing & anjing (SOCIAL_ANIMALS) — kriteria medsos sengaja
 # BEDA dari blog, yang tetap memuat semua hewan.
 # Pola deteksi artikel baru SAMA dengan notify-new-post.yml (status A = ditambahkan),
@@ -15,14 +25,20 @@ on:
     branches: [main]
     paths:
       - "content/**"
-  # Posting ulang MANUAL (uji): kosongkan `path` -> artikel terbaru,
-  # atau isi path artikel tertentu (mis. content/panduan-tips/xxx.md).
+  # Dipicu POS (Pusat Konten) setelah caption & foto DISETUJUI, atau manual utk uji.
+  # `posting` = false (default) hanya menghitung ulang pratinjau; true baru menayangkan.
   workflow_dispatch:
     inputs:
       path:
-        description: "Path artikel utk diposting (kosong = artikel terbaru)"
+        description: "Path artikel (kosong = artikel terbaru)"
         required: false
         default: ""
+      posting:
+        description: "true = TAYANGKAN ke IG/FB. false = pratinjau saja"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
 
 permissions:
   contents: write  # perlu untuk membuat/menambah asset di release `ig-images`
@@ -83,7 +99,12 @@ jobs:
         run: pip install --quiet pillow
 
       # Non-blocking: gagal posting IG tidak boleh menggagalkan apa pun.
-      - name: Posting ke Instagram
+      #
+      # DRY_RUN menentukan langkah ini menghitung PRATINJAU atau benar-benar posting:
+      #   push ke main          -> DRY_RUN=1, hanya menyiapkan preview-<slug>.json
+      #   workflow_dispatch     -> ikut input `posting` (default false = pratinjau)
+      # Jadi tidak ada yang tayang di IG/FB tanpa disetujui lebih dulu di POS.
+      - name: Pratinjau / posting ke Instagram
         if: steps.detect.outputs.has == 'true'
         continue-on-error: true
         env:
@@ -94,4 +115,5 @@ jobs:
           BASE_URL: "https://blog.centralcats.id/"
           NEW_FILES: ${{ steps.detect.outputs.files }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.posting == 'true') && '0' || '1' }}
         run: python3 scripts/post_instagram.py
