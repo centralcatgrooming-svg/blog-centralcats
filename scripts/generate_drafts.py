@@ -233,6 +233,39 @@ def _norm(s):
     return " ".join(s.split()).strip()
 
 
+# Kata yang tidak membawa topik. Dibuang sebelum membandingkan judul supaya
+# "Cara ... yang Aman" dan "... dengan Aman" tidak dianggap berbeda hanya karena
+# susunan katanya.
+STOPWORDS = {
+    "cara", "yang", "dengan", "dan", "untuk", "di", "ke", "dari", "pada", "agar",
+    "supaya", "tips", "panduan", "apa", "saja", "bagaimana", "kenapa", "mengapa",
+    "itu", "ini", "si", "atau", "bisa", "harus", "saat", "ketika", "sebagai",
+    "tanpa", "lebih", "paling", "juga", "serta", "adalah", "akan", "dalam",
+    "secara", "punya", "milik", "buat", "biar",
+}
+
+# Ambang kemiripan judul. DIUKUR, bukan ditebak: dari 88 artikel yang sudah ada,
+# pasangan sah yang PALING mirip cuma 0,62 ("Waspada Alergi pada Kucing" vs
+# "Waspada Tungau Telinga pada Kucing" — memang dua topik berbeda), sedangkan
+# duplikat nyata yang lolos 18 Agu 2026 mencetak 1,00. Jadi 0,75 duduk di jurang
+# antara keduanya. Menaikkan ambang = duplikat lolos lagi; menurunkannya sampai
+# di bawah 0,62 = topik sah ikut diblokir (dan 3 kali tolak berarti hari itu
+# tidak ada artikel sama sekali).
+DUP_SIMILARITY = 0.75
+
+
+def _tokens(title):
+    """Himpunan kata bermakna sebuah judul."""
+    return {w for w in _norm(title).split() if w and w not in STOPWORDS}
+
+
+def _similarity(a, b):
+    """Jaccard: irisan dibagi gabungan. 1,0 = himpunan katanya persis sama."""
+    if not a or not b:
+        return 0.0
+    return len(a & b) / len(a | b)
+
+
 def existing_index():
     """Kumpulkan (daftar judul, set slug, set judul ternormalisasi) dari SEMUA
     artikel yang sudah ada — KECUALI _index.md. Dipakai untuk mencegah duplikat
@@ -276,20 +309,45 @@ def section_hewan_counts(section):
     return counts
 
 
-def is_duplicate(data, slugs, norm_titles):
-    """True bila slug atau judul (ternormalisasi) sudah ada di katalog."""
+def is_duplicate(data, slugs, norm_titles, titles=()):
+    """True bila artikel ini mengulang topik yang sudah ada di katalog.
+
+    Perbandingan PERSIS saja tidak cukup, dan itu terbukti: 18 Agu 2026 lolos
+    "Cara Memandikan Hamster dengan Pasir Mandi yang Aman" padahal katalog sudah
+    memuat "Cara Aman Memandikan Hamster dengan Mandi Pasir" — beda urutan kata,
+    string-nya jelas tidak sama, topiknya sama persis. Model bahkan SUDAH diberi
+    tahu lewat daftar HINDARI di prompt dan tetap mengulang; jadi yang harus
+    menangkap adalah penjaga ini, bukan modelnya.
+    """
     slug = slugify(data.get("slug") or data.get("title") or "")
     if slug in slugs:
         return True, f"slug '{slug}' sudah ada"
     nt = _norm(data.get("title", ""))
     if nt and nt in norm_titles:
         return True, f"judul '{data.get('title')}' mirip artikel yang sudah ada"
+
+    judul = data.get("title", "")
+    toks = _tokens(judul)
+    if toks:
+        mirip = max(
+            ((_similarity(toks, _tokens(t)), t) for t in titles if t),
+            default=(0.0, ""),
+        )
+        if mirip[0] >= DUP_SIMILARITY:
+            return True, (f"judul '{judul}' {mirip[0]:.0%} sama topiknya dengan "
+                          f"'{mirip[1]}'")
     return False, ""
 
 
 def gemini_article(section, avoid):
     subcats = SUBCATS[section]
-    avoid_txt = "; ".join(avoid[-80:]) if avoid else "(belum ada)"
+    # SELURUH judul dikirim, tanpa dipotong. Dulu `avoid[-80:]` — dan karena
+    # existing_index() menelusuri direktori (bukan urutan terbit), "80 terakhir"
+    # berarti 80 yang kebetulan terbaca belakangan: begitu katalog lewat 80
+    # artikel, sebagian judul berhenti diberitahukan ke model TANPA pola apa pun.
+    # 88 judul ~ 1 rb token; kalaupun kelak jadi 500, itu masih murah dibanding
+    # menerbitkan artikel yang mengulang topik.
+    avoid_txt = "; ".join(t for t in avoid if t) if avoid else "(belum ada)"
     extra = ""
     if section == "bisnis-hewan":
         extra += ("Topik boleh bisnis hewan peliharaan ATAU ternak HALAL "
@@ -777,7 +835,7 @@ def main():
             except Exception as e:
                 print(f"[GAGAL] artikel ke-{i+1} (percobaan {attempt}): {e}", file=sys.stderr)
                 continue
-            dup, why = is_duplicate(d, slugs, norm_titles)
+            dup, why = is_duplicate(d, slugs, norm_titles, avoid)
             if not dup:
                 data = d
                 break

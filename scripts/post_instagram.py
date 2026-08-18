@@ -418,6 +418,40 @@ def has_asset(release, name):
     return any(a.get("name") == name for a in release.get("assets", []))
 
 
+def preview_images(release, slug):
+    """Baca daftar foto yang SUDAH ditinjau dari `preview-<slug>.json`.
+
+    Return `(image_urls, photo_credits)`; `([], [])` bila pratinjaunya tidak ada
+    atau tak terbaca — pemanggil lalu menghitung ulang.
+
+    Ini yang membuat janji panel ("foto 1:1 yang persis akan tayang") jadi benar.
+    Sebelumnya slide carousel dicari ULANG ke Pexels dan diverifikasi Gemini pada
+    saat publish, sehingga hasilnya bisa berbeda dari yang ditinjau — terukur
+    17 Agu 2026: pratinjau 1 foto, yang tayang 4 foto.
+    """
+    name = f"preview-{slug}.json"
+    for a in release.get("assets", []):
+        if a.get("name") != name or not a.get("browser_download_url"):
+            continue
+        try:
+            req = urllib.request.Request(
+                a["browser_download_url"],
+                headers={"User-Agent": "blog-centralcats-ig"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                j = json.loads(r.read().decode("utf-8", "replace"))
+        except Exception as e:
+            warn(f"pratinjau '{name}' tidak terbaca: {e}")
+            return [], []
+        if not isinstance(j, dict):
+            return [], []
+        urls = [u for u in (j.get("image_urls") or []) if isinstance(u, str) and u]
+        if not urls and isinstance(j.get("image_url"), str) and j["image_url"]:
+            urls = [j["image_url"]]        # bentuk lama, sebelum carousel ada
+        credits = [c for c in (j.get("photo_credits") or []) if isinstance(c, str)]
+        return urls, credits
+    return [], []
+
+
 def mark_posted(release, slug, payload):
     """Tandai artikel SUDAH TAYANG dengan asset `posted-<slug>.json`.
 
@@ -757,50 +791,76 @@ def main():
                    f"yang diposting: {', '.join(SOCIAL_ANIMALS)}) — dilewati.")
             continue
 
-        img_path = first_image(fm)
-        if not img_path:
-            notice(f"'{title}' tidak punya gambar unggulan — dilewati "
-                   "(Instagram & Facebook wajib pakai gambar).")
-            continue
+        # ── Foto yang ditinjau = foto yang tayang ─────────────────────────────
+        # Saat MENAYANGKAN, slide diambil apa adanya dari pratinjau yang sudah
+        # dilihat manusia. Dulu foto tambahan dicari ULANG ke Pexels + diverifikasi
+        # Gemini pada saat publish, jadi yang naik ke IG bukan yang ditinjau:
+        # pratinjau artikel bengal berisi 1 foto, yang tayang 4 foto — 3 slide
+        # tak pernah dilihat siapa pun padahal panel menjanjikan "foto yang persis
+        # akan tayang". Efek sampingnya besar: publish tak lagi memanggil Pexels
+        # maupun Gemini sama sekali (run 18 Agu 2026 memakan 4 mnt 45 dtk hanya
+        # karena Gemini balas 503 lalu di-retry).
+        image_urls, credits = [], []
+        if not DRY_RUN:
+            image_urls, credits = preview_images(release, p.stem)
+            if image_urls:
+                hidup = [u for u in image_urls if is_public(u)]
+                if len(hidup) == len(image_urls):
+                    print(f"  memakai {len(image_urls)} foto dari pratinjau "
+                          "(tidak dicari ulang)")
+                else:
+                    # Aset pratinjau raib (mis. release dibersihkan manual).
+                    # Lebih baik hitung ulang daripada gagal di tengah Graph API.
+                    warn(f"{len(image_urls) - len(hidup)} foto pratinjau tidak bisa "
+                         "diakses lagi — foto dihitung ulang. Yang tayang bisa "
+                         "berbeda dari yang ditinjau.")
+                    image_urls, credits = [], []
 
-        raw = load_image_bytes(img_path)
-        if not raw:
-            continue
-        try:
-            jpeg = to_square_jpeg(raw)
-        except Exception as e:
-            warn(f"gagal konversi gambar '{img_path}' ke JPEG: {e}")
-            continue
-
-        stem = pathlib.PurePosixPath(img_path).stem
-        image_url = upload_asset(release, stem + ".jpg", jpeg)
-        if not image_url or not is_public(image_url):
-            continue
-
-        # Carousel: gambar unggulan jadi slide pertama, sisanya foto tambahan
-        # yang relevan. Kredit fotografer dikumpulkan untuk ditulis di caption.
-        image_urls = [image_url]
-        credits = []
-        for i, ph in enumerate(extra_photos(fm, animals, CAROUSEL_MAX - 1), start=2):
-            try:
-                j = to_square_jpeg(ph["bytes"])
-            except Exception as e:
-                warn(f"gagal konversi foto carousel #{i}: {e}")
+        if not image_urls:
+            img_path = first_image(fm)
+            if not img_path:
+                notice(f"'{title}' tidak punya gambar unggulan — dilewati "
+                       "(Instagram & Facebook wajib pakai gambar).")
                 continue
-            u = upload_asset(release, f"{stem}-{i}.jpg", j)
-            if u and is_public(u):
-                image_urls.append(u)
-                if ph.get("credit"):
-                    credits.append(ph["credit"])
-        if len(image_urls) > 1:
-            print(f"  carousel siap: {len(image_urls)} gambar")
-        elif CAROUSEL_MAX > 1:
-            # Jangan diam. Verifikasi vision sengaja fail-closed, jadi saat kuota
-            # Gemini habis SEMUA kandidat ditolak dan carousel menciut jadi satu
-            # gambar tanpa error apa pun. Tanpa peringatan ini, gejalanya cuma
-            # "kok postingannya cuma 1 foto" dan sangat sulit dilacak.
-            warn(f"'{title}': tidak ada foto tambahan yang lolos verifikasi — "
-                 "postingan jadi foto tunggal. Cek kuota Gemini / stok Pexels.")
+
+            raw = load_image_bytes(img_path)
+            if not raw:
+                continue
+            try:
+                jpeg = to_square_jpeg(raw)
+            except Exception as e:
+                warn(f"gagal konversi gambar '{img_path}' ke JPEG: {e}")
+                continue
+
+            stem = pathlib.PurePosixPath(img_path).stem
+            image_url = upload_asset(release, stem + ".jpg", jpeg)
+            if not image_url or not is_public(image_url):
+                continue
+
+            # Carousel: gambar unggulan jadi slide pertama, sisanya foto tambahan
+            # yang relevan. Kredit fotografer dikumpulkan untuk ditulis di caption.
+            image_urls = [image_url]
+            for i, ph in enumerate(extra_photos(fm, animals, CAROUSEL_MAX - 1), start=2):
+                try:
+                    j = to_square_jpeg(ph["bytes"])
+                except Exception as e:
+                    warn(f"gagal konversi foto carousel #{i}: {e}")
+                    continue
+                u = upload_asset(release, f"{stem}-{i}.jpg", j)
+                if u and is_public(u):
+                    image_urls.append(u)
+                    if ph.get("credit"):
+                        credits.append(ph["credit"])
+
+            if len(image_urls) > 1:
+                print(f"  carousel siap: {len(image_urls)} gambar")
+            elif CAROUSEL_MAX > 1:
+                # Jangan diam. Verifikasi vision sengaja fail-closed, jadi saat kuota
+                # Gemini habis SEMUA kandidat ditolak dan carousel menciut jadi satu
+                # gambar tanpa error apa pun. Tanpa peringatan ini, gejalanya cuma
+                # "kok postingannya cuma 1 foto" dan sangat sulit dilacak.
+                warn(f"'{title}': tidak ada foto tambahan yang lolos verifikasi — "
+                     "postingan jadi foto tunggal. Cek kuota Gemini / stok Pexels.")
 
         url = article_url(f)
 

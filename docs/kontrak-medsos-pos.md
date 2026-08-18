@@ -113,6 +113,14 @@ tetap dengan awalan `preview-`, bukan sekadar `.json`.
 memotong kepala hewan, dan itu baru kelihatan setelah di-crop — justru itu yang
 perlu ditinjau.
 
+✅ **Sejak 18 Agu 2026 janji "persis yang akan tayang" benar-benar berlaku:** saat
+menayangkan, skrip memakai `image_urls` dari pratinjau **apa adanya**. Sebelumnya
+foto tambahan dicari ULANG ke Pexels dan diverifikasi Gemini pada saat publish,
+jadi yang naik bisa berbeda dari yang ditinjau — terukur: pratinjau berisi **1
+foto**, yang tayang **4 foto**. Kalau salah satu foto pratinjau sudah tak bisa
+diakses, skrip menghitung ulang sambil memperingatkan (lebih baik daripada gagal
+di tengah Graph API) — hanya dalam kasus itu isinya bisa berbeda.
+
 ⚠️ **Caption IG dan FB sengaja berbeda.** Tampilkan keduanya terpisah; jangan
 tampilkan satu lalu menganggap yang lain sama.
 
