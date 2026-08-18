@@ -47,6 +47,29 @@ Antrean ini **membersihkan dirinya sendiri**: begitu sebuah artikel berhasil
 tayang, `preview-<slug>.json` dihapus otomatis. Kalau posting GAGAL, pratinjaunya
 sengaja dibiarkan supaya bisa dicoba lagi.
 
+⚠️ **Pembersihan itu terjadi di UJUNG workflow, yang berjalan 1–5 menit.** Jadi
+sesudah panel mengirim `tayangkan`, kartunya **masih akan terlihat** untuk
+beberapa menit. Itu normal — bukan tanda aksinya gagal. Panel WAJIB mengunci
+tombol kartu itu selama menunggu; lihat §5.
+
+### Penanda "sudah tayang" — `posted-<slug>.json`
+
+Sesudah IG berhasil, skrip menulis asset `posted-<slug>.json` (media id, post id
+FB, jumlah foto, waktu) **sebelum** membuang pratinjaunya. Penanda ini adalah
+gerbang anti posting-ganda: selama ia ada, artikel itu **tidak akan** diposting
+lagi dan pratinjaunya **tidak akan** dibangkitkan ulang oleh `aksi: "pratinjau"`.
+
+Ini lahir dari kejadian nyata **17 Agu 2026**: satu artikel tayang **dua kali**
+di Instagram dan Halaman Facebook hanya karena tombol di panel diklik dua kali
+selagi workflow pertama masih berjalan — lalu `aksi: "pratinjau"` menghidupkan
+kembali kartunya sehingga bisa tayang untuk ketiga kalinya.
+
+Ingin sengaja memposting ulang? Hapus `posted-<slug>.json` lewat halaman Releases
+GitHub — sadar dan manual.
+
+⚠️ Panel **tidak boleh** menampilkan `posted-*.json` sebagai antrean. Saring
+tetap dengan awalan `preview-`, bukan sekadar `.json`.
+
 ---
 
 ## 3. Bentuk `preview-<slug>.json`
@@ -146,9 +169,26 @@ Content-Type: application/json
 - `aksi: "tolak"` → buang pratinjau dari antrean tanpa memposting.
 - Nilainya **string**, bukan boolean — input `workflow_dispatch` selalu string.
 
-Balasan `204 No Content` berarti workflow *dijadwalkan*, **bukan** berarti sudah
-tayang. Untuk status sesungguhnya, pantau run terbaru workflow itu, atau cukup
-anggap selesai ketika `preview-<slug>.json` hilang dari antrean.
+🔴 Balasan `204 No Content` berarti workflow **berhasil diantre**, BUKAN berarti
+sudah tayang — dan langkah postingnya `continue-on-error: true`, jadi run yang
+gagal pun tetap berstatus hijau. Jangan pernah membaca 204 sebagai "beres".
+Status sesungguhnya: pantau run terbaru workflow itu, atau anggap selesai ketika
+`preview-<slug>.json` hilang dari antrean.
+
+**Kewajiban panel selama menunggu** (ini bagian dari kontrak, bukan saran gaya):
+
+1. Kunci tombol kartu itu begitu aksi dikirim — jangan biarkan tombolnya hidup
+   lagi hanya karena `fetch` dispatch sudah selesai (itu terjadi dalam < 1 detik,
+   sementara workflownya butuh menit).
+2. Kuncinya bertahan melewati refresh halaman (simpan di `sessionStorage` atau
+   sepadan). Kartu yang tombolnya hidup kembali = undangan posting ganda.
+3. Muat ulang antrean **berkala sampai kartunya hilang** (mis. tiap 20 detik,
+   maksimum ~6 menit), bukan sekali setelah 30 detik. Sekali-jalan **selalu**
+   terlalu cepat dan membuat aksinya tampak gagal padahal berhasil.
+4. Habis jendela tunggu tanpa perubahan → katakan apa adanya, jangan diam.
+
+Skrip sekarang menolak posting kedua (lihat §2 `posted-<slug>.json`), tapi itu
+jaring pengaman terakhir — panel tetap wajib tidak memancing kliknya.
 
 **Menolak** cukup dengan `aksi: "tolak"` — skrip yang membuang asset-nya. Panel
 tidak perlu izin `contents:write` sendiri.

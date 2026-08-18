@@ -395,6 +395,56 @@ def delete_asset(release, name):
     return False
 
 
+def refresh_assets(release):
+    """Segarkan daftar asset `release` DARI SERVER (objeknya diubah di tempat).
+
+    upload_asset()/delete_asset() mengubah keadaan di server tapi TIDAK menyentuh
+    salinan lokal ini, dan run yang berbeda sama sekali tidak saling tahu. Tanpa
+    penyegaran, pemeriksaan "apakah pratinjau masih ada" membaca daftar basi —
+    itulah yang membuat run kedua 17 Agu 2026 mencetak "pratinjau dibersihkan"
+    padahal asetnya sudah dihapus run pertama (konfirmasi palsu).
+    """
+    status, rel = gh_api(f"https://api.github.com/repos/{GH_REPO}/releases/tags/{RELEASE_TAG}")
+    if status == 200 and isinstance(rel, dict):
+        release["assets"] = rel.get("assets", [])
+    else:
+        warn(f"gagal menyegarkan daftar asset release (HTTP {status}) — "
+             "memakai daftar sebelumnya.")
+    return release
+
+
+def has_asset(release, name):
+    """True bila asset bernama `name` ada di release."""
+    return any(a.get("name") == name for a in release.get("assets", []))
+
+
+def mark_posted(release, slug, payload):
+    """Tandai artikel SUDAH TAYANG dengan asset `posted-<slug>.json`.
+
+    Penanda ini yang mencegah posting ganda. Riwayatnya:
+    17 Agu 2026 satu artikel tayang DUA KALI ke Instagram & Halaman Facebook
+    (media 18082033565299307 & 18435495808134699) hanya karena tombol di POS
+    diklik dua kali — kartunya belum sempat hilang dari layar saat workflow
+    pertama masih berjalan (~1-5 menit). Gerbang tinjau tak ada gunanya kalau
+    aksi yang sama bisa dijalankan berkali-kali.
+
+    Penanda dibuat SEBELUM pratinjau dihapus supaya tidak pernah ada celah waktu
+    di mana keduanya sama-sama tidak ada.
+
+    Ingin sengaja memposting ulang? Hapus asset `posted-<slug>.json` di release
+    `ig-images` lewat halaman Releases GitHub — sadar dan manual, bukan tak sengaja.
+    """
+    blob = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+    if upload_asset(release, f"posted-{slug}.json", blob, "application/json"):
+        print(f"  ditandai sudah tayang: posted-{slug}.json")
+        return True
+    # Gagal menandai = risiko posting ganda pada klik berikutnya. Harus berisik.
+    warn(f"GAGAL menulis penanda posted-{slug}.json — artikel SUDAH tayang tapi "
+         "tidak tercatat. Buang pratinjaunya lewat tombol 'Hapus dari antrean' "
+         "di POS supaya tidak terposting dua kali.")
+    return False
+
+
 def is_public(url):
     """Pastikan URL bisa diambil TANPA autentikasi (Instagram mengunduhnya sendiri)."""
     try:
@@ -653,15 +703,42 @@ def main():
             print(f"  lewati (file tak ada di checkout): {f}")
             continue
 
+        # Daftar asset diambil ULANG per artikel: run lain — atau klik kedua di
+        # POS yang men-dispatch workflow kembar — bisa sudah mengubahnya sejak
+        # run ini dimulai.
+        refresh_assets(release)
+        preview_name = f"preview-{p.stem}.json"
+        posted_name = f"posted-{p.stem}.json"
+
         # TOLAK: cukup buang pratinjau dari antrean. Ditangani paling awal supaya
         # tidak sempat mengunduh foto atau memanggil Gemini sama sekali.
         if AKSI == "tolak":
-            if delete_asset(release, f"preview-{p.stem}.json"):
+            if delete_asset(release, preview_name):
                 ditolak += 1
                 notice(f"'{p.stem}' ditolak — pratinjau dibuang, "
                        "tidak ada yang diposting.")
             else:
                 notice(f"'{p.stem}' tidak ada di antrean pratinjau.")
+            continue
+
+        # ── Gerbang anti posting-ganda ────────────────────────────────────────
+        # Sekali tayang, artikel keluar dari peredaran: tidak diposting lagi, dan
+        # pratinjaunya tidak dibangkitkan ulang. Tanpa ini, klik kedua di POS
+        # (yang sangat mudah terjadi karena kartunya belum hilang selama workflow
+        # berjalan 1-5 menit) menghasilkan postingan kembar di IG DAN Facebook —
+        # sudah terjadi 17 Agu 2026. `aksi=pratinjau` juga tertutup di sini,
+        # karena dulu ia MENGHIDUPKAN kembali kartu artikel yang sudah tayang.
+        if has_asset(release, posted_name):
+            notice(f"'{p.stem}' SUDAH pernah tayang — dilewati. Hapus asset "
+                   f"'{posted_name}' di release '{RELEASE_TAG}' bila memang "
+                   "ingin menayangkannya lagi.")
+            continue
+
+        # Menayangkan hanya sah untuk artikel yang memang sedang menunggu
+        # keputusan. Pratinjau hilang = keputusannya sudah diambil.
+        if not DRY_RUN and not has_asset(release, preview_name):
+            notice(f"'{p.stem}' tidak ada di antrean pratinjau — tidak diposting. "
+                   "Buat pratinjaunya dulu lewat tombol 'Segarkan pratinjau' di POS.")
             continue
 
         fm, body = split_doc(p.read_text(encoding="utf-8"))
@@ -767,16 +844,29 @@ def main():
         # Halaman FB: tautan BISA diklik di sini, jadi permalink ikut dimuat.
         # Catatan: setelan crosspost IG->FB TIDAK berlaku untuk postingan yang
         # diterbitkan lewat Graph API, jadi Halaman harus diposting terpisah.
+        post_id = None
         if FB_PAGE_ID and fb_token:
             post_id = post_facebook(image_urls, caption_fb, fb_token)
             if post_id:
                 posted_fb += 1
                 print(f"[FB] {title} -> post id {post_id} ({url})")
 
-        # Sudah tayang -> keluarkan dari antrean POS. Hanya kalau IG berhasil:
-        # kalau gagal, pratinjaunya harus tetap ada supaya bisa dicoba lagi.
+        # Sudah tayang -> tandai, lalu keluarkan dari antrean POS. Hanya kalau IG
+        # berhasil: kalau gagal, pratinjaunya harus tetap ada supaya bisa dicoba
+        # lagi. Urutannya disengaja — penanda dulu, baru pratinjau dihapus.
         if media_id:
-            delete_asset(release, f"preview-{slug}.json")
+            refresh_assets(release)   # daftar sudah berubah oleh unggahan JPEG di atas
+            mark_posted(release, slug, {
+                "slug": slug,
+                "path": f,
+                "title": title,
+                "article_url": url,
+                "ig_media_id": media_id,
+                "fb_post_id": post_id or "",
+                "images": len(image_urls),
+                "posted_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            })
+            delete_asset(release, preview_name)
 
     if AKSI == "tolak":
         notice(f"selesai. {ditolak} pratinjau ditolak & dibuang dari antrean.")
