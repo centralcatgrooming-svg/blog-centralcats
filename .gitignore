@@ -13,3 +13,11 @@ __pycache__/
 
 # Ringkasan sementara pratinjau medsos (dibuat di runner, jangan di-commit)
 preview-summary.json
+
+# Rahasia — repo ini PUBLIK, dan alur kerjanya menyentuh token GitHub,
+# kunci Gemini, serta kunci Pexels. Satu .env yang ter-commit langsung
+# terbaca seluruh internet. Per 19 Agu 2026 belum pernah ada .env di sini;
+# ini PAGAR, bukan tambalan. Rahasia asli hidup di GitHub Secrets.
+.env
+.env.*
+!.env.example
