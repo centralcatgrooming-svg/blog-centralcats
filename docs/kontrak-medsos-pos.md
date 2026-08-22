@@ -373,3 +373,50 @@ turunan artikel, plus tripwire yang memaksa `MUST_TAGS` masuk kalau sampai hilan
 
 ⚠️ Menambah/mengurangi `BRAND_TAGS` **tidak** membatalkan jaminan ini — `MUST_TAGS`
 sengaja dipisah supaya tetap terjamin walau daftar brand kelak dirapikan.
+
+---
+
+## 📸 Foto artikel RAS — dibuat, bukan dicari (22 Agu 2026)
+
+**Foto stok TIDAK BISA menjamin ras.** Penandaan Pexels dibuat pengunggah, bukan juri ras.
+Diuji pada carousel `sejarah-kucing-persia`, bukan diasumsikan:
+
+| Cara | Hasil |
+|---|---|
+| `"apakah foto ini menampilkan X?"` | meloloskan **semua** — tak menyaring apa pun |
+| `"nilai dengan standar CFA/TICA"` | menolak **semua**, termasuk Persia asli (model menuntut tipe kontes ekstrem; foto stok isinya kucing peliharaan) |
+| bentuk terkalibrasi | tak bisa memisahkan ras **mirip** (Persia tradisional vs Turkish Angora) |
+| **gambar DIBUAT, organisasi disebut** | **ras benar** ✅ |
+
+**Bentuk sekarang:** artikel ras (punya `image_subject`) membuat **foto unggulan DAN slide
+carousel**-nya lewat Gemini. Prompt **WAJIB menyebut nama organisasi** (`BREED_STANDARD_ORG`,
+default `TICA`) — terpantau, menyebutnya menghasilkan tipe standar (wajah rata, break hidung di
+antara mata), sementara tanpa itu hasilnya tipe tradisional yang ciri rasnya kabur.
+
+🔑 **Kredit wajib `"Ilustrasi AI — bukan foto kucing sungguhan"`.** Instagram/Meta memasang
+label AI sendiri (gambar Google membawa watermark SynthID), jadi menyebutnya lebih dulu membuat
+kita terlihat jujur, bukan ketahuan.
+
+⚠️ **Penilaian AI soal standar ras TIDAK STABIL — jangan jadikan ia hakim.** Diuji: model yang
+sama membuat gambar sambil menyatakan sesuai standar, lalu **menemukan 3–4 cacat pada gambarnya
+sendiri** begitu ditanya *"apakah kamu yakin?"* — untuk Persia **maupun** Bengal. Jawabannya
+mengikuti cara bertanya, bukan mengikuti fotonya. Yang menilai layak-tidaknya tetap **manusia di
+panel pratinjau**.
+
+### ⏭️ BELUM SELESAI — kuota Gemini (22 Agu 2026)
+
+Generasi gambar **belum pernah berhasil dijalankan**: tiga run berturut-turut dibalas
+**HTTP 429**, termasuk sesudah backoff 5→15 detik dipasang. Karena backoff tak menolong,
+ini **bukan** batas per-menit. Dua kemungkinan yang belum dipisahkan:
+
+1. kuota harian kunci memang habis (hari itu sudah ada auto-draft + beberapa run pratinjau), atau
+2. model gambar (`gemini-2.5-flash-image`) **nol jatah** di tier kunci ini — dari luar kedua hal
+   ini terlihat identik.
+
+Pesan galat sudah diperbaiki agar **menyertakan alasan dari server**, jadi run berikutnya akan
+menjawabnya sendiri. **Keputusan Boss: dibiarkan dulu** — yang penting prompt & pipeline-nya aman.
+
+✅ **Aman ditinggal**, karena rantai fallback-nya sudah terbukti di run nyata: generasi gagal →
+foto stok → verifikasi gagal → fail-closed → carousel kosong, dan **pipeline tidak mati**.
+Yang perlu diperiksa saat kuota pulih hanyalah baris log
+`(generasi gambar gagal HTTP …: <alasan>)`.
