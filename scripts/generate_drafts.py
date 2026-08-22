@@ -768,7 +768,15 @@ def generate_breed_photos(subject, count=3):
                 "generationConfig": {"responseModalities": ["IMAGE"]},
             }, timeout=120)
             if r.status_code != 200:
-                print(f"    (generasi gambar gagal HTTP {r.status_code} — "
+                # Sertakan ALASAN dari server. "429" saja tak bisa dibedakan
+                # antara "kuota harian habis" dan "model ini nol jatah di tier
+                # kunci ini" — dua hal yang penanganannya berbeda total
+                # (menunggu vs mengganti model/menaikkan paket).
+                try:
+                    sebab = (r.json().get("error", {}).get("message") or "")[:300]
+                except Exception:
+                    sebab = (r.text or "")[:300]
+                print(f"    (generasi gambar gagal HTTP {r.status_code}: {sebab} — "
                       f"jatuh balik ke foto stok)", file=sys.stderr)
                 return out
             parts = r.json()["candidates"][0]["content"].get("parts") or []
