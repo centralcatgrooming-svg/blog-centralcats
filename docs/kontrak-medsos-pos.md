@@ -5,9 +5,21 @@ untuk panel Media Sosial di `https://app.centralcats.id/technology-system`.
 
 Sisi blog **sudah jadi**: tiap artikel baru otomatis menghasilkan pratinjau, dan
 tidak ada apa pun yang tayang ke Instagram/Facebook tanpa perintah eksplisit.
-Sisi POS **belum dibangun** (per 15 Agu 2026 panelnya masih "Segera Hadir").
+Sisi POS **juga sudah LIVE sejak 15 Agu 2026** (commit `481f7f7`) — panel Media
+Sosial ada di Pusat Konten, lengkap dengan kunci tombol lolos-refresh dan poll
+antrean. Kalimat "Segera Hadir" di versi lama dokumen ini **sudah tidak berlaku**;
+jangan lagi menayangkan manual dari tab Actions sebagai jalur normal, karena itu
+melewati seluruh pagar yang ada di panel.
 
 Repo blog: `centralcatgrooming-svg/blog-centralcats` (PUBLIC).
+
+> 🔴 **REPO INI PUBLIC — dokumen ini ikut terbaca siapa pun.**
+> Yang boleh di sini: **kontrak teknis** (cara kerja mekanisme, bentuk data, nama
+> env, aturan yang harus dipatuhi kode). Yang **TIDAK** boleh:
+> **kredensial atau nilai token** apa pun · **angka bisnis** (jumlah pengikut,
+> omzet, jumlah pelanggan) · **pertimbangan strategi/kompetitif** · **path mesin
+> pribadi**. Semua itu tempatnya di dokumen **internal** repo POS (privat).
+> Kalau ragu: tulis *aturannya* di sini, tulis *alasan bisnisnya* di sana.
 
 ---
 
@@ -207,6 +219,17 @@ tidak perlu izin `contents:write` sendiri.
 
 Ini perilaku disengaja, bukan bug — jangan "diperbaiki" di sisi POS:
 
+- 🔴 **Artikel di luar `SOCIAL_SECTIONS`** (default `kesehatan-hewan,panduan-tips,berita-tren`).
+  Ini **ALLOWLIST**, bukan blocklist: section baru apa pun **otomatis tidak ikut
+  tayang** sampai didaftarkan secara sadar. Sengaja gagal ke sisi aman — blocklist
+  akan meloloskan tipe konten baru diam-diam (mis. rencana "Kisah Sukses" di
+  `.ai/ROADMAP.md` Tahap 6).
+  **`bisnis-hewan` DI LUAR medsos** — keputusan pemilik, 22 Agu 2026. Di blog tetap
+  terbit; kriteria blog memang sengaja lebih longgar. (Pertimbangan di balik keputusan
+  ini dicatat di dokumen internal, bukan di sini — repo ini PUBLIC.)
+- **Artikel bertag `bisnis`** (`SOCIAL_EXCLUDE_TAGS`). Lapis tambahan untuk artikel
+  *Berita & Tren* (Sabtu = hari kucing ⇒ pasti tayang) yang mengambil sudut peluang
+  usaha. Bergantung pada Gemini menuliskan tagnya, jadi **lapis pelengkap, bukan pagar utama**.
 - **Artikel di luar `SOCIAL_ANIMALS`** (default `kucing,anjing`). Blog sengaja
   memuat semua hewan, medsos hanya dua ini. Artikel kelinci/hamster/burung tetap
   terbit di blog + push OneSignal + IndexNow, tapi tidak pernah masuk medsos.
@@ -221,7 +244,132 @@ Ini perilaku disengaja, bukan bug — jangan "diperbaiki" di sisi POS:
 
 - Batas carousel IG **2–10 gambar**; `CAROUSEL_MAX` default 4. Kalau hanya 1
   gambar yang lolos, skrip otomatis turun ke postingan foto tunggal.
+
+  🔑 **`CAROUSEL_MAX` = BATAS ATAS, BUKAN TARGET.** Hasil **1, 2, 3, atau 4 foto
+  sama sahnya**. Satu foto yang tepat lebih baik daripada empat yang dipaksakan;
+  panel POS **tidak boleh** memperlakukan carousel pendek sebagai kegagalan.
+
+  🔴 **Kenapa aturan ini ditulis (kejadian nyata 22 Agu 2026).** Pratinjau
+  `peluang-bisnis-playground-kucing` berisi 4 foto: 1 rak dinding kucing (relevan)
+  + **3 kucing di POHON OUTDOOR**, padahal artikelnya tentang playground *indoor*.
+  Sebabnya bukan verifikasi yang mati, melainkan **verifikasi yang menanyakan hal
+  yang salah**: subjeknya jatuh ke nama hewan (`"kucing"`), jadi Gemini hanya
+  ditanya *"apakah foto ini menampilkan kucing?"* — dan kucing di pohon menjawab YA.
+  Kata kunci `image_query = "cat climbing tree shelf"` membuat Pexels mengembalikan
+  pohon sungguhan. Kedua lapis bekerja sesuai rancangan; yang bolong rancangannya:
+  **nol lapis yang memeriksa kaitan foto dengan ISI artikel.**
+
+  Sejak perbaikan: subjek verifikasi = `image_subject` bila ada, selain itu **JUDUL
+  artikel** (deterministik, tidak bergantung Gemini mengisi front matter), dan
+  `fetch_photos_bytes` **fail-closed** — tanpa subjek, foto tambahan tidak diambil
+  sama sekali. Ada pula batas **10 panggilan verifikasi per artikel**: kuota habis
+  ⇒ pulang dengan foto **lebih sedikit**, bukan dengan foto yang tidak diperiksa.
 - Halaman Facebook memakai alur berbeda (unggah `published=false` lalu
   `attached_media` di `/feed`) — itu wajar, IG dan FB memang tak punya endpoint
   yang sama untuk multi-foto.
 - Rujukan lengkap ada di `CLAUDE.md` Bagian 13 dan `scripts/post_instagram.py`.
+
+---
+
+## 8. Kontrak MATERI — apa yang boleh mengisi medsos (22 Agu 2026)
+
+Sumber tunggal. Kalau tabel ini berbeda dari kode, **kodenya yang salah**.
+
+### 8a. Pasokan mingguan — jaminan 4 posting
+
+`WEEKDAY_SECTION` + `CAT_WEEKDAYS = {0,3,5}` + `HISTORY_WEEKDAYS = {6}` di
+`scripts/generate_drafts.py`, 1 artikel/hari:
+
+| Hari | Section blog | Hari kucing | Medsos | Pilar @centralcat_official |
+|---|---|:--:|:--:|---|
+| **Senin** | Kesehatan Hewan | ✅ | ✅ | Edukasi |
+| Selasa | Panduan & Tips | — | bonus | Edukasi |
+| **Rabu** | Bisnis Hewan | — | 🚫 **diblokir** | — *(internal tim)* |
+| **Kamis** | Kesehatan Hewan | ✅ | ✅ | Edukasi |
+| Jumat | Panduan & Tips | — | bonus | Edukasi |
+| **Sabtu** | Berita & Tren | ✅ | ✅ | Berita |
+| **Minggu** | Berita & Tren → *Ras & Sejarah* | ✅ (`hewan` dikunci) | ✅ | Sejarah |
+
+⇒ **jaminan 4 posting/minggu** (Sen · Kam · Sab · Min); Sel/Jum bonus bila Gemini
+kebetulan menulis kucing/anjing.
+
+🔴 **Hari kucing dulu Rabu, dipindah ke Kamis 22 Agu 2026.** Sebabnya Rabu =
+*Bisnis Hewan*, yang kini di luar kontrak materi — kalau Rabu dibiarkan jadi hari
+kucing, ia menghasilkan artikel kucing yang tetap diblokir gerbang materi dan
+**jaminan turun diam-diam 4 → 3**. **Jangan kembalikan ke `{0,2,5}`** tanpa lebih
+dulu mengembalikan `bisnis-hewan` ke `SOCIAL_SECTIONS`.
+
+⚠️ **Jangan hapus hari kucing ATAU slot Minggu tanpa mengganti yang lain** —
+keduanya yang menjamin medsos terisi (blog CLAUDE.md Bagian 8 & 13).
+
+### 8b. Kekuatan tiap sinyal — kenapa gerbangnya folder, bukan tag
+
+🔑 **Aturan pokok: gerbang medsos TIDAK BOLEH bergantung pada keluaran Gemini.**
+
+| Sinyal | Ditentukan siapa | Kekuatan | Perannya |
+|---|---|---|---|
+| **section / folder** | `WEEKDAY_SECTION` di skrip — **deterministik** | ✅ kuat | **gerbang utama** (allowlist) |
+| `hewan = [...]` | Gemini (dipaksa `FORCE_CAT` di hari kucing) | ⚠️ sedang | filter hewan |
+| `tags` memuat `bisnis` | **Gemini** — bisa lupa | ⚠️ lemah | lapis pelengkap |
+| judul artikel | ditulis Gemini tapi **selalu ada** | ✅ cukup | subjek verifikasi foto |
+
+### 8c. Foto
+
+**1–4 foto, batas atas bukan target.** Tiap foto tambahan wajib lolos verifikasi
+vision terhadap **judul/`image_subject`**, bukan sekadar nama hewan. Ragu, kuota
+habis, atau tanpa subjek ⇒ **lebih sedikit foto**. Rinciannya di §7.
+
+### 8d. Yang TIDAK berubah
+
+Kadensi **tetap 4×/minggu** — yang dibenahi materinya, bukan frekuensinya.
+Kriteria blog tetap longgar (semua hewan, bisnis boleh) dan **sengaja berbeda**
+dari medsos. Perbedaan itu fitur, bukan inkonsistensi.
+
+### 8e. Copywriting & hashtag caption medsos
+
+Caption blog cukup mengajak **membaca**; caption medsos harus juga mengajak
+**bertindak**. Susunannya:
+
+```
+{emoji topik} {judul}          <- baris 1: satu-satunya yang terbaca sebelum "selengkapnya"
+{paragraf pembuka artikel}
+
+📌 Yang dibahas:
+• ...
+
+{ajakan berkomentar}
+
+━━━━━━━━━━━━━━
+📖 Artikel lengkap → tautan di bio   (FB: tautan langsung)
+📲 Booking grooming & cat hotel → WA <nomor>
+📍 Pasar Kemis & Rajeg, Tangerang
+
+{hashtag}
+```
+
+- **Emoji pembuka diturunkan dari subkategori** (`TOPIC_EMOJI`), **deterministik** —
+  artikel yang sama selalu menghasilkan caption yang sama. Itu syarat mutlak agar
+  pratinjau di panel POS benar-benar sama dengan yang tayang.
+- **Blok CTA seluruhnya env** (`SOCIAL_CTA_WA` · `SOCIAL_CTA_LAYANAN` ·
+  `SOCIAL_CTA_LOKASI`) — mengubah nomor/layanan/lokasi tidak boleh butuh commit.
+- **Ekor (ajakan + CTA + hashtag) TIDAK PERNAH dipotong.** Kalau caption melebihi
+  2.200 karakter, yang dipangkas bagian isinya.
+
+🔴 **Hashtag — jaminan yang tidak boleh dilanggar (keputusan pemilik 22 Agu 2026):**
+
+| Aturan | Nilai |
+|---|---|
+| **Wajib ada di setiap caption** | **`#centralcats`** dan **`#petshoptangerang`** (`MUST_TAGS`) |
+| Minimal | **5** hashtag (`MIN_HASHTAGS`) |
+| Maksimal | 20 (`MAX_HASHTAGS`) |
+| Urutan | spesifik-artikel → hewan → komunitas → brand |
+
+🔴 **Bentuk lama BISA MEMBUANG `#petshoptangerang` dan itu bukan hipotesis.**
+Dulu daftarnya dirakit `tags + hewan + BRAND_TAGS` lalu dipotong `[:MAX_HASHTAGS]` —
+brand ada di **urutan paling belakang**, jadi merekalah yang pertama hilang begitu
+artikel punya banyak tag. Terbukti di uji: artikel bertag 25 kehilangan seluruh
+hashtag brand. Sekarang **slot brand dipesan lebih dulu**, sisanya baru diisi tag
+turunan artikel, plus tripwire yang memaksa `MUST_TAGS` masuk kalau sampai hilang.
+
+⚠️ Menambah/mengurangi `BRAND_TAGS` **tidak** membatalkan jaminan ini — `MUST_TAGS`
+sengaja dipisah supaya tetap terjamin walau daftar brand kelak dirapikan.
