@@ -685,6 +685,91 @@ def fetch_image(queries, slug, subject=None, strict=False):
     return None, None
 
 
+# Model gambar dipisah dari MODEL teks: keduanya beda kemampuan, dan memisahnya
+# membuat model gambar bisa diganti lewat env tanpa menyentuh jalur artikel.
+IMAGE_MODEL = os.environ.get("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
+GEMINI_IMAGE_URL = (
+    f"https://generativelanguage.googleapis.com/v1beta/models/{IMAGE_MODEL}:generateContent")
+
+# Organisasi yang disebut di prompt. JANGAN dikosongkan — lihat catatan di
+# generate_breed_photos().
+BREED_ORG = os.environ.get("BREED_STANDARD_ORG", "TICA")
+
+# Kredit WAJIB untuk gambar hasil generasi. Bukan hiasan: Instagram/Meta
+# memasang label "AI info" sendiri (gambar Google membawa watermark SynthID),
+# jadi menyebutnya lebih dulu membuat kita terlihat jujur, bukan ketahuan.
+AI_CREDIT = "Ilustrasi AI — bukan foto kucing sungguhan"
+
+
+def generate_breed_photos(subject, count=3):
+    """Buat foto ras lewat Gemini, kembalikan list bytes JPEG/PNG.
+
+    🔴 KENAPA DIBUAT, BUKAN DICARI — diuji 22 Agu 2026, bukan diasumsikan.
+    Pencarian foto stok TIDAK BISA menjamin ras, karena penandaan Pexels dibuat
+    pengunggah, bukan juri ras. Tiga bentuk verifikasi dicoba pada carousel
+    `sejarah-kucing-persia` dan semuanya gagal dengan cara berbeda:
+      - "apakah foto ini menampilkan X?"  -> meloloskan semua
+      - "nilai dengan standar CFA/TICA"   -> menolak semua, termasuk Persia asli
+      - bentuk terkalibrasi               -> tak bisa memisahkan ras yang mirip
+    Generasi menutupnya karena rasnya ditentukan di HULU, bukan dinilai di hilir.
+
+    ⚠️ NAMA ORGANISASI WAJIB DISEBUT di prompt. Terpantau: "standarisasi
+    organisasi TICA" menghasilkan Persia bertipe standar (wajah rata, break
+    hidung di antara mata), sementara prompt tanpa/berbeda organisasi cenderung
+    menghasilkan tipe tradisional yang ciri rasnya kabur.
+
+    ⚠️ Gagal apa pun -> kembalikan list KOSONG, JANGAN melempar. Pemanggil lalu
+    jatuh balik ke Pexels. Pipeline medsos tak boleh mati gara-gara model gambar
+    tak tersedia / kuota habis / kunci tanpa akses.
+    """
+    if not GEMINI_KEY or not subject or count <= 0:
+        return []
+    prompt = (
+        f"Buatkan foto {subject} yang sesuai standarisasi organisasi {BREED_ORG}. "
+        "Format persegi 1:1, kualitas foto untuk Instagram, pencahayaan alami, "
+        "hewan menghadap kamera sehingga ciri rasnya terlihat jelas. "
+        "Tanpa teks, tanpa watermark, tanpa manusia di dalam foto."
+    )
+    out = []
+    for i in range(count):
+        try:
+            r = requests.post(
+                GEMINI_IMAGE_URL,
+                headers={"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"},
+                json={
+                    "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                    "generationConfig": {"responseModalities": ["IMAGE"]},
+                },
+                timeout=120,
+            )
+            if r.status_code != 200:
+                print(f"    (generasi gambar gagal HTTP {r.status_code} — "
+                      f"jatuh balik ke foto stok)", file=sys.stderr)
+                return out
+            parts = r.json()["candidates"][0]["content"].get("parts") or []
+            data = None
+            for p in parts:
+                blob = p.get("inline_data") or p.get("inlineData")
+                if blob and blob.get("data"):
+                    data = base64.b64decode(blob["data"])
+                    break
+            if not data:
+                print("    (balasan tanpa gambar — jatuh balik ke foto stok)", file=sys.stderr)
+                return out
+            # Dedup isi: model bisa mengembalikan gambar nyaris sama pada
+            # permintaan berulang, dan carousel berisi 3 foto kembar lebih buruk
+            # daripada carousel berisi 1 foto.
+            sig = photo_signature(data)
+            if sig and any(sig == photo_signature(b) for b in out):
+                continue
+            out.append(data)
+        except Exception as e:
+            print(f"    (generasi gambar gagal: {e} — jatuh balik ke foto stok)",
+                  file=sys.stderr)
+            return out
+    return out
+
+
 def photo_signature(img_bytes):
     """Sidik ISI gambar (average hash 8x8) — bukan sidik berkasnya.
 

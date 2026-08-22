@@ -809,6 +809,20 @@ def extra_photos(fm, animals, want, exclude_sigs=()):
     print(f"  carousel: cari {want} foto tambahan, query={queries}, "
           f"verifikasi subjek \"{subject}\"")
     try:
+        # ARTIKEL RAS -> foto DIBUAT, bukan dicari. `image_subject` hanya diisi
+        # untuk subkategori "Ras & Sejarah", jadi ia sekaligus penanda yang tepat.
+        # Alasan lengkap + hasil ujinya ada di generate_breed_photos().
+        if field("image_subject", fm):
+            gen = g.generate_breed_photos(subject, count=want)
+            if gen:
+                print(f"  carousel: {len(gen)} gambar DIBUAT (ras) — "
+                      f"organisasi {g.BREED_ORG}")
+                return [{"bytes": b, "credit": g.AI_CREDIT, "query": "generated"}
+                        for b in gen]
+            # Kosong = model tak tersedia/kuota habis. Jangan mati; pakai jalur
+            # foto stok apa adanya, dengan verifikasi terkalibrasi yang ada.
+            warn("generasi gambar ras tidak menghasilkan apa pun — "
+                 "jatuh balik ke foto stok")
         return g.fetch_photos_bytes(queries, subject=subject, count=want,
                                     exclude_sigs=exclude_sigs)
     except Exception as e:
