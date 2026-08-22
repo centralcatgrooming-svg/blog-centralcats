@@ -761,7 +761,7 @@ def post_facebook(image_urls, message, tok):
 
 
 # ---------------------------------------------------------------------- main
-def extra_photos(fm, animals, want):
+def extra_photos(fm, animals, want, exclude_sigs=()):
     """Cari `want` foto TAMBAHAN untuk carousel, di luar gambar unggulan artikel.
 
     Relevansi dijaga dua lapis:
@@ -809,7 +809,8 @@ def extra_photos(fm, animals, want):
     print(f"  carousel: cari {want} foto tambahan, query={queries}, "
           f"verifikasi subjek \"{subject}\"")
     try:
-        return g.fetch_photos_bytes(queries, subject=subject, count=want)
+        return g.fetch_photos_bytes(queries, subject=subject, count=want,
+                                    exclude_sigs=exclude_sigs)
     except Exception as e:
         warn(f"gagal mengambil foto carousel: {e}")
         return []
@@ -987,7 +988,14 @@ def main():
             # Carousel: gambar unggulan jadi slide pertama, sisanya foto tambahan
             # yang relevan. Kredit fotografer dikumpulkan untuk ditulis di caption.
             image_urls = [image_url]
-            for i, ph in enumerate(extra_photos(fm, animals, CAROUSEL_MAX - 1), start=2):
+            # Sidik foto unggulan diteruskan supaya slide 1 tak muncul lagi di
+            # tengah carousel. Hero dan carousel diambil dua fungsi terpisah,
+            # jadi tanpa ini keduanya tak tahu satu sama lain — persis yang
+            # membuat `sejarah-kucing-persia` punya slide 1 == slide 3.
+            hero_sig = g.photo_signature(raw)
+            for i, ph in enumerate(
+                    extra_photos(fm, animals, CAROUSEL_MAX - 1,
+                                 exclude_sigs=(hero_sig,)), start=2):
                 try:
                     j = to_square_jpeg(ph["bytes"])
                 except Exception as e:
