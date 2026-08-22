@@ -316,3 +316,52 @@ habis, atau tanpa subjek ⇒ **lebih sedikit foto**. Rinciannya di §7.
 Kadensi **tetap 4×/minggu** — yang dibenahi materinya, bukan frekuensinya.
 Kriteria blog tetap longgar (semua hewan, bisnis boleh) dan **sengaja berbeda**
 dari medsos. Perbedaan itu fitur, bukan inkonsistensi.
+
+### 8e. Copywriting & hashtag caption medsos
+
+Caption blog cukup mengajak **membaca**; caption medsos harus juga mengajak
+**bertindak**. Susunannya:
+
+```
+{emoji topik} {judul}          <- baris 1: satu-satunya yang terbaca sebelum "selengkapnya"
+{paragraf pembuka artikel}
+
+📌 Yang dibahas:
+• ...
+
+{ajakan berkomentar}
+
+━━━━━━━━━━━━━━
+📖 Artikel lengkap → tautan di bio   (FB: tautan langsung)
+📲 Booking grooming & cat hotel → WA <nomor>
+📍 Pasar Kemis & Rajeg, Tangerang
+
+{hashtag}
+```
+
+- **Emoji pembuka diturunkan dari subkategori** (`TOPIC_EMOJI`), **deterministik** —
+  artikel yang sama selalu menghasilkan caption yang sama. Itu syarat mutlak agar
+  pratinjau di panel POS benar-benar sama dengan yang tayang.
+- **Blok CTA seluruhnya env** (`SOCIAL_CTA_WA` · `SOCIAL_CTA_LAYANAN` ·
+  `SOCIAL_CTA_LOKASI`) — mengubah nomor/layanan/lokasi tidak boleh butuh commit.
+- **Ekor (ajakan + CTA + hashtag) TIDAK PERNAH dipotong.** Kalau caption melebihi
+  2.200 karakter, yang dipangkas bagian isinya.
+
+🔴 **Hashtag — jaminan yang tidak boleh dilanggar (keputusan pemilik 22 Agu 2026):**
+
+| Aturan | Nilai |
+|---|---|
+| **Wajib ada di setiap caption** | **`#centralcats`** dan **`#petshoptangerang`** (`MUST_TAGS`) |
+| Minimal | **5** hashtag (`MIN_HASHTAGS`) |
+| Maksimal | 20 (`MAX_HASHTAGS`) |
+| Urutan | spesifik-artikel → hewan → komunitas → brand |
+
+🔴 **Bentuk lama BISA MEMBUANG `#petshoptangerang` dan itu bukan hipotesis.**
+Dulu daftarnya dirakit `tags + hewan + BRAND_TAGS` lalu dipotong `[:MAX_HASHTAGS]` —
+brand ada di **urutan paling belakang**, jadi merekalah yang pertama hilang begitu
+artikel punya banyak tag. Terbukti di uji: artikel bertag 25 kehilangan seluruh
+hashtag brand. Sekarang **slot brand dipesan lebih dulu**, sisanya baru diisi tag
+turunan artikel, plus tripwire yang memaksa `MUST_TAGS` masuk kalau sampai hilang.
+
+⚠️ Menambah/mengurangi `BRAND_TAGS` **tidak** membatalkan jaminan ini — `MUST_TAGS`
+sengaja dipisah supaya tetap terjamin walau daftar brand kelak dirapikan.

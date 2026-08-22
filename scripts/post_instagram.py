@@ -125,6 +125,44 @@ HEAD_RE = re.compile(r'(?m)^(#{2,3})\s+(.+?)\s*$')
 # Hashtag tetap milik brand. Sisanya diturunkan dari `tags`/`hewan` artikel.
 BRAND_TAGS = ["centralcats", "groomingkucing", "petshoptangerang", "pasarkemis", "rajeg"]
 
+# 🔴 WAJIB ADA di SETIAP caption medsos — keputusan pemilik 22 Agu 2026.
+# Dipisah dari BRAND_TAGS supaya tetap terjamin walau daftar brand kelak dirapikan.
+MUST_TAGS = ["centralcats", "petshoptangerang"]
+# Batas bawah jumlah hashtag. Kurang dari ini caption terasa telanjang dan
+# jangkauannya mati; kalau tag turunan artikel sedikit, sisanya ditambal dari
+# SOCIAL_EXTRA_TAGS.
+MIN_HASHTAGS = 5
+
+# Hashtag komunitas/minat — memperluas jangkauan ke luar pengikut sendiri.
+# Sengaja env supaya bisa disetel tanpa menyentuh kode (suara brand = keputusan
+# pemilik, bukan keputusan skrip).
+SOCIAL_EXTRA_TAGS = [t.strip() for t in
+                     (os.environ.get("SOCIAL_EXTRA_TAGS",
+                                     "catlovers,kucinglucu,anabul,cathotel")).split(",")
+                     if t.strip()]
+
+# ── BLOK CTA MEDSOS ──────────────────────────────────────────────────────────
+# Caption blog cukup mengajak baca; caption medsos harus juga MENGAJAK BERTINDAK.
+# Nomor & lokasi di bawah memang sudah tercantum publik di bio kedua akun IG.
+# Semuanya env: mengubah nomor/jam/lokasi tidak boleh butuh commit.
+CTA_WA = (os.environ.get("SOCIAL_CTA_WA") or "0821-1182-7798").strip()
+CTA_LAYANAN = (os.environ.get("SOCIAL_CTA_LAYANAN")
+               or "Booking grooming & cat hotel").strip()
+CTA_LOKASI = (os.environ.get("SOCIAL_CTA_LOKASI")
+              or "Pasar Kemis & Rajeg, Tangerang").strip()
+
+# Emoji pembuka caption, dipilih dari subkategori artikel supaya baris pertama
+# punya penanda visual. Dicocokkan berurutan; yang pertama cocok dipakai.
+TOPIC_EMOJI = [
+    ("grooming", "✂️"), ("perawatan", "✂️"),
+    ("kesehatan", "\U0001fa7a"), ("penyakit", "\U0001fa7a"),
+    ("nutrisi", "\U0001f37d️"), ("makanan", "\U0001f37d️"),
+    ("sejarah", "\U0001f4dc"), ("ras", "\U0001f4dc"),
+    ("tren", "✨"), ("lifestyle", "✨"),
+    ("event", "\U0001f389"), ("komunitas", "\U0001f389"),
+    ("panduan", "\U0001f4a1"), ("pemula", "\U0001f4a1"),
+]
+
 # Ajakan berkomentar — ditaruh di caption medsos (blog tidak punya kolom komentar).
 # Dipilih deterministik dari slug supaya tiap artikel dapat variasi tetapi
 # posting ulang artikel yang sama menghasilkan caption yang sama.
@@ -205,14 +243,49 @@ def article_url(path):
 
 
 # ------------------------------------------------------------------- caption
-def hashtags(fm):
-    raw = list_field("tags", fm) + list_field("hewan", fm) + BRAND_TAGS
+def _norm_tags(raw, skip=()):
+    """Normalkan daftar teks jadi hashtag valid (huruf/angka, tak diawali angka)."""
     out = []
     for t in raw:
         tag = re.sub(r"[^0-9a-z]", "", t.lower())
-        if tag and not tag[0].isdigit() and tag not in out:
+        if tag and not tag[0].isdigit() and tag not in out and tag not in skip:
             out.append(tag)
-    return " ".join("#" + t for t in out[:MAX_HASHTAGS])
+    return out
+
+
+def hashtags(fm):
+    """Hashtag caption medsos.
+
+    🔴 HASHTAG BRAND WAJIB SELALU IKUT — khususnya #petshoptangerang.
+    Bentuk lama `tags + hewan + BRAND_TAGS` lalu dipotong `[:MAX_HASHTAGS]`
+    menaruh brand di URUTAN PALING BELAKANG, sehingga justru brand-lah yang
+    pertama hilang begitu artikel punya banyak tag. Sekarang slot brand
+    DIPESAN lebih dulu dan sisanya baru diisi tag turunan artikel.
+
+    Urutan tampil: spesifik-artikel -> hewan -> komunitas -> brand, karena
+    pembaca memindai dari depan dan pencarian IG lebih menghargai tag spesifik.
+    """
+    brand = _norm_tags(BRAND_TAGS + MUST_TAGS)   # MUST ikut walau BRAND dirapikan
+    ruang = max(0, MAX_HASHTAGS - len(brand))    # slot brand dipesan lebih dulu
+    kandidat = _norm_tags(list_field("tags", fm)
+                          + list_field("hewan", fm)
+                          + SOCIAL_EXTRA_TAGS, skip=set(brand))
+    lain = kandidat[:ruang]
+    hasil = lain + brand
+
+    # Jaring pengaman batas bawah: tambal dari sisa kandidat bila masih kurang.
+    if len(hasil) < MIN_HASHTAGS:
+        for t in kandidat[len(lain):]:
+            if len(hasil) >= MIN_HASHTAGS:
+                break
+            hasil.insert(len(lain), t)
+
+    # Tripwire: kalau ini pernah gagal, ada yang mengubah daftar tanpa sadar.
+    wajib = _norm_tags(MUST_TAGS)
+    hilang = [t for t in wajib if t not in hasil]
+    if hilang:                                    # tak boleh terjadi
+        hasil = hasil + hilang
+    return " ".join("#" + t for t in hasil)
 
 
 def plain(s):
@@ -249,6 +322,22 @@ def outline(body, limit=5):
     return items[:limit]
 
 
+def topic_emoji(fm):
+    """Emoji pembuka caption, diturunkan dari subkategori artikel.
+
+    Baris pertama caption IG adalah satu-satunya yang terbaca sebelum tombol
+    "selengkapnya", jadi ia perlu penanda visual. Deterministik (bukan acak)
+    supaya artikel yang sama selalu menghasilkan caption yang sama — syarat
+    agar pratinjau di panel POS benar-benar sama dengan yang tayang.
+    """
+    teks = " ".join(list_field("categories", fm) + list_field("tags", fm)).lower()
+    for kunci, emoji in TOPIC_EMOJI:
+        if kunci in teks:
+            return emoji
+    animals = [a.lower() for a in list_field("hewan", fm)] or ["kucing"]
+    return "\U0001f436" if animals[0] == "anjing" else "\U0001f431"
+
+
 def engage(fm, seed):
     """Kalimat ajakan berkomentar, dipilih deterministik dari seed (slug)."""
     animals = [a.lower() for a in list_field("hewan", fm)] or ["kucing"]
@@ -268,19 +357,27 @@ def build_caption(title, fm, body, url=None, seed=""):
     `url` diisi HANYA untuk Facebook — di sana tautan bisa diklik. Di Instagram
     tautan dalam caption TIDAK bisa diklik, jadi diarahkan ke bio.
     """
-    head = [title]
+    head = [f"{topic_emoji(fm)} {title}".strip()]
     lead = lede(body) or field("summary", fm)
     if lead:
         head.append(lead)
     items = outline(body)
     if items:
-        head.append("Yang dibahas:\n" + "\n".join("• " + i for i in items))
+        head.append("\U0001f4cc Yang dibahas:\n" + "\n".join("• " + i for i in items))
 
-    cta = (f"Baca artikel lengkapnya:\n{url}" if url
-           else "Baca artikel lengkapnya di blog kami — tautan ada di bio \U0001f517")
+    # Blok CTA. Di IG tautan dalam caption TIDAK bisa diklik -> diarahkan ke bio;
+    # di FB tautannya dipasang langsung. Baris layanan + lokasi ditambahkan supaya
+    # postingan tidak berhenti di "baca artikel" — pembaca diberi langkah nyata
+    # berikutnya. Garis pemisah memisahkan isi dari ajakan agar mudah dipindai.
+    baca = (f"\U0001f4d6 Artikel lengkap → {url}" if url
+            else "\U0001f4d6 Artikel lengkap → tautan di bio")
+    cta_lines = ["━" * 14, baca]
+    if CTA_LAYANAN and CTA_WA:
+        cta_lines.append(f"\U0001f4f2 {CTA_LAYANAN} → WA {CTA_WA}")
+    if CTA_LOKASI:
+        cta_lines.append(f"\U0001f4cd {CTA_LOKASI}")
     # Ajakan komentar ikut di ekor agar TIDAK pernah kena pemotongan caption.
-    tail = [engage(fm, seed or title),
-            cta + "\nCentral Cat's — grooming, petshop & cat hotel di Pasar Kemis & Rajeg."]
+    tail = [engage(fm, seed or title), "\n".join(cta_lines)]
     tags = hashtags(fm)
     if tags:
         tail.append(tags)
