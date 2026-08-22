@@ -13,6 +13,14 @@ melewati seluruh pagar yang ada di panel.
 
 Repo blog: `centralcatgrooming-svg/blog-centralcats` (PUBLIC).
 
+> 🔴 **REPO INI PUBLIC — dokumen ini ikut terbaca siapa pun.**
+> Yang boleh di sini: **kontrak teknis** (cara kerja mekanisme, bentuk data, nama
+> env, aturan yang harus dipatuhi kode). Yang **TIDAK** boleh:
+> **kredensial atau nilai token** apa pun · **angka bisnis** (jumlah pengikut,
+> omzet, jumlah pelanggan) · **pertimbangan strategi/kompetitif** · **path mesin
+> pribadi**. Semua itu tempatnya di dokumen **internal** repo POS (privat).
+> Kalau ragu: tulis *aturannya* di sini, tulis *alasan bisnisnya* di sana.
+
 ---
 
 ## 1. Kenapa ada gerbang tinjau
@@ -216,9 +224,9 @@ Ini perilaku disengaja, bukan bug — jangan "diperbaiki" di sisi POS:
   tayang** sampai didaftarkan secara sadar. Sengaja gagal ke sisi aman — blocklist
   akan meloloskan tipe konten baru diam-diam (mis. rencana "Kisah Sukses" di
   `.ai/ROADMAP.md` Tahap 6).
-  **`bisnis-hewan` DI LUAR medsos** (keputusan pemilik, 22 Agu 2026): materi peluang
-  usaha menyangkut brand dan mengajari pesaing ⇒ konten **internal tim**. Di blog
-  tetap terbit — kriteria blog memang sengaja lebih longgar.
+  **`bisnis-hewan` DI LUAR medsos** — keputusan pemilik, 22 Agu 2026. Di blog tetap
+  terbit; kriteria blog memang sengaja lebih longgar. (Pertimbangan di balik keputusan
+  ini dicatat di dokumen internal, bukan di sini — repo ini PUBLIC.)
 - **Artikel bertag `bisnis`** (`SOCIAL_EXCLUDE_TAGS`). Lapis tambahan untuk artikel
   *Berita & Tren* (Sabtu = hari kucing ⇒ pasti tayang) yang mengambil sudut peluang
   usaha. Bergantung pada Gemini menuliskan tagnya, jadi **lapis pelengkap, bukan pagar utama**.
