@@ -571,8 +571,13 @@ def verify_photo(img_bytes, subject):
         parts = r.json()["candidates"][0]["content"].get("parts") or []
         answer = " ".join(p.get("text", "") for p in parts).strip()
     except Exception as e:
-        print(f"    (verifikasi foto gagal, foto ditolak: {e})", file=sys.stderr)
-        return False
+        # None = TAK BISA MENILAI (kuota habis, timeout, jaringan) — berbeda dari
+        # False = sudah dinilai dan DITOLAK. Foto tetap tidak dipakai, tapi
+        # pemanggil tak boleh menghitungnya sebagai jatah verifikasi: satu blip
+        # kuota akan menghabiskan seluruh jatah tanpa satu foto pun benar-benar
+        # dinilai (terjadi nyata, run 32563602477).
+        print(f"    (verifikasi TAK BISA dijalankan: {e})", file=sys.stderr)
+        return None
     # Fail-closed tetap jadi pakemnya: apa pun yang tak bisa dibaca = TOLAK.
     # Termasuk saat model mengarang teks di luar JSON atau kuota habis.
     verdict, ras, alasan = False, "?", ""
@@ -611,7 +616,7 @@ def fetch_photo_pexels(query, slug, subject=None, candidates=1):
         for p in photos:
             src = p["src"].get("large2x") or p["src"].get("large") or p["src"]["original"]
             img = requests.get(src, timeout=60).content
-            if subject and not verify_photo(img, subject):
+            if subject and verify_photo(img, subject) is not True:
                 continue
             return _save_webp(img, slug), f"Foto: {p.get('photographer', 'Pexels')} / Pexels"
         return None, None
@@ -874,8 +879,13 @@ def fetch_photos_bytes(queries, subject=None, count=4, per_query=12,
             if sig and sig in seen_sigs:
                 print("    (foto dilewati — isinya sama dengan foto lain)", file=sys.stderr)
                 continue
+            verdict = verify_photo(img, subject)
+            if verdict is None:
+                # Tak bisa dinilai: foto dilewati TANPA memakan jatah. Fail-closed
+                # tetap berlaku — yang tak terverifikasi tidak pernah dipakai.
+                continue
             checked += 1
-            if not verify_photo(img, subject):
+            if not verdict:
                 continue
             if sig:
                 seen_sigs.add(sig)
