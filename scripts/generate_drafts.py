@@ -94,7 +94,20 @@ WEEKDAY_SECTION = {
 # artikel kucing & anjing, sedangkan aturan diversifikasi di bawah justru
 # mendorong ke hewan lain — tanpa hari khusus ini, medsos nyaris tidak terisi.
 # Senin=0 ... Minggu=6.
-CAT_WEEKDAYS = {0, 2, 5}    # Senin (Kesehatan), Rabu (Bisnis), Sabtu (Berita & Tren)
+#
+# 🔴 RABU DICABUT, KAMIS MASUK (22 Agu 2026). Rabu = "Bisnis Hewan", dan materi
+# peluang usaha kini DI LUAR kontrak materi medsos (keputusan pemilik: menyangkut
+# brand & mengajari pesaing; lihat SOCIAL_SECTIONS di post_instagram.py). Kalau
+# Rabu dibiarkan jadi hari kucing, ia menghasilkan artikel kucing yang tetap
+# diblokir di gerbang materi — jaminan pasokan medsos diam-diam turun 4 -> 3
+# per minggu. Kamis ("Kesehatan Hewan") menggantikannya supaya jaminannya TETAP 4
+# dan keempat slotnya cocok dengan pilar akun @centralcat_official
+# (edukasi / sejarah / berita / ucapan hari raya).
+#
+# Kamis dipilih ketimbang Selasa karena jaraknya lebih rata: Sen-Kam-Sab-Min,
+# bukan Sen-Sel lalu bolong 4 hari. Rabu kembali bebas hewan => diversifikasi
+# blog justru bertambah satu slot.
+CAT_WEEKDAYS = {0, 3, 5}    # Senin (Kesehatan), Kamis (Kesehatan), Sabtu (Berita & Tren)
 
 # Minggu = slot evergreen "Ras & Sejarah": asal-usul ras kucing/anjing dan kisah
 # hewan terkenal (mis. Hachiko). Bukan hari kucing murni — anjing juga boleh,
@@ -621,7 +634,7 @@ def fetch_image(queries, slug, subject=None, strict=False):
     return None, None
 
 
-def fetch_photos_bytes(queries, subject=None, count=4, per_query=12):
+def fetch_photos_bytes(queries, subject=None, count=4, per_query=12, max_verify=10):
     """Ambil hingga `count` foto BERBEDA dari Pexels sebagai bytes mentah.
 
     Dipakai carousel medsos (scripts/post_instagram.py). Beda dari `fetch_image()`
@@ -637,10 +650,25 @@ def fetch_photos_bytes(queries, subject=None, count=4, per_query=12):
     artikel, bukan sekadar hewan yang sama. Foto yang tidak lolos dibuang, dan
     lebih baik pulang dengan sedikit foto daripada memaksa penuh dengan foto
     yang tidak nyambung.
+
+    🔑 `count` adalah BATAS ATAS, BUKAN TARGET. Hasil 1, 2, 3, atau 4 foto sama
+    sahnya — satu foto yang tepat lebih baik daripada empat yang dipaksakan.
+    Fungsi ini TIDAK BOLEH menambal kekurangan dengan kandidat yang tak lolos.
     """
     out, seen_ids, seen_q = [], set(), set()
     if not PEXELS_KEY:
         return out
+    # FAIL-CLOSED: tanpa subjek verifikasi, foto tambahan tidak diambil sama sekali.
+    # Dulu `subject` kosong berarti "terima semua kandidat tanpa diperiksa" — default
+    # yang persis terbalik dari niat docstring di atas.
+    if not subject:
+        print("  (carousel dilewati: tidak ada subjek verifikasi)", file=sys.stderr)
+        return out
+    # Batas panggilan Gemini vision per artikel. Verifikasi yang lebih galak berarti
+    # lebih banyak kandidat ditolak, dan tanpa batas ini satu artikel bisa menghabiskan
+    # puluhan panggilan saat kuota sedang tipis. Habis jatah = pulang dengan foto lebih
+    # SEDIKIT, bukan dengan foto yang tidak diperiksa.
+    checked = 0
     for q in queries:
         q = (q or "").strip()
         if not q or q.lower() in seen_q:
@@ -671,7 +699,12 @@ def fetch_photos_bytes(queries, subject=None, count=4, per_query=12):
                 img = requests.get(src, timeout=60).content
             except Exception:
                 continue
-            if subject and not verify_photo(img, subject):
+            if checked >= max_verify:
+                print(f"    (batas {max_verify} verifikasi tercapai — "
+                      f"carousel pulang dengan {len(out)} foto)", file=sys.stderr)
+                return out
+            checked += 1
+            if not verify_photo(img, subject):
                 continue
             seen_ids.add(pid)
             out.append({

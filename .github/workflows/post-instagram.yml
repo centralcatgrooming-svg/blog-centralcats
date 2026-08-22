@@ -129,6 +129,14 @@ jobs:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           FB_PAGE_ID: "112817513877801"   # Halaman centralcat_official (ID publik)
           SOCIAL_ANIMALS: "kucing,anjing" # medsos khusus 2 hewan ini; blog tetap semua hewan
+          # Kontrak MATERI medsos. ALLOWLIST — section baru otomatis TIDAK ikut
+          # tayang sampai didaftarkan di sini secara sadar (gagal ke sisi aman).
+          # `bisnis-hewan` sengaja di luar: materi peluang usaha = konten internal
+          # tim, menyangkut brand & mengajari pesaing. Di blog tetap terbit.
+          SOCIAL_SECTIONS: "kesehatan-hewan,panduan-tips,berita-tren"
+          # Lapis tambahan: artikel "Berita & Tren" (Sabtu, hari kucing) yang
+          # mengambil sudut peluang usaha diberi tag `bisnis` oleh generate_drafts.py.
+          SOCIAL_EXCLUDE_TAGS: "bisnis"
           BASE_URL: "https://blog.centralcats.id/"
           NEW_FILES: ${{ steps.detect.outputs.files }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

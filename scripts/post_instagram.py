@@ -54,6 +54,30 @@ FB_PAGE_ID = (os.environ.get("FB_PAGE_ID") or "").strip()  # kosong = lewati Hal
 # Kosongkan (SOCIAL_ANIMALS="") untuk mematikan filter & posting semua artikel.
 SOCIAL_ANIMALS = [a.strip().lower() for a in
                   (os.environ.get("SOCIAL_ANIMALS", "kucing,anjing")).split(",") if a.strip()]
+# ── KONTRAK MATERI MEDSOS ────────────────────────────────────────────────────
+# Section (= folder `content/<section>/`) yang BOLEH masuk medsos. Sengaja
+# ALLOWLIST, bukan blocklist: section baru apa pun otomatis TIDAK ikut tayang
+# sampai didaftarkan di sini secara sadar. Blocklist akan meloloskan tipe konten
+# baru diam-diam (mis. rencana "Kisah Sukses" di .ai/ROADMAP.md Tahap 6).
+#
+# `bisnis-hewan` DIKELUARKAN atas keputusan pemilik (22 Agu 2026): materi peluang
+# usaha menyangkut brand & mengajari pesaing, jadi ia konten INTERNAL tim. Di blog
+# tetap terbit — kriteria blog memang sengaja beda & lebih longgar.
+#
+# Sinyalnya DETERMINISTIK: folder ditentukan WEEKDAY_SECTION di generate_drafts.py,
+# bukan oleh keluaran Gemini. Itu sebabnya gerbang utamanya folder, bukan tag.
+# Kosongkan (SOCIAL_SECTIONS="") untuk mematikan filter.
+SOCIAL_SECTIONS = [s.strip().lower() for s in
+                   (os.environ.get("SOCIAL_SECTIONS",
+                                   "kesehatan-hewan,panduan-tips,berita-tren")).split(",")
+                   if s.strip()]
+# Lapis TAMBAHAN, bukan andalan: menambal artikel "Berita & Tren" (Sabtu = hari
+# kucing, jadi pasti tayang) yang mengambil sudut peluang usaha. generate_drafts.py
+# menyuruh Gemini menambahkan tag "bisnis" pada kasus itu — berguna untuk blog,
+# dan di sini dipakai sebagai penyaring. Lemah karena bergantung Gemini menuliskannya;
+# jangan pernah jadikan ini satu-satunya pagar.
+SOCIAL_EXCLUDE_TAGS = [t.strip().lower() for t in
+                       (os.environ.get("SOCIAL_EXCLUDE_TAGS", "bisnis")).split(",") if t.strip()]
 GRAPH_VERSION = (os.environ.get("IG_GRAPH_VERSION") or "v21.0").strip()
 BASE_URL = ((os.environ.get("BASE_URL") or "https://blog.centralcats.id/").strip().rstrip("/")) + "/"
 FILES = [f.strip() for f in (os.environ.get("NEW_FILES") or "").splitlines() if f.strip()]
@@ -671,10 +695,20 @@ def extra_photos(fm, animals, want):
     queries = [q for q in (field("image_query", fm),
                            field("image_query_fallback", fm),
                            animal_en) if q]
-    # Subjek verifikasi: pakai `image_subject` (artikel ras) bila ada, selain itu
-    # nama hewannya. Ini menjamin HEWAN yang benar terlihat di foto; kaitan ke
-    # topik artikel datang dari kata kunci di atas.
-    subject = field("image_subject", fm) or animals[0]
+    # Subjek verifikasi: `image_subject` (artikel ras) bila ada, selain itu JUDUL
+    # artikel. Jangan kembalikan ke nama hewan — itu penyebab carousel "dipaksa".
+    #
+    # Kejadian nyata 22 Agu 2026, `peluang-bisnis-playground-kucing`: subject jatuh
+    # ke "kucing", jadi Gemini cuma ditanya "apakah foto ini menampilkan kucing?".
+    # Query "cat climbing tree shelf" mengembalikan kucing di POHON OUTDOOR — jawaban
+    # YA, lolos semua, carousel penuh 4 foto yang tak nyambung dengan artikel tentang
+    # playground INDOOR. Kedua lapis bekerja sesuai rancangan; yang bolong adalah
+    # rancangannya: NOL lapis yang memeriksa kaitan foto dengan ISI artikel.
+    #
+    # Judul menutup celah itu dan DETERMINISTIK — selalu ada, tidak bergantung Gemini
+    # mengisi `image_subject`. Kalau verifikasinya jadi lebih galak dan foto yang lolos
+    # sedikit, itu HASIL YANG DIINGINKAN: CAROUSEL_MAX adalah batas atas, bukan target.
+    subject = field("image_subject", fm) or field("title", fm) or animals[0]
     print(f"  carousel: cari {want} foto tambahan, query={queries}, "
           f"verifikasi subjek \"{subject}\"")
     try:
@@ -789,6 +823,22 @@ def main():
         if SOCIAL_ANIMALS and not any(a in SOCIAL_ANIMALS for a in animals):
             notice(f"'{title}' di luar cakupan medsos (hewan: {', '.join(animals)}; "
                    f"yang diposting: {', '.join(SOCIAL_ANIMALS)}) — dilewati.")
+            continue
+
+        # Gerbang MATERI, deterministik: folder artikel harus ada di allowlist.
+        # `parts[1]` = section; bentuk path sudah divalidasi di awal loop.
+        section = parts[1].lower()
+        if SOCIAL_SECTIONS and section not in SOCIAL_SECTIONS:
+            notice(f"'{title}' di luar kontrak materi medsos (section: {section}; "
+                   f"yang boleh: {', '.join(SOCIAL_SECTIONS)}) — dilewati.")
+            continue
+
+        # Lapis tambahan untuk artikel berangle usaha yang lolos lewat section lain.
+        art_tags = [t.lower() for t in list_field("tags", fm)]
+        blocked = [t for t in art_tags if t in SOCIAL_EXCLUDE_TAGS]
+        if blocked:
+            notice(f"'{title}' bertag {', '.join(blocked)} — materi usaha, "
+                   "di luar kontrak materi medsos; dilewati.")
             continue
 
         # ── Foto yang ditinjau = foto yang tayang ─────────────────────────────
