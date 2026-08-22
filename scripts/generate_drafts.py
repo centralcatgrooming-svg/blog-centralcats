@@ -31,6 +31,7 @@ import json
 import base64
 import datetime
 import pathlib
+import time
 
 try:
     import requests
@@ -496,6 +497,35 @@ def _save_webp(img_bytes, slug):
     return f"/images/{out.name}"
 
 
+def _gemini_post(url, payload, tries=3, timeout=90):
+    """POST ke Gemini dengan backoff saat 429.
+
+    Ada karena kuota Gemini dibatasi PER MENIT, sementara verifikasi carousel
+    menembakkan banyak panggilan beruntun. Terjadi nyata (run 32563602477):
+    satu ledakan 429 membuat SELURUH kandidat ditolak dan carousel pulang
+    dengan 0 foto — bukan karena fotonya jelek, tapi karena kita menembak
+    terlalu cepat.
+
+    Jeda 5 -> 15 detik. Sengaja pendek: workflow medsos tak boleh menggantung
+    lama, dan gagal pulang dengan sedikit foto masih lebih baik daripada
+    menahan seluruh antrean.
+    """
+    last = None
+    for i in range(tries):
+        r = requests.post(
+            url,
+            headers={"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"},
+            json=payload, timeout=timeout)
+        if r.status_code != 429:
+            return r
+        last = r
+        if i < tries - 1:
+            jeda = 5 * (i + 2)
+            print(f"    (kuota 429 — tunggu {jeda}s lalu coba lagi)", file=sys.stderr)
+            time.sleep(jeda)
+    return last
+
+
 def verify_photo(img_bytes, subject):
     """Tanya Gemini (vision): apakah foto ini BENAR-BENAR menampilkan `subject`?
 
@@ -554,19 +584,14 @@ def verify_photo(img_bytes, subject):
         '{"ras": "<nama ras>", "cocok": true/false, "alasan": "<1 kalimat>"}'
     )
     try:
-        r = requests.post(
-            GEMINI_URL,
-            headers={"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"},
-            json={
-                "contents": [{"role": "user", "parts": [
-                    {"inline_data": {"mime_type": "image/jpeg",
-                                     "data": base64.b64encode(img_bytes).decode("ascii")}},
-                    {"text": prompt},
-                ]}],
-                "generationConfig": {"temperature": 0, "maxOutputTokens": 512},
-            },
-            timeout=90,
-        )
+        r = _gemini_post(GEMINI_URL, {
+            "contents": [{"role": "user", "parts": [
+                {"inline_data": {"mime_type": "image/jpeg",
+                                 "data": base64.b64encode(img_bytes).decode("ascii")}},
+                {"text": prompt},
+            ]}],
+            "generationConfig": {"temperature": 0, "maxOutputTokens": 512},
+        })
         r.raise_for_status()
         parts = r.json()["candidates"][0]["content"].get("parts") or []
         answer = " ".join(p.get("text", "") for p in parts).strip()
@@ -738,15 +763,10 @@ def generate_breed_photos(subject, count=3):
     out = []
     for i in range(count):
         try:
-            r = requests.post(
-                GEMINI_IMAGE_URL,
-                headers={"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"},
-                json={
-                    "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                    "generationConfig": {"responseModalities": ["IMAGE"]},
-                },
-                timeout=120,
-            )
+            r = _gemini_post(GEMINI_IMAGE_URL, {
+                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                "generationConfig": {"responseModalities": ["IMAGE"]},
+            }, timeout=120)
             if r.status_code != 200:
                 print(f"    (generasi gambar gagal HTTP {r.status_code} — "
                       f"jatuh balik ke foto stok)", file=sys.stderr)
@@ -980,7 +1000,24 @@ def write_article(section, data):
           file=sys.stderr)
     if subject:
         print(f"  Verifikasi ras aktif — subjek wajib: \"{subject}\"", file=sys.stderr)
-    img_path, credit = fetch_image(queries, slug, subject=subject or None, strict=is_breed)
+    # ARTIKEL RAS: foto UNGGULAN ikut dibuat, bukan dicari.
+    # 🔴 Ini titik yang paling terlihat pembaca — hero tampil di blog DAN jadi
+    # slide 1 carousel. Sempat terlewat saat generasi hanya dipasang di carousel,
+    # dan akibatnya langsung kelihatan: carousel kosong karena kuota, yang
+    # tersisa cuma foto stok hitam-putih yang rasnya meragukan.
+    img_path, credit = None, None
+    if is_breed and subject:
+        _gen = generate_breed_photos(subject, count=1)
+        if _gen:
+            img_path = _save_webp(_gen[0], slug)
+            credit = AI_CREDIT
+            print(f"  foto unggulan DIBUAT (ras, organisasi {BREED_ORG})", file=sys.stderr)
+        else:
+            print("  generasi foto unggulan gagal — jatuh balik ke foto stok",
+                  file=sys.stderr)
+    if not img_path:
+        img_path, credit = fetch_image(queries, slug, subject=subject or None,
+                                       strict=is_breed)
     if credit:
         print(f"  {credit}", file=sys.stderr)
 
