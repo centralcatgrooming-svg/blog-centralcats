@@ -508,12 +508,50 @@ def verify_photo(img_bytes, subject):
     Sengaja FAIL-CLOSED: ragu, ciri ras tak terlihat, atau API error = TOLAK.
     Artikel tanpa foto jauh lebih baik daripada artikel ras berfoto ras lain.
     """
+    # 🔴 JANGAN kembalikan ke pertanyaan YA/TIDAK sederhana (bentuk sebelum
+    # 22 Agu 2026). Bentuk itu terlalu mudah dijawab "YA" secara longgar:
+    # artikel "Sejarah Kucing Persia" lolos dengan foto kucing berbulu panjang
+    # bermoncong NORMAL — ciri Turkish Angora, bukan Persia. Pemilik kucing ras
+    # langsung melihat kekeliruannya, dan merekalah pembaca artikel ras.
+    #
+    # Penutupnya: PAKSA model MENYEBUT ras yang dilihatnya lebih dulu, lalu
+    # mendaftar ciri standar yang terlihat DAN yang tidak. Menyebut nama ras
+    # jauh lebih sulit dilakukan asal-asalan daripada menjawab "YA", dan
+    # jawabannya bisa dibaca manusia saat menelusuri kenapa sebuah foto lolos.
+    # ⚠️ KALIBRASI INI DIUJI, BUKAN DITEBAK (22 Agu 2026, Gemini Flash, foto nyata
+    # dari carousel `sejarah-kucing-persia`). Tiga bentuk dicoba:
+    #
+    #   "apakah foto ini menampilkan {subject}?"   -> meloloskan SEMUA. Tak menyaring.
+    #   "nilai memakai standar CFA/TICA"           -> MENOLAK SEMUA, termasuk foto
+    #                                                 Persia yang benar: model menuntut
+    #                                                 tipe kontes "peke-face ekstrem",
+    #                                                 sementara foto stok isinya kucing
+    #                                                 peliharaan biasa. Carousel jadi
+    #                                                 selalu kosong.
+    #   bentuk di bawah (MENGENALI RAS)            -> dipakai.
+    #
+    # 🔑 Batas yang HARUS disadari: ini menyaring ras yang JELAS berbeda (Maine Coon,
+    # Ragdoll, Siberian) — ia TIDAK bisa memisahkan ras yang memang mirip, mis. Persia
+    # tipe tradisional vs Turkish Angora; keduanya dinilai "Persia" oleh model. Untuk
+    # artikel ras yang menuntut ketepatan standar organisasi, satu-satunya cara yang
+    # benar-benar andal adalah FOTO MANUAL. Jangan mengklaim lebih dari ini.
+    #
+    # Menyuruh model MENYEBUT rasnya (bukan menjawab ya/tidak) tetap dipertahankan:
+    # jawabannya terbaca manusia, jadi saat foto salah lolos, alasannya bisa ditelusuri.
     prompt = (
-        f"Apakah foto ini menampilkan {subject}?\n"
-        "Jawab HANYA satu kata: YA atau TIDAK.\n"
-        "Jawab TIDAK bila kamu ragu, bila hewan di foto tampak dari ras lain, "
-        "bila ciri khas ras tidak terlihat jelas, atau bila tidak ada hewan "
-        "yang dimaksud di foto."
+        "Tugasmu MENGENALI RAS hewan di foto, BUKAN menilai kelayakan kontes.\n"
+        f"Foto ini akan dipakai untuk artikel tentang: {subject}\n\n"
+        "Aturan:\n"
+        "- Varian tradisional / doll face TETAP dihitung sebagai ras tersebut. "
+        "Jangan menolak hanya karena cirinya kurang ekstrem.\n"
+        "- Yang HARUS ditolak: ras lain, atau foto yang rasnya tak bisa dipastikan "
+        "(wajah tertutup, membelakangi, terlalu jauh, terpotong).\n\n"
+        "Langkah:\n"
+        "1. Sebutkan ras yang paling mungkin.\n"
+        "2. Sebutkan ciri yang jadi dasar penilaianmu.\n"
+        "3. Putuskan.\n\n"
+        "Jawab HANYA JSON: "
+        '{"ras": "<nama ras>", "cocok": true/false, "alasan": "<1 kalimat>"}'
     )
     try:
         r = requests.post(
@@ -531,14 +569,27 @@ def verify_photo(img_bytes, subject):
         )
         r.raise_for_status()
         parts = r.json()["candidates"][0]["content"].get("parts") or []
-        answer = " ".join(p.get("text", "") for p in parts).strip().upper()
+        answer = " ".join(p.get("text", "") for p in parts).strip()
     except Exception as e:
         print(f"    (verifikasi foto gagal, foto ditolak: {e})", file=sys.stderr)
         return False
-    ok = answer.startswith("YA")
-    if not ok:
-        print(f"    (foto ditolak verifikasi: jawaban \"{answer[:40]}\")", file=sys.stderr)
-    return ok
+    # Fail-closed tetap jadi pakemnya: apa pun yang tak bisa dibaca = TOLAK.
+    # Termasuk saat model mengarang teks di luar JSON atau kuota habis.
+    verdict, ras, alasan = False, "?", ""
+    try:
+        m = re.search(r"\{.*\}", answer, re.S)
+        if m:
+            j = json.loads(m.group(0))
+            verdict = bool(j.get("cocok"))
+            ras = str(j.get("ras") or "?")[:40]
+            alasan = str(j.get("alasan") or "")[:120]
+    except Exception:
+        verdict = False
+    if not verdict:
+        print(f"    (foto DITOLAK — terlihat: {ras}. {alasan})", file=sys.stderr)
+    else:
+        print(f"    (foto diterima — terlihat: {ras})", file=sys.stderr)
+    return verdict
 
 
 def fetch_photo_pexels(query, slug, subject=None, candidates=1):
@@ -634,7 +685,117 @@ def fetch_image(queries, slug, subject=None, strict=False):
     return None, None
 
 
-def fetch_photos_bytes(queries, subject=None, count=4, per_query=12, max_verify=10):
+# Model gambar dipisah dari MODEL teks: keduanya beda kemampuan, dan memisahnya
+# membuat model gambar bisa diganti lewat env tanpa menyentuh jalur artikel.
+IMAGE_MODEL = os.environ.get("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
+GEMINI_IMAGE_URL = (
+    f"https://generativelanguage.googleapis.com/v1beta/models/{IMAGE_MODEL}:generateContent")
+
+# Organisasi yang disebut di prompt. JANGAN dikosongkan — lihat catatan di
+# generate_breed_photos().
+BREED_ORG = os.environ.get("BREED_STANDARD_ORG", "TICA")
+
+# Kredit WAJIB untuk gambar hasil generasi. Bukan hiasan: Instagram/Meta
+# memasang label "AI info" sendiri (gambar Google membawa watermark SynthID),
+# jadi menyebutnya lebih dulu membuat kita terlihat jujur, bukan ketahuan.
+AI_CREDIT = "Ilustrasi AI — bukan foto kucing sungguhan"
+
+
+def generate_breed_photos(subject, count=3):
+    """Buat foto ras lewat Gemini, kembalikan list bytes JPEG/PNG.
+
+    🔴 KENAPA DIBUAT, BUKAN DICARI — diuji 22 Agu 2026, bukan diasumsikan.
+    Pencarian foto stok TIDAK BISA menjamin ras, karena penandaan Pexels dibuat
+    pengunggah, bukan juri ras. Tiga bentuk verifikasi dicoba pada carousel
+    `sejarah-kucing-persia` dan semuanya gagal dengan cara berbeda:
+      - "apakah foto ini menampilkan X?"  -> meloloskan semua
+      - "nilai dengan standar CFA/TICA"   -> menolak semua, termasuk Persia asli
+      - bentuk terkalibrasi               -> tak bisa memisahkan ras yang mirip
+    Generasi menutupnya karena rasnya ditentukan di HULU, bukan dinilai di hilir.
+
+    ⚠️ NAMA ORGANISASI WAJIB DISEBUT di prompt. Terpantau: "standarisasi
+    organisasi TICA" menghasilkan Persia bertipe standar (wajah rata, break
+    hidung di antara mata), sementara prompt tanpa/berbeda organisasi cenderung
+    menghasilkan tipe tradisional yang ciri rasnya kabur.
+
+    ⚠️ Gagal apa pun -> kembalikan list KOSONG, JANGAN melempar. Pemanggil lalu
+    jatuh balik ke Pexels. Pipeline medsos tak boleh mati gara-gara model gambar
+    tak tersedia / kuota habis / kunci tanpa akses.
+    """
+    if not GEMINI_KEY or not subject or count <= 0:
+        return []
+    prompt = (
+        f"Buatkan foto {subject} yang sesuai standarisasi organisasi {BREED_ORG}. "
+        "Format persegi 1:1, kualitas foto untuk Instagram, pencahayaan alami, "
+        "hewan menghadap kamera sehingga ciri rasnya terlihat jelas. "
+        "Tanpa teks, tanpa watermark, tanpa manusia di dalam foto."
+    )
+    out = []
+    for i in range(count):
+        try:
+            r = requests.post(
+                GEMINI_IMAGE_URL,
+                headers={"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"},
+                json={
+                    "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                    "generationConfig": {"responseModalities": ["IMAGE"]},
+                },
+                timeout=120,
+            )
+            if r.status_code != 200:
+                print(f"    (generasi gambar gagal HTTP {r.status_code} — "
+                      f"jatuh balik ke foto stok)", file=sys.stderr)
+                return out
+            parts = r.json()["candidates"][0]["content"].get("parts") or []
+            data = None
+            for p in parts:
+                blob = p.get("inline_data") or p.get("inlineData")
+                if blob and blob.get("data"):
+                    data = base64.b64decode(blob["data"])
+                    break
+            if not data:
+                print("    (balasan tanpa gambar — jatuh balik ke foto stok)", file=sys.stderr)
+                return out
+            # Dedup isi: model bisa mengembalikan gambar nyaris sama pada
+            # permintaan berulang, dan carousel berisi 3 foto kembar lebih buruk
+            # daripada carousel berisi 1 foto.
+            sig = photo_signature(data)
+            if sig and any(sig == photo_signature(b) for b in out):
+                continue
+            out.append(data)
+        except Exception as e:
+            print(f"    (generasi gambar gagal: {e} — jatuh balik ke foto stok)",
+                  file=sys.stderr)
+            return out
+    return out
+
+
+def photo_signature(img_bytes):
+    """Sidik ISI gambar (average hash 8x8) — bukan sidik berkasnya.
+
+    Ada karena dedup lama memakai `id` foto Pexels, dan itu TIDAK cukup: foto
+    unggulan artikel diambil `fetch_image()` sementara slide carousel diambil
+    `fetch_photos_bytes()` — dua panggilan terpisah dengan himpunan `seen_ids`
+    masing-masing. Akibatnya foto yang sama bisa muncul sebagai slide 1 DAN
+    slide 3 (terjadi nyata pada `sejarah-kucing-persia`, 22 Agu 2026).
+
+    aHash dipakai supaya crop/resize/kompresi ulang dari sumber yang sama tetap
+    tertangkap; perbandingan `id` mentah akan lolos begitu Pexels menyajikan
+    ukuran berbeda. Gagal baca gambar = kembalikan None (JANGAN menebak sidik
+    palsu — itu bisa membuang foto yang sah).
+    """
+    try:
+        from PIL import Image
+        im = Image.open(io.BytesIO(img_bytes)).convert("L").resize((8, 8))
+        px = list(im.getdata())
+        avg = sum(px) / len(px)
+        return "".join("1" if p >= avg else "0" for p in px)
+    except Exception:
+        return None
+
+
+def fetch_photos_bytes(queries, subject=None, count=4, per_query=12,
+                       max_verify=10, exclude_sigs=()):
     """Ambil hingga `count` foto BERBEDA dari Pexels sebagai bytes mentah.
 
     Dipakai carousel medsos (scripts/post_instagram.py). Beda dari `fetch_image()`
@@ -656,6 +817,9 @@ def fetch_photos_bytes(queries, subject=None, count=4, per_query=12, max_verify=
     Fungsi ini TIDAK BOLEH menambal kekurangan dengan kandidat yang tak lolos.
     """
     out, seen_ids, seen_q = [], set(), set()
+    # Sidik ISI, bukan id Pexels. `exclude_sigs` diisi pemanggil dengan sidik
+    # foto unggulan supaya slide 1 tak terulang di tengah carousel.
+    seen_sigs = {x for x in (exclude_sigs or ()) if x}
     if not PEXELS_KEY:
         return out
     # FAIL-CLOSED: tanpa subjek verifikasi, foto tambahan tidak diambil sama sekali.
@@ -703,9 +867,18 @@ def fetch_photos_bytes(queries, subject=None, count=4, per_query=12, max_verify=
                 print(f"    (batas {max_verify} verifikasi tercapai — "
                       f"carousel pulang dengan {len(out)} foto)", file=sys.stderr)
                 return out
+            # Dedup ISI dijalankan SEBELUM verifikasi: kuota Gemini terbatas,
+            # dan memverifikasi foto yang toh akan dibuang membakar jatah yang
+            # semestinya dipakai kandidat baru (batas `max_verify`).
+            sig = photo_signature(img)
+            if sig and sig in seen_sigs:
+                print("    (foto dilewati — isinya sama dengan foto lain)", file=sys.stderr)
+                continue
             checked += 1
             if not verify_photo(img, subject):
                 continue
+            if sig:
+                seen_sigs.add(sig)
             seen_ids.add(pid)
             out.append({
                 "bytes": img,
