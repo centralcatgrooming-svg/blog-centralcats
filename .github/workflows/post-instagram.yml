@@ -121,6 +121,7 @@ jobs:
       #   workflow_dispatch     -> ikut input `posting` (default false = pratinjau)
       # Jadi tidak ada yang tayang di IG/FB tanpa disetujui lebih dulu di POS.
       - name: Pratinjau / posting ke Instagram
+        id: post
         if: steps.detect.outputs.has == 'true'
         continue-on-error: true
         env:
@@ -158,3 +159,34 @@ jobs:
           REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: python3 scripts/notify_social_email.py
+
+      # ── PENJAGA GAGAL SENYAP ─────────────────────────────────────────────────
+      # Lahir dari kejadian NYATA 12 Agu 2026: run 31554609198 berstatus `success`
+      # padahal post_instagram.py mati di ensure_release() dengan
+      #   ssl.SSLCertVerificationError: CERTIFICATE_VERIFY_FAILED (self-signed certificate)
+      # Akibatnya artikel `peluang-bisnis-playground-kucing` (kucing, ber-images,
+      # draft=false — memenuhi semua syarat) TIDAK PERNAH punya pratinjau dan tidak
+      # pernah tayang. Nol email, nol notifikasi, nol jejak: run hijau menutupinya.
+      #
+      # `continue-on-error: true` di atas SENGAJA DIPERTAHANKAN — supaya langkah
+      # email pratinjau tetap jalan meski posting gagal. Yang ditambahkan di sini
+      # cuma satu hal: membuat run BERWARNA MERAH ketika skripnya benar-benar mati,
+      # supaya notifikasi kegagalan GitHub menyala.
+      #
+      # AMAN dari alarm palsu — sudah diverifikasi ke scripts/post_instagram.py:
+      # SEMUA jalur wajar keluar dengan status 0, bukan exception:
+      #   - aksi=tolak                       -> continue
+      #   - artikel di luar SOCIAL_ANIMALS   -> continue   (tiap Sel/Kam/Jum!)
+      #   - tidak ada artikel baru           -> return
+      #   - Pillow / token / repo kosong     -> return
+      # Jadi outcome == 'failure' HANYA terjadi saat ada exception tak tertangani.
+      # Kalau kelak ada jalur wajar yang diubah jadi sys.exit(1)/raise, penjaga ini
+      # WAJIB ditinjau ulang — alarm yang sering salah pasti dimatikan orang.
+      #
+      # Merah di sini tidak menggagalkan apa pun: workflow ini terpisah dari
+      # hugo.yml (deploy situs) dan tak punya langkah lain sesudahnya.
+      - name: Penjaga — jangan biarkan kegagalan lolos sebagai run hijau
+        if: always() && steps.post.outcome == 'failure'
+        run: |
+          echo "::error title=Medsos GAGAL (bukan run hijau biasa)::scripts/post_instagram.py keluar dengan status GAGAL. Pratinjau kemungkinan TIDAK terbentuk dan artikel TIDAK tayang. Buka log langkah 'Pratinjau / posting ke Instagram' di run ini. Kalau penyebabnya transien (mis. SSL/jaringan), jalankan ulang workflow ini lewat Actions -> Run workflow dengan input path = artikel yang terlewat dan aksi = pratinjau."
+          exit 1
