@@ -1,12 +1,12 @@
 +++
-title = "Grooming Keliling: Jurus Jitu Kembangkan Bisnis Petshop Anda!"
+title = "Grooming Keliling: Cara Kembangkan Bisnis Petshop"
 date = 2026-06-17T14:10:14+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Tips Petshop & Grooming"]
 tags = ["bisnis hewan", "grooming kucing", "peluang usaha", "petshop"]
 hewan = ["kucing", "anjing"]
-summary = "Ingin memperluas jangkauan bisnis petshop Anda? Layanan grooming keliling bisa jadi solusi inovatif! Pahami potensi, persiapan, dan cara sukses menjalankannya."
+summary = "Ingin memperluas jangkauan bisnis petshop? Layanan grooming keliling bisa jadi solusi. Pahami potensi, persiapan, dan cara menjalankannya."
 images = ["/images/grooming-keliling-kembangkan-bisnis-petshop.webp"]
 image_query = "cat grooming mobile van"
 image_query_fallback = "cat grooming service"

@@ -1,5 +1,5 @@
 +++
-title = "Mengenal Feline Calicivirus: Flu Kucing dengan Gejala Sariawan"
+title = "Feline Calicivirus: Flu Kucing dengan Gejala Sariawan"
 date = 2026-07-13T08:17:39+07:00
 draft = false
 author = "Team Central Cat's"

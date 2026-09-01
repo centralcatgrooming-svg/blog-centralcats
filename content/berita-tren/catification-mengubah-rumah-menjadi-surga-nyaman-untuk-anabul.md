@@ -1,12 +1,12 @@
 +++
-title = "Catification: Mengubah Rumah Menjadi Surga Nyaman untuk Anabul"
+title = "Catification: Mengubah Rumah Jadi Surga Nyaman Anabul"
 date = 2026-06-17T15:16:25+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Tren & Lifestyle"]
 tags = ["catification", "kucing indoor", "lingkungan kucing", "enrichment"]
 hewan = ["kucing"]
-summary = "Yuk, intip tren 'Catification'! Pelajari cara mengubah rumah menjadi lingkungan yang lebih kaya dan menyenangkan bagi anabul kesayangan Anda, meningkatkan kesejahteraan fisik dan mentalnya."
+summary = "Tren Catification: ubah rumah jadi lingkungan yang lebih kaya bagi anabul, sekaligus meningkatkan kesejahteraan fisik dan mentalnya."
 images = ["/images/catification-mengubah-rumah-menjadi-surga-nyaman-untuk-anabul.webp"]
 image_query = "cat wall shelf"
 image_query_fallback = "cat scratching post"

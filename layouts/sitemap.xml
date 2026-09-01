@@ -1,0 +1,37 @@
+{{/*
+  Sitemap kustom — menimpa bawaan Hugo HANYA untuk menyaring /tags/.
+
+  KENAPA: sitemap bawaan memuat 320 URL padahal artikel aslinya cuma 98. Sisanya
+  191 halaman tag, dan 148 di antaranya hanya berisi SATU artikel — praktis duplikat
+  tipis dari artikel itu sendiri. Mengiklankannya ke Google membuang crawl budget
+  dan mengadu halaman arsip melawan artikelnya sendiri.
+
+  /cari/ ikut disaring karena alasan berbeda: itu halaman pencarian internal yang
+  kosong tanpa parameter `?q=`, dan Google menyarankan halaman semacam itu tidak
+  diindeks. Tetap ada di menu untuk pengunjung.
+
+  Berpasangan dengan `<meta name="robots" content="noindex,follow">` di
+  layouts/_default/baseof.html. Keduanya harus sejalan: percuma (malah membingungkan)
+  kalau sitemap mengiklankan URL yang di-noindex, atau sebaliknya. Daftar saring di
+  sini dan kondisi di baseof.html harus memuat URL yang sama persis.
+
+  Kategori (/categories/) dan Indeks Hewan (/hewan/) SENGAJA tetap masuk — jumlahnya
+  wajar (13 & 11) dan berfungsi sebagai halaman hub yang benar-benar mengelompokkan.
+
+  Sisanya sengaja dibuat sesederhana mungkin dibanding template bawaan: situs ini
+  satu bahasa (tanpa terjemahan) dan tidak menyetel [sitemap] di hugo.toml, jadi
+  changefreq/priority/hreflang tidak pernah menghasilkan apa pun.
+*/}}
+{{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  {{- range .Pages }}
+  {{- if not (or (hasPrefix .RelPermalink "/tags/") (eq .RelPermalink "/cari/")) }}
+  <url>
+    <loc>{{ .Permalink }}</loc>
+    {{- if not .Lastmod.IsZero }}
+    <lastmod>{{ safeHTML (.Lastmod.Format "2006-01-02T15:04:05-07:00") }}</lastmod>
+    {{- end }}
+  </url>
+  {{- end }}
+  {{- end }}
+</urlset>

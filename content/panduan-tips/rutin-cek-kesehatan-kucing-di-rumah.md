@@ -1,12 +1,12 @@
 +++
-title = "Rutin Cek Kesehatan Kucing di Rumah: Deteksi Dini Masalah Anabulmu"
+title = "Cek Kesehatan Kucing di Rumah: Panduan Deteksi Dini"
 date = 2026-06-26T08:17:28+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Perawatan Harian"]
 tags = ["kucing", "kesehatan kucing", "perawatan kucing", "deteksi dini"]
 hewan = ["kucing"]
-summary = "Pemilik anabul wajib tahu cara rutin memeriksa kesehatan kucing di rumah. Kenali tanda-tanda kucing sehat dan waspadai gejala awal masalah agar anabul kesayangan tetap prima dan terhindar dari penyakit serius."
+summary = "Cara rutin memeriksa kesehatan kucing di rumah. Kenali tanda kucing sehat dan gejala awal masalah agar anabul terhindar dari penyakit serius."
 images = ["/images/rutin-cek-kesehatan-kucing-di-rumah.webp"]
 image_query = "cat health check at home"
 image_query_fallback = "cat being examined"

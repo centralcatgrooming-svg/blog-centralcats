@@ -1,5 +1,5 @@
 +++
-title = "Mengatasi Kucing Picky Eater: Tips Jitu Hadapi Anabul Pemilih Makanan"
+title = "Kucing Picky Eater: Tips Hadapi Anabul Pemilih Makanan"
 date = 2026-06-30T08:17:31+07:00
 draft = false
 author = "Team Central Cat's"

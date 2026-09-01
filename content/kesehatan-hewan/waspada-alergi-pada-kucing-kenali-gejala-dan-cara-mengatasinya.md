@@ -1,12 +1,12 @@
 +++
-title = "Waspada Alergi pada Kucing: Kenali Gejala & Cara Mengatasinya"
+title = "Alergi pada Kucing: Gejala & Cara Mengatasinya"
 date = 2026-06-25T08:17:31+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Penyakit & Pencegahan"]
 tags = ["kucing alergi", "alergi anabul", "kesehatan kulit kucing", "perawatan kucing"]
 hewan = ["kucing"]
-summary = "Apakah anabulmu sering gatal, bulu rontok, atau bersin-bersin? Bisa jadi ia alergi! Kenali tanda-tanda alergi pada kucing dan langkah penanganan yang bisa kamu lakukan."
+summary = "Anabul sering gatal, bulu rontok, atau bersin? Bisa jadi alergi. Kenali tanda alergi pada kucing dan langkah penanganan yang tepat."
 images = ["/images/waspada-alergi-pada-kucing-kenali-gejala-dan-cara-mengatasinya.webp"]
 image_query = "cat scratching itchy skin"
 image_query_fallback = "cat scratching"
