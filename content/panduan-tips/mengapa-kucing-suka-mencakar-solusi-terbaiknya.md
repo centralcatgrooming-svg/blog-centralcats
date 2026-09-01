@@ -1,12 +1,12 @@
 +++
-title = "Mengapa Kucing Suka Mencakar & Solusi Terbaiknya untuk Anabul"
+title = "Kenapa Kucing Suka Mencakar & Cara Mengatasinya"
 date = 2026-06-23T08:17:33+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Perawatan Harian"]
 tags = ["perilaku kucing", "cakar kucing", "cat scratcher", "perawatan kucing"]
 hewan = ["kucing"]
-summary = "Anabul suka mencakar bukan karena iseng, tapi naluri penting! Pahami alasan di baliknya dan temukan cara tepat menyediakan media cakar agar anabul bahagia & perabot aman."
+summary = "Kucing mencakar karena naluri, bukan iseng. Pahami alasannya dan cara menyediakan media cakar agar anabul bahagia dan perabot tetap aman."
 images = ["/images/mengapa-kucing-suka-mencakar-solusi-terbaiknya.webp"]
 image_query = "cat using scratching post"
 image_query_fallback = "cat scratching furniture"

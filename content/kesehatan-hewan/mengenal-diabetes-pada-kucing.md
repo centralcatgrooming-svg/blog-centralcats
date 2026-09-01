@@ -1,5 +1,5 @@
 +++
-title = "Mengenal Diabetes pada Kucing: Gejala, Penyebab, dan Pencegahan"
+title = "Diabetes pada Kucing: Gejala, Penyebab & Pencegahan"
 date = 2026-08-31T08:17:43+07:00
 draft = false
 author = "Team Central Cat's"

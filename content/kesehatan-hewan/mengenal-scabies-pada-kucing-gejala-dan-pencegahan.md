@@ -1,5 +1,5 @@
 +++
-title = "Mengenal Scabies pada Kucing: Gejala, Cara Mengatasi, dan Pencegahannya"
+title = "Scabies pada Kucing: Gejala dan Cara Mengatasinya"
 date = 2026-06-29T23:28:24+07:00
 draft = false
 author = "Team Central Cat's"

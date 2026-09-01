@@ -1,12 +1,12 @@
 +++
-title = "Tren Produk Eco-Friendly: Merawat Anabul Lebih Ramah Lingkungan"
+title = "Produk Eco-Friendly Anabul: Tren Ramah Lingkungan"
 date = 2026-06-17T15:35:52+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Tren & Lifestyle"]
 tags = ["eco-friendly", "produk kucing", "perawatan kucing", "lingkungan"]
 hewan = ["kucing"]
-summary = "Ingin merawat anabul sambil menjaga bumi? Tren produk eco-friendly untuk kucing semakin populer! Temukan bagaimana pilihan produk yang berkelanjutan bisa membuat anabul bahagia dan lingkungan tetap lestari."
+summary = "Tren produk eco-friendly untuk kucing makin populer. Temukan pilihan yang berkelanjutan agar anabul bahagia dan lingkungan tetap lestari."
 images = ["/images/tren-produk-eco-friendly-merawat-anabul-lebih-ramah-lingkungan.webp"]
 image_query = "cat wooden litter box"
 image_query_fallback = "cat litter box"

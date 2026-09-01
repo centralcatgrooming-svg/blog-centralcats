@@ -1,5 +1,5 @@
 +++
-title = "Cara Menjaga Air Akuarium Kura-Kura Tetap Jernih dan Bebas Bau"
+title = "Cara Menjaga Air Akuarium Kura-Kura Tetap Jernih"
 date = 2026-08-14T08:17:36+07:00
 draft = false
 author = "Team Central Cat's"

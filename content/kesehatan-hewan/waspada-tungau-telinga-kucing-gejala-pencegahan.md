@@ -1,12 +1,12 @@
 +++
-title = "Waspada Tungau Telinga pada Kucing: Kenali Gejala dan Cara Mengatasinya"
+title = "Tungau Telinga Kucing: Gejala dan Cara Mengatasinya"
 date = 2026-06-18T14:55:02+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Penyakit & Pencegahan"]
 tags = ["tungau telinga", "kucing sakit", "perawatan telinga", "parasit kucing"]
 hewan = ["kucing"]
-summary = "Tungau telinga adalah masalah umum pada kucing yang bisa menyebabkan gatal parah dan infeksi. Kenali gejala-gejalanya seperti sering menggaruk telinga atau kotoran telinga berwarna gelap, serta pentingnya penanganan yang tepat untuk menjaga kesehatan anabul."
+summary = "Tungau telinga bikin kucing gatal parah hingga infeksi. Kenali gejalanya, dari sering menggaruk telinga sampai kotoran gelap, dan cara menanganinya."
 images = ["/images/waspada-tungau-telinga-kucing-gejala-pencegahan.webp"]
 image_query = "cat ear close up"
 image_query_fallback = "cat scratching ear"

@@ -1,12 +1,12 @@
 +++
-title = "Jaga Senyum Anabul: Pentingnya Kesehatan Gigi Kucing & Cara Merawatnya"
+title = "Kesehatan Gigi Kucing: Tanda Masalah & Cara Merawat"
 date = 2026-06-16T09:43:42+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Perawatan Harian"]
 tags = ["kesehatan gigi", "kucing", "perawatan harian", "bau mulut"]
 hewan = ["kucing"]
-summary = "Kesehatan gigi anabul sering terabaikan, padahal dampaknya bisa serius. Kenali pentingnya merawat gigi kucing, tanda masalah, dan tips praktis untuk menjaga gigi si mpus tetap bersih dan sehat."
+summary = "Kesehatan gigi kucing sering terabaikan padahal dampaknya serius. Kenali tanda masalah dan tips praktis merawat gigi anabul tetap bersih."
 images = ["/images/jaga-senyum-anabul-pentingnya-kesehatan-gigi-kucing-cara-merawatnya.webp"]
 image_query = "cat teeth brushing"
 image_query_fallback = "cat open mouth teeth"

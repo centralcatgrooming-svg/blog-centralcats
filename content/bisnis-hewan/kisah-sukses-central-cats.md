@@ -1,5 +1,5 @@
 +++
-title = "Dari Emperan Rumah ke Petshop Tepercaya: Kisah Bangkit Central Cat's"
+title = "Kisah Bangkit Central Cat's: Dari Emperan ke Petshop"
 date = 2026-06-01T09:00:00+07:00
 draft = false
 categories = ["Peluang Usaha & Waralaba"]
@@ -9,7 +9,7 @@ tipe = "kisah-sukses"
 narasumber = "Central Cat's"
 instagram = "https://www.instagram.com/centralcat_official"
 situs = "https://centralcats.id"
-summary = "Berawal dari kebangkrutan di masa pandemi, Central Cat's bangkit dari emperan rumah menjadi layanan grooming, cat hotel, dan petshop kucing tepercaya di Tangerang."
+summary = "Berawal dari kebangkrutan saat pandemi, Central Cat's bangkit dari emperan rumah jadi layanan grooming, cat hotel, dan petshop di Tangerang."
 images = ["/images/kisah-sukses-central-cats.webp"]
 image_query = "pet shop storefront cat"
 image_query_fallback = "cat in pet shop"

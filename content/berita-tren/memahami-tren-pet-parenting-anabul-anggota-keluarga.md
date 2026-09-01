@@ -1,12 +1,12 @@
 +++
-title = "Memahami Tren Pet Parenting: Anabul Kini Bagian Penuh Keluarga"
+title = "Tren Pet Parenting: Anabul Kini Anggota Keluarga"
 date = 2026-06-27T03:23:57+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Tren & Lifestyle"]
 tags = ["pet parenting", "tren hewan peliharaan", "kesehatan kucing", "gaya hidup"]
 hewan = ["kucing"]
-summary = "Fenomena 'pet parenting' mengubah cara kita memandang anabul, dari sekadar hewan peliharaan menjadi anggota keluarga yang setara. Mari selami tren ini dan dampaknya pada perawatan anabul kesayangan Anda."
+summary = "Tren pet parenting mengubah anabul dari sekadar hewan peliharaan menjadi anggota keluarga. Simak dampaknya pada cara merawat kucing kesayangan."
 images = ["/images/memahami-tren-pet-parenting-anabul-anggota-keluarga.webp"]
 image_query = "cat cuddling with owner"
 image_query_fallback = "cat at home"

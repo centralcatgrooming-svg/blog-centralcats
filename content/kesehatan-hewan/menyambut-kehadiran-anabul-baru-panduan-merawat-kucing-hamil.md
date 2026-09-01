@@ -1,12 +1,12 @@
 +++
-title = "Menyambut Kehadiran Anabul Baru: Panduan Merawat Kucing Hamil"
+title = "Panduan Merawat Kucing Hamil hingga Melahirkan"
 date = 2026-06-29T23:20:46+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Kesehatan Kucing"]
 tags = ["kucing hamil", "perawatan kucing", "melahirkan kucing", "kesehatan reproduksi"]
 hewan = ["kucing"]
-summary = "Kucing hamil butuh perhatian ekstra! Kenali tanda-tanda kehamilan, cara merawat anabul selama bunting, hingga persiapan persalinan agar ia dan calon bayinya sehat."
+summary = "Kucing hamil butuh perhatian ekstra. Kenali tanda kehamilan, cara merawat anabul selama bunting, dan persiapan menjelang persalinan."
 images = ["/images/menyambut-kehadiran-anabul-baru-panduan-merawat-kucing-hamil.webp"]
 image_query = "pregnant cat resting"
 image_query_fallback = "cat with kittens"

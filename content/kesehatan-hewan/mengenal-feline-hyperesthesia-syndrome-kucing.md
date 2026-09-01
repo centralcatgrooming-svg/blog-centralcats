@@ -1,5 +1,5 @@
 +++
-title = "Mengenal Feline Hyperesthesia Syndrome: Kenapa Kulit Kucing Suka Berkedut Tiba-Tiba?"
+title = "Feline Hyperesthesia: Kulit Kucing Berkedut Tiba-Tiba"
 date = 2026-08-27T18:13:08+07:00
 draft = false
 author = "Team Central Cat's"

@@ -1,12 +1,12 @@
 +++
-title = "Enrichment untuk Kucing: Tren Membuat Anabul Bahagia & Sehat Mental"
+title = "Enrichment Kucing: Bikin Anabul Bahagia & Sehat Mental"
 date = 2026-06-20T08:17:34+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Tren & Lifestyle"]
 tags = ["kesejahteraan kucing", "main kucing", "kucing bahagia", "aktivitas kucing"]
 hewan = ["kucing"]
-summary = "Ingin anabul selalu bahagia dan sehat mental? Mengenal enrichment adalah jawabannya! Pelajari tren terbaru untuk menstimulasi fisik dan mental kucing kesayangan Anda."
+summary = "Enrichment membuat kucing bahagia dan sehat mental. Pelajari tren terbaru untuk menstimulasi fisik dan mental anabul kesayangan Anda."
 images = ["/images/enrichment-kucing-tren-membuat-anabul-bahagia-sehat-mental.webp"]
 image_query = "cat playing puzzle toy"
 image_query_fallback = "cat indoor play"

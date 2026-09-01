@@ -1,12 +1,12 @@
 +++
-title = "Sterilisasi Kucing: Langkah Penting untuk Anabul Lebih Sehat & Hidup Lebih Lama"
+title = "Sterilisasi Kucing: Manfaat untuk Kesehatan Anabul"
 date = 2026-06-29T08:17:37+07:00
 draft = false
 author = "Team Central Cat's"
 categories = ["Kesehatan Kucing"]
 tags = ["sterilisasi kucing", "kastrasi kucing", "kesehatan kucing", "perawatan kucing"]
 hewan = ["kucing"]
-summary = "Sterilisasi atau kastrasi bukan hanya tentang mengendalikan populasi kucing, tapi juga kunci untuk kesehatan jangka panjang dan perilaku positif anabul Anda. Pahami berbagai manfaatnya di sini."
+summary = "Sterilisasi kucing bukan sekadar mengendalikan populasi, tapi kunci kesehatan jangka panjang dan perilaku positif anabul. Pahami manfaatnya."
 images = ["/images/sterilisasi-kucing-manfaat-kesehatan-anabul.webp"]
 image_query = "cat recovering after surgery"
 image_query_fallback = "cat at vet clinic"
