@@ -9,6 +9,16 @@ enableRobotsTXT = false
   description = "Berita hewan peliharaan, tips kesehatan, dan panduan merawat anabul dari Central Cat's."
   brandColor = "#1e3a8a"
   mainSite = "https://www.centralcats.id"
+  # Profil resmi untuk JSON-LD `sameAs` di homepage. Tanpa ini mesin pencari tidak
+  # punya sinyal bahwa akun-akun medsos itu milik entitas yang sama dengan blog ini.
+  # Footer di baseof.html memuat tautan yang sama sebagai markup; daftar di sini
+  # khusus dipakai schema — kalau menambah akun, ubah KEDUANYA.
+  sameAs = [
+    "https://www.instagram.com/centralcat_official",
+    "https://www.tiktok.com/@central_cats",
+    "https://www.youtube.com/@central_cats",
+    "https://www.facebook.com/Centralcatsofficial/",
+  ]
 
 # Kategori utama = folder di /content (section). Subkategori = isi field "categories" di artikel.
 [taxonomies]
