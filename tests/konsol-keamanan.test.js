@@ -63,3 +63,31 @@ describe('Tema blog: default terang, tidak ikut OS', () => {
     expect(kode).toContain("localStorage.getItem('theme')==='dark'?'dark':'light'")
   })
 })
+
+describe('Lebar artikel sejajar dengan header', () => {
+  // Keputusan user 2026-09-19. Cangkang situs (.topbar/.wrap/.footer-inner)
+  // semuanya 1100px dan halaman utama sudah sejajar; hanya article.post yang
+  // menyimpang di 760px, sehingga isi artikel masuk 150px ke dalam dibanding
+  // tepi logo/nav. Nilai 1100 pada article.post efektif jadi 1060px karena
+  // dipotong padding .wrap -- dan 1060 itu persis isi header.
+  // Kalau angka cangkangnya diubah, angka artikel WAJIB ikut; keduanya dikunci
+  // bersama di sini. Sengaja TANPA regex ber-escape: berkas ini pernah rusak
+  // gara-gara backslash hilang saat ditulis lewat shell.
+  const nilai = (sel) => {
+    const i = BASEOF.indexOf(sel + '{')
+    if (i < 0) return null
+    const blok = BASEOF.slice(i, BASEOF.indexOf('}', i))
+    const j = blok.indexOf('max-width:')
+    if (j < 0) return null
+    return parseInt(blok.slice(j + 'max-width:'.length), 10)
+  }
+
+  it('article.post selebar cangkang situs', () => {
+    expect(nilai('article.post')).toBe(nilai('.wrap'))
+  })
+
+  it('cangkang situs masih 1100px', () => {
+    expect(nilai('.wrap')).toBe(1100)
+    expect(nilai('.topbar')).toBe(1100)
+  })
+})
