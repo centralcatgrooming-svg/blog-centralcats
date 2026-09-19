@@ -1,0 +1,53 @@
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+// Pesan keamanan console (self-XSS). Ditambahkan 2026-09-19 supaya blog setara
+// dengan www.centralcats.id dan app.centralcats.id yang sudah punya blok ini.
+// Modus "tempelkan kode ini di console" masih umum; peringatannya harus muncul
+// tepat di tempat korban akan menempel. Jadi blok ini FITUR, bukan sisa debug --
+// tes ini yang mencegahnya ikut terbuang saat bersih-bersih console.
+const DIR = dirname(fileURLToPath(import.meta.url))
+const SRC = readFileSync(resolve(DIR, '../assets/js/konsol-keamanan.js'), 'utf8')
+const BASEOF = readFileSync(resolve(DIR, '../layouts/_default/baseof.html'), 'utf8')
+
+describe('Pesan keamanan console (fitur disengaja, jangan dihapus)', () => {
+  let spy
+  beforeEach(() => { spy = vi.spyOn(console, 'log').mockImplementation(() => {}) })
+  afterEach(() => { spy.mockRestore() })
+
+  it('menghasilkan tepat 6 pesan saat dijalankan', () => {
+    // Skrip klasik (di-inline mentah oleh Hugo), jadi dievaluasi apa adanya.
+    new Function(SRC)()
+    expect(spy).toHaveBeenCalledTimes(6)
+  })
+
+  it('memuat peringatan self-XSS yang jadi inti blok ini', () => {
+    new Function(SRC)()
+    const semua = spy.mock.calls.flat().join(' ')
+    expect(semua).toMatch(/HARAP BERHATI-HATI SAAT MENEMPELKAN KODE/i)
+    expect(semua).toMatch(/Social Engineering Attack/i)
+  })
+
+  it('di-inline oleh baseof.html', () => {
+    // Kalau barisnya hilang dari template, skripnya tidak pernah jalan di
+    // browser walau berkasnya masih ada -- gagal diam-diam tanpa tes ini.
+    expect(BASEOF).toContain('js/konsol-keamanan.js')
+  })
+})
+
+describe('Tema blog: default terang, tidak ikut OS', () => {
+  // Keputusan user 2026-09-19, disamakan dengan situs utama. Sebelumnya script
+  // anti-kedip menanyakan skema warna OS, jadi pengunjung ber-OS gelap melihat
+  // blog gelap tanpa pernah menekan tombol tema.
+  const kode = BASEOF.replace(/<!--[\s\S]*?-->/g, '')
+
+  it('script anti-kedip tidak menanyakan skema warna OS', () => {
+    expect(kode).not.toMatch(/prefers-color-scheme/i)
+  })
+
+  it('default data-theme adalah light', () => {
+    expect(kode).toContain("localStorage.getItem('theme')==='dark'?'dark':'light'")
+  })
+})

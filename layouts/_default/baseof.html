@@ -3,7 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script>(function(){try{var t=localStorage.getItem('theme')||((window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <meta name="color-scheme" content="light">
+  <!-- Tema DEFAULT = TERANG, sengaja TIDAK mengikuti pengaturan OS/Chrome
+       (2026-09-19, disamakan dengan www.centralcats.id). Dulu fallback-nya
+       menanyakan skema warna OS lewat matchMedia, sehingga pengunjung ber-OS
+       gelap langsung melihat blog gelap tanpa pernah menekan tombol.
+       Sekarang gelap HANYA kalau pilihan manual tersimpan di localStorage.
+       Dipasang sebelum paint pertama supaya tidak ada kedipan. -->
+  <script>(function(){try{var t=localStorage.getItem('theme')==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
@@ -544,6 +551,7 @@ nav.main a[href="/cari/"]{display:none}
   <script>(function(){var btns=[document.getElementById('cc-theme-toggle'),document.getElementById('cc-theme-toggle-m')].filter(Boolean);if(!btns.length)return;function flip(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}}btns.forEach(function(b){b.addEventListener('click',flip);});})();</script>
   {{ with resources.Get "js/share.js" | minify }}<script>{{ .Content | safeJS }}</script>{{ end }}
   {{ with resources.Get "js/analytics.js" | minify }}<script>{{ .Content | safeJS }}</script>{{ end }}
+  {{ with resources.Get "js/konsol-keamanan.js" | minify }}<script>{{ .Content | safeJS }}</script>{{ end }}
   <script>(function(){
     var data=[],loaded=false,loading=false,waiters=[];
     function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
