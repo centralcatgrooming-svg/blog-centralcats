@@ -27,3 +27,10 @@ console.log(
 );
 console.log("%cJika seseorang menyuruhmu menempelkan sesuatu di console,\nbisa jadi itu adalah penipuan (Social Engineering Attack).", "color:#ef4444;font-size:13px;");
 console.log("%cBlog Central Cat's  •  https://blog.centralcats.id", "color:#22c55e;font-size:13px;font-weight:600;");
+
+/* Skrip ini di-INLINE ke dalam HTML oleh Hugo, jadi DevTools menamainya
+   "(index):NN". Lokasi sumber TIDAK BISA disembunyikan -- tidak ada API
+   untuk itu, semua pesan console selalu membawa tautan berkas:baris.
+   Yang bisa: memberi nama virtual lewat sourceURL supaya terbaca
+   "konsol-keamanan.js:NN", bukan "(index):NN". */
+//# sourceURL=konsol-keamanan.js
