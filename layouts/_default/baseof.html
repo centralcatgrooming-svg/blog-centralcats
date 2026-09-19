@@ -551,7 +551,12 @@ nav.main a[href="/cari/"]{display:none}
   <script>(function(){var btns=[document.getElementById('cc-theme-toggle'),document.getElementById('cc-theme-toggle-m')].filter(Boolean);if(!btns.length)return;function flip(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}}btns.forEach(function(b){b.addEventListener('click',flip);});})();</script>
   {{ with resources.Get "js/share.js" | minify }}<script>{{ .Content | safeJS }}</script>{{ end }}
   {{ with resources.Get "js/analytics.js" | minify }}<script>{{ .Content | safeJS }}</script>{{ end }}
-  {{ with resources.Get "js/konsol-keamanan.js" | minify }}<script>{{ .Content | safeJS }}</script>{{ end }}
+  {{/* sourceURL memberi nama virtual supaya DevTools menulis
+      "konsol-keamanan.js:NN", bukan "(index):NN". Ditaruh DI SINI, bukan di
+      dalam berkas JS-nya: minify membuang komentar, termasuk direktif ini. */}}
+  {{ with resources.Get "js/konsol-keamanan.js" | minify }}<script>{{ .Content | safeJS }}
+//# sourceURL=konsol-keamanan.js
+</script>{{ end }}
   <script>(function(){
     var data=[],loaded=false,loading=false,waiters=[];
     function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
