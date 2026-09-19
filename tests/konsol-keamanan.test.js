@@ -30,6 +30,18 @@ describe('Pesan keamanan console (fitur disengaja, jangan dihapus)', () => {
     expect(semua).toMatch(/Social Engineering Attack/i)
   })
 
+  // Escaping ASCII art gampang hilang satu backslash saat berkas ditulis lewat
+  // shell/heredoc. Akibatnya string memuat teks '\\n' alih-alih baris baru dan
+  // gambar kucingnya berantakan -- tidak ada yang merah, hanya jelek di console.
+  // Sudah kejadian 2026-09-19, jadi dikunci di sini.
+  it('ASCII art tercetak sebagai 3 baris, bukan teks escape mentah', () => {
+    new Function(SRC)()
+    const pertama = String(spy.mock.calls[0][0]).replace(/^%c/, '')
+    expect(pertama).not.toContain('\\n')
+    expect(pertama.split('\n')).toHaveLength(3)
+    expect(pertama).toContain('( o.o )')
+  })
+
   it('di-inline oleh baseof.html', () => {
     // Kalau barisnya hilang dari template, skripnya tidak pernah jalan di
     // browser walau berkasnya masih ada -- gagal diam-diam tanpa tes ini.

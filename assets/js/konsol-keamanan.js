@@ -16,7 +16,7 @@
    jadi ini skrip klasik: jangan pakai import/export.
 ============================================================= */
 console.log(
-  "%c  /\_/\\n ( o.o )   Central Cat's\n  > ^ <    Blog Petshop & Grooming Tangerang",
+  "%c  /\\_/\\\n ( o.o )   Central Cat's\n  > ^ <    Blog Petshop & Grooming Tangerang",
   "color:#d4af37;font-weight:bold;font-size:13px;line-height:1.8;"
 );
 console.log("%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "color:#d4af37;font-size:10px;");
