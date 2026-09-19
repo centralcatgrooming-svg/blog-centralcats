@@ -7,9 +7,9 @@ categories = ["Ras & Sejarah"]
 tags = ["ras kucing", "sejarah kucing", "abyssinian"]
 hewan = ["kucing"]
 summary = "Kenali sejarah, asal-usul, dan karakteristik unik kucing Abyssinian, ras eksotis yang cerdas, aktif, dan menyerupai kucing purba Mesir kuno."
-images = []
+images = ["/images/sejarah-kucing-abyssinian.webp"]
 image_query = "abyssinian cat standing elegantly"
-image_query_fallback = "abysian cat"
+image_query_fallback = "abyssinian cat"
 image_subject = "kucing ras Abyssinian"
 
 [[faq]]
