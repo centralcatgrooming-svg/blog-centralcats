@@ -9,6 +9,13 @@
         <span>{{ time.Format ":date_long" .Date }}</span>
         <span class="dot"></span>
         <span>{{ .ReadingTime }} menit baca</span>
+        {{/* Jumlah view ditanam saat build dari data/views.json (diisi
+             .github/workflows/ga4-views.yml dari GA4). Kalau berkasnya belum
+             ada atau path ini belum punya data, blok ini tidak menghasilkan
+             apa-apa -- halaman tetap normal, tidak ada angka 0 yang muncul. */}}
+        {{ $views := 0 }}
+        {{ with site.Data.views }}{{ $views = index . $.RelPermalink | default 0 }}{{ end }}
+        {{ if gt $views 0 }}<span class="dot"></span><span class="post-views">Post View : {{ lang.FormatNumber 0 $views }} views</span>{{ end }}
       </div>
     </header>
     {{ with .Params.images }}<img class="post-hero" src="{{ index . 0 }}" alt="{{ $.Title }}" loading="eager" fetchpriority="high">{{ end }}

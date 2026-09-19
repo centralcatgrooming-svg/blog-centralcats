@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -89,5 +89,26 @@ describe('Lebar artikel sejajar dengan header', () => {
   it('cangkang situs masih 1100px', () => {
     expect(nilai('.wrap')).toBe(1100)
     expect(nilai('.topbar')).toBe(1100)
+  })
+})
+
+describe('Post View di artikel', () => {
+  // Ditanam saat build dari data/views.json (diisi workflow ga4-views.yml dari
+  // GA4), bukan dihitung di browser -- supaya nol request bagi pengunjung.
+  const SINGLE = readFileSync(resolve(DIR, '../layouts/_default/single.html'), 'utf8')
+
+  it('membaca angka dari site.Data.views', () => {
+    expect(SINGLE).toContain('site.Data.views')
+  })
+
+  it('hanya tampil bila angkanya > 0', () => {
+    // Tanpa penjaga ini, artikel tanpa data akan menampilkan 'Post View : 0 views'
+    // pada SEMUA artikel sebelum GA4 tersambung -- terlihat rusak.
+    expect(SINGLE).toContain('gt $views 0')
+  })
+
+  it('skrip & workflow penariknya ada', () => {
+    expect(existsSync(resolve(DIR, '../scripts/fetch_ga4_views.py'))).toBe(true)
+    expect(existsSync(resolve(DIR, '../.github/workflows/ga4-views.yml'))).toBe(true)
   })
 })

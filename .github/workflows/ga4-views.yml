@@ -1,0 +1,68 @@
+name: Tarik View GA4
+
+# Menanam jumlah pageview ke data/views.json supaya Hugo bisa menuliskannya
+# langsung ke HTML artikel (nol request bagi pengunjung). Lihat
+# scripts/fetch_ga4_views.py dan layouts/_default/single.html.
+#
+# Commit yang dihasilkan job ini otomatis memicu "Deploy Hugo ke GitHub Pages"
+# karena workflow itu berjalan pada push ke main. Tidak ada risiko loop: job ini
+# hanya berjalan terjadwal / manual, tidak pada push.
+
+on:
+  schedule:
+    - cron: "17 21 * * *"      # 04.17 WIB tiap hari (GitHub pakai UTC)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ga4-views
+  cancel-in-progress: false
+
+jobs:
+  tarik:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Pasang dependensi
+        run: pip install --quiet google-analytics-data
+
+      - name: Tulis kredensial service account
+        env:
+          SA_JSON: ${{ secrets.GA4_SA_JSON }}
+        run: |
+          if [ -z "$SA_JSON" ]; then
+            echo "Secret GA4_SA_JSON belum diisi - lihat CLAUDE.md Bagian setup GA4." >&2
+            exit 1
+          fi
+          printf '%s' "$SA_JSON" > "$RUNNER_TEMP/ga4-sa.json"
+
+      - name: Tarik data dari GA4
+        env:
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/ga4-sa.json
+        run: python scripts/fetch_ga4_views.py
+
+      - name: Hapus kredensial
+        if: always()
+        run: rm -f "$RUNNER_TEMP/ga4-sa.json"
+
+      - name: Commit bila berubah
+        run: |
+          if git diff --quiet -- data/views.json; then
+            echo "Angka view tidak berubah - tidak ada commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/views.json
+          git commit -m "chore(views): perbarui jumlah view dari GA4"
+          git push
